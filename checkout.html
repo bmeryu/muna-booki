@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Completar Compra - Muna Booki</title>
+    <!-- 1. SDK de Mercado Pago -->
+    <script src="https://sdk.mercadopago.com/js/v2"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --color-dark-blue: #0A2F5B;
+            --color-teal: #00B2A9;
+        }
+        body {
+            font-family: 'Poppins', sans-serif;
+        }
+        .loader {
+            border-top-color: var(--color-teal);
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 flex items-center justify-center min-h-screen">
+
+    <div class="bg-white p-8 rounded-2xl shadow-lg max-w-md w-full text-center">
+        <a href="index.html">
+             <img src="https://bmeryu.github.io/muna-booki/Logo_MunaBooki.png" alt="Logo de Muna Booki" class="h-20 mx-auto mb-6">
+        </a>
+        <h1 id="checkout-title" class="text-2xl font-bold text-gray-800 mb-4">Completar tu compra</h1>
+        <p id="checkout-description" class="text-gray-600 mb-8">Estás a un paso de unirte a la magia.</p>
+        
+        <!-- Este loader se oculta cuando el botón de MP está listo -->
+        <div id="loader" class="loader ease-linear rounded-full border-4 border-t-4 border-gray-200 h-12 w-12 mx-auto mb-8"></div>
+        
+        <!-- 3. Contenedor para el Botón de Pago -->
+        <div id="mercado-pago-button-container" class="mt-6">
+            <!-- El botón de Mercado Pago se montará aquí -->
+        </div>
+
+        <p class="text-xs text-gray-400 mt-6">Transacción segura procesada por Mercado Pago.</p>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            // --- CONFIGURACIÓN ---
+            // 2. Clave PÚBLICA de PRUEBA de Mercado Pago
+            const MERCADO_PAGO_PUBLIC_KEY = "APP_USR-9e779faa-40ec-4f96-8ec4-8263cffe1362";
+
+            // --- LÓGICA DE LA PÁGINA ---
+            const urlParams = new URLSearchParams(window.location.search);
+            const planId = urlParams.get('plan');
+
+            const titleEl = document.getElementById('checkout-title');
+            const descriptionEl = document.getElementById('checkout-description');
+            const loader = document.getElementById('loader');
+
+            const planDetails = {
+                biblioteca: {
+                    title: "Plan Biblioteca Mágica",
+                    description: "Acceso ilimitado a todos nuestros cuentos.",
+                    price: 9.00
+                },
+                aliado: {
+                    title: "Plan Aliado Mensual",
+                    description: "Biblioteca completa + 1 cuento personalizado al mes.",
+                    price: 15.00
+                },
+                personalizado: {
+                    title: "Cuento Personalizado Único",
+                    description: "Un video-cuento hecho a medida.",
+                    price: 39.00
+                }
+            };
+            
+            const selectedPlan = planDetails[planId];
+
+            if (!selectedPlan) {
+                titleEl.textContent = "Plan no encontrado";
+                descriptionEl.textContent = "Por favor, vuelve a la página de inicio y selecciona un plan.";
+                loader.style.display = 'none';
+                return;
+            }
+            
+            titleEl.textContent = selectedPlan.title;
+            descriptionEl.textContent = selectedPlan.description;
+            
+            // --- INTEGRACIÓN CON MERCADO PAGO ---
+            try {
+                // 4. Se obtiene la preferencia de pago desde el backend (Firebase Function)
+                const preferenceId = await createPaymentPreference(selectedPlan);
+                
+                // 5. Se renderiza el botón de pago
+                renderMercadoPagoButton(preferenceId);
+
+            } catch (error) {
+                console.error("Error al crear la preferencia de pago:", error);
+                descriptionEl.textContent = "Hubo un error al preparar tu pago. Por favor, intenta de nuevo.";
+                loader.style.display = 'none';
+            }
+
+            // --- FUNCIONES AUXILIARES ---
+
+            // ESTA ES LA FUNCIÓN QUE DEBERÁS REEMPLAZAR
+            async function createPaymentPreference(plan) {
+                // --- SIMULACIÓN (PARA PRUEBAS SIN BACKEND) ---
+                // Esto simula que el backend respondió correctamente.
+                // Borra o comenta esta parte cuando implementes tu Firebase Function.
+                console.warn("MODO SIMULACIÓN: Usando una preferencia de pago falsa.");
+                // Para que el modo prueba funcione, necesitamos un ID de preferencia real.
+                // Este ID de preferencia falso NO FUNCIONARÁ, pero permitirá renderizar el botón.
+                // Cuando tengas tu backend, el ID real lo generará tu Firebase Function.
+                // Por ahora, lo dejamos así para ver el botón.
+                return "ID_DE_PREFERENCIA_GENERADO_POR_TU_BACKEND";
+                // --- FIN DE LA SIMULACIÓN ---
+
+
+                /*
+                // --- CÓDIGO REAL (CUANDO TENGAS TU FIREBASE FUNCTION) ---
+                // 1. Descomenta este bloque de código.
+                // 2. Reemplaza la URL con la URL de tu Firebase Function.
+
+                const response = await fetch("URL_DE_TU_FIREBASE_FUNCTION", {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        title: plan.title,
+                        price: plan.price
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error('La respuesta del servidor no fue exitosa.');
+                }
+
+                const preference = await response.json();
+                return preference.id;
+                // --- FIN DEL CÓDIGO REAL ---
+                */
+            }
+            
+            function renderMercadoPagoButton(preferenceId) {
+                if (!MERCADO_PAGO_PUBLIC_KEY || MERCADO_PAGO_PUBLIC_KEY === "TU_PUBLIC_KEY") {
+                    descriptionEl.textContent = "Error: La clave pública de Mercado Pago no está configurada.";
+                    loader.style.display = 'none';
+                    return;
+                }
+
+                const mp = new MercadoPago(MERCADO_PAGO_PUBLIC_KEY);
+                
+                mp.checkout({
+                    preference: {
+                        id: preferenceId
+                    },
+                    render: {
+                        container: '#mercado-pago-button-container', // ID del contenedor
+                        label: `Pagar $${selectedPlan.price.toFixed(2)} USD`,
+                        theme: {
+                            elementsColor: '#00B2A9', // Verde azulado de Muna Booki
+                            headerColor: '#0A2F5B'    // Azul oscuro de Muna Booki
+                        }
+                    }
+                }).then(() => {
+                    loader.style.display = 'none'; // Oculta el loader cuando el botón está listo
+                }).catch((err) => {
+                    console.error("Error al renderizar el botón de Mercado Pago", err);
+                    descriptionEl.textContent = "Error al mostrar el botón de pago. Revisa que el ID de preferencia sea válido.";
+                    loader.style.display = 'none';
+                });
+            }
+        });
+    </script>
+
+</body>
+</html>
+
