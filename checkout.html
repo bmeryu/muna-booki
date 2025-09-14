@@ -36,10 +36,8 @@
         <h1 id="checkout-title" class="text-2xl font-bold text-gray-800 mb-4">Completar tu compra</h1>
         <p id="checkout-description" class="text-gray-600 mb-8">Estás a un paso de unirte a la magia.</p>
         
-        <!-- Este loader se oculta cuando el botón de MP está listo -->
         <div id="loader" class="loader ease-linear rounded-full border-4 border-t-4 border-gray-200 h-12 w-12 mx-auto mb-8"></div>
         
-        <!-- 3. Contenedor para el Botón de Pago -->
         <div id="mercado-pago-button-container" class="mt-6">
             <!-- El botón de Mercado Pago se montará aquí -->
         </div>
@@ -49,11 +47,8 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
-            // --- CONFIGURACIÓN ---
-            // 2. Clave PÚBLICA de PRUEBA de Mercado Pago
             const MERCADO_PAGO_PUBLIC_KEY = "APP_USR-9e779faa-40ec-4f96-8ec4-8263cffe1362";
 
-            // --- LÓGICA DE LA PÁGINA ---
             const urlParams = new URLSearchParams(window.location.search);
             const planId = urlParams.get('plan');
 
@@ -62,71 +57,41 @@
             const loader = document.getElementById('loader');
 
             const planDetails = {
-                biblioteca: {
-                    title: "Plan Biblioteca Mágica",
-                    description: "Acceso ilimitado a todos nuestros cuentos.",
-                    price: 9.00
-                },
-                aliado: {
-                    title: "Plan Aliado Mensual",
-                    description: "Biblioteca completa + 1 cuento personalizado al mes.",
-                    price: 15.00
-                },
-                personalizado: {
-                    title: "Cuento Personalizado Único",
-                    description: "Un video-cuento hecho a medida.",
-                    price: 39.00
-                }
+                biblioteca: { title: "Plan Biblioteca Mágica", price: 9.00 },
+                aliado: { title: "Plan Aliado Mensual", price: 15.00 },
+                personalizado: { title: "Cuento Personalizado Único", price: 39.00 }
             };
             
             const selectedPlan = planDetails[planId];
 
             if (!selectedPlan) {
                 titleEl.textContent = "Plan no encontrado";
-                descriptionEl.textContent = "Por favor, vuelve a la página de inicio y selecciona un plan.";
+                descriptionEl.textContent = "Por favor, vuelve y selecciona un plan.";
                 loader.style.display = 'none';
                 return;
             }
             
             titleEl.textContent = selectedPlan.title;
-            descriptionEl.textContent = selectedPlan.description;
+            descriptionEl.textContent = `Total a pagar: $${selectedPlan.price.toFixed(2)} USD`;
             
-            // --- INTEGRACIÓN CON MERCADO PAGO ---
             try {
-                // 4. Se obtiene la preferencia de pago desde el backend (Firebase Function)
                 const preferenceId = await createPaymentPreference(selectedPlan);
-                
-                // 5. Se renderiza el botón de pago
-                renderMercadoPagoButton(preferenceId);
-
+                if (preferenceId) {
+                    renderMercadoPagoButton(preferenceId);
+                } else {
+                    throw new Error("No se recibió un ID de preferencia.");
+                }
             } catch (error) {
                 console.error("Error al crear la preferencia de pago:", error);
-                descriptionEl.textContent = "Hubo un error al preparar tu pago. Por favor, intenta de nuevo.";
+                descriptionEl.textContent = "Hubo un error al preparar tu pago. Revisa la URL de la función y la consola para más detalles.";
                 loader.style.display = 'none';
             }
 
-            // --- FUNCIONES AUXILIARES ---
-
-            // ESTA ES LA FUNCIÓN QUE DEBERÁS REEMPLAZAR
             async function createPaymentPreference(plan) {
-                // --- SIMULACIÓN (PARA PRUEBAS SIN BACKEND) ---
-                // Esto simula que el backend respondió correctamente.
-                // Borra o comenta esta parte cuando implementes tu Firebase Function.
-                console.warn("MODO SIMULACIÓN: Usando una preferencia de pago falsa.");
-                // Para que el modo prueba funcione, necesitamos un ID de preferencia real.
-                // Este ID de preferencia falso NO FUNCIONARÁ, pero permitirá renderizar el botón.
-                // Cuando tengas tu backend, el ID real lo generará tu Firebase Function.
-                // Por ahora, lo dejamos así para ver el botón.
-                return "ID_DE_PREFERENCIA_GENERADO_POR_TU_BACKEND";
-                // --- FIN DE LA SIMULACIÓN ---
+                // URL REAL de tu Firebase Function
+                const functionUrl = "https://payment-k47f45ttga-uc.a.run.app/create_preference";
 
-
-                /*
-                // --- CÓDIGO REAL (CUANDO TENGAS TU FIREBASE FUNCTION) ---
-                // 1. Descomenta este bloque de código.
-                // 2. Reemplaza la URL con la URL de tu Firebase Function.
-
-                const response = await fetch("URL_DE_TU_FIREBASE_FUNCTION", {
+                const response = await fetch(functionUrl, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -136,43 +101,30 @@
                 });
                 
                 if (!response.ok) {
-                    throw new Error('La respuesta del servidor no fue exitosa.');
+                    const errorText = await response.text();
+                    throw new Error(`La respuesta del servidor no fue exitosa: ${errorText}`);
                 }
 
                 const preference = await response.json();
                 return preference.id;
-                // --- FIN DEL CÓDIGO REAL ---
-                */
             }
             
             function renderMercadoPagoButton(preferenceId) {
-                if (!MERCADO_PAGO_PUBLIC_KEY || MERCADO_PAGO_PUBLIC_KEY === "TU_PUBLIC_KEY") {
-                    descriptionEl.textContent = "Error: La clave pública de Mercado Pago no está configurada.";
-                    loader.style.display = 'none';
-                    return;
-                }
-
                 const mp = new MercadoPago(MERCADO_PAGO_PUBLIC_KEY);
                 
                 mp.checkout({
-                    preference: {
-                        id: preferenceId
-                    },
+                    preference: { id: preferenceId },
                     render: {
-                        container: '#mercado-pago-button-container', // ID del contenedor
-                        label: `Pagar $${selectedPlan.price.toFixed(2)} USD`,
+                        container: '#mercado-pago-button-container',
+                        label: 'Pagar Ahora',
                         theme: {
-                            elementsColor: '#00B2A9', // Verde azulado de Muna Booki
-                            headerColor: '#0A2F5B'    // Azul oscuro de Muna Booki
+                            elementsColor: '#00B2A9',
+                            headerColor: '#0A2F5B'
                         }
                     }
-                }).then(() => {
-                    loader.style.display = 'none'; // Oculta el loader cuando el botón está listo
-                }).catch((err) => {
-                    console.error("Error al renderizar el botón de Mercado Pago", err);
-                    descriptionEl.textContent = "Error al mostrar el botón de pago. Revisa que el ID de preferencia sea válido.";
-                    loader.style.display = 'none';
                 });
+
+                loader.style.display = 'none';
             }
         });
     </script>
