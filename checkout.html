@@ -88,8 +88,9 @@
             }
 
             async function createPaymentPreference(plan) {
-                // URL REAL de tu Firebase Function
-                onst functionUrl = "https://payment-k47f45ttga-uc.a.run.app/payment/create_preference";
+                // --- URL CORREGIDA ---
+                // Se añade "/payment" que es el nombre de tu función exportada.
+                const functionUrl = "https://payment-k47f45ttga-uc.a.run.app/payment/create_preference";
 
                 const response = await fetch(functionUrl, {
                     method: 'POST',
@@ -131,4 +132,3 @@
 
 </body>
 </html>
-
