@@ -329,7 +329,7 @@
                             <li>✓ Cancela en cualquier momento.</li>
                         </ul>
                         <div class="mt-auto text-center">
-                           <a href="#" class="btn bg-gray-200 text-gray-800 hover:bg-gray-300 font-bold py-3 px-6 rounded-full focus-ring w-full">Suscribirme Ahora</a>
+                           <a href="checkout.html?plan=biblioteca" class="btn bg-gray-200 text-gray-800 hover:bg-gray-300 font-bold py-3 px-6 rounded-full focus-ring w-full">Suscribirme Ahora</a>
                            <span class="guarantee-badge">✓ Garantía de Satisfacción</span>
                         </div>
                     </div>
@@ -347,7 +347,7 @@
                             <li>✓ Cancela en cualquier momento.</li>
                         </ul>
                          <div class="mt-auto text-center">
-                           <a href="#" class="btn btn-primary font-bold py-3 px-6 rounded-full focus-ring w-full">Elegir Plan Aliado</a>
+                           <a href="checkout.html?plan=aliado" class="btn btn-primary font-bold py-3 px-6 rounded-full focus-ring w-full">Elegir Plan Aliado</a>
                            <span class="guarantee-badge">✓ Garantía de Satisfacción</span>
                         </div>
                     </div>
@@ -364,7 +364,7 @@
                             <li>✓ Entrega en menos de 24 horas.</li>
                         </ul>
                         <div class="mt-auto text-center">
-                           <a href="#" class="btn btn-secondary font-bold py-3 px-6 rounded-full focus-ring w-full">Crear mi Cuento</a>
+                           <a href="checkout.html?plan=personalizado" class="btn btn-secondary font-bold py-3 px-6 rounded-full focus-ring w-full">Crear mi Cuento</a>
                            <span class="guarantee-badge">✓ Garantía de Satisfacción</span>
                         </div>
                     </div>
@@ -638,14 +638,14 @@
             signOut
         } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-        // TODO: Add your Firebase project's configuration here
+        // COMPLETE FIREBASE CONFIG
         const firebaseConfig = {
             apiKey: "AIzaSyBivlKO0Ijt1hvMNyH9aIGXf_7WZwE2tA4",
             authDomain: "munabooki.firebaseapp.com",
             projectId: "munabooki",
-            storageBucket: "TU_STORAGE_BUCKET",
-            messagingSenderId: "TU_MESSAGING_SENDER_ID",
-            appId: "TU_APP_ID"
+            storageBucket: "TU_STORAGE_BUCKET", // <-- DEBES REEMPLAZAR ESTO
+            messagingSenderId: "TU_MESSAGING_SENDER_ID", // <-- DEBES REEMPLAZAR ESTO
+            appId: "TU_APP_ID" // <-- DEBES REEMPLAZAR ESTO
         };
 
         // Initialize Firebase
@@ -810,6 +810,9 @@
                     break;
                 case 'auth/weak-password':
                     authErrorMessage.textContent = 'La contraseña debe tener al menos 6 caracteres.';
+                    break;
+                 case 'auth/unauthorized-domain':
+                    authErrorMessage.textContent = 'Dominio no autorizado para esta operación.';
                     break;
                 default:
                     authErrorMessage.textContent = 'Ocurrió un error. Inténtalo de nuevo.';
