@@ -144,6 +144,24 @@
         .prose li { margin-bottom: 0.5em; }
         .faq-question { cursor: pointer; }
         .faq-answer { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-in-out; }
+
+        /* NUEVO: Estilos para el tooltip de libro impreso */
+        .tooltip-trigger {
+            position: relative;
+            cursor: pointer;
+            border-bottom: 1px dotted var(--color-teal);
+        }
+        .tooltip-content {
+            visibility: hidden;
+            opacity: 0;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            transform: translateY(10px);
+        }
+        .tooltip-trigger:hover .tooltip-content {
+            visibility: visible;
+            opacity: 1;
+            transform: translateY(0);
+        }
     </style>
 </head>
 <body class="bg-white">
@@ -335,7 +353,16 @@
                     <div class="plan-card bg-white rounded-2xl shadow-lg p-8 flex flex-col text-center">
                         <h3 class="text-2xl font-bold text-gray-800">Tu Cuento a Medida</h3>
                         <p class="text-gray-500 mt-2 flex-grow">Un video-cuento único para un desafío o valor específico.</p>
-                         <p class="text-sm text-teal-600 font-semibold mt-4">+ Opción de libro impreso</p>
+                        <!-- Tooltip Trigger -->
+                        <div class="relative mt-4">
+                            <span class="tooltip-trigger text-sm text-teal-600 font-semibold">
+                                + Opción de libro impreso
+                                <div class="tooltip-content absolute bottom-full mb-2 w-64 bg-gray-800 text-white text-xs rounded-lg p-3 shadow-lg z-10 left-1/2 -translate-x-1/2">
+                                    <strong class="font-bold block">¡Conviértelo en un tesoro!</strong>
+                                    Añade la versión impresa de tu cuento por $50.000. Tapa dura y calidad premium.
+                                </div>
+                            </span>
+                        </div>
                         <div class="my-6">
                             <span class="text-5xl font-extrabold" style="color: var(--color-dark-blue);">$18.900</span>
                             <span class="text-gray-500 font-medium">/ único</span>
@@ -350,7 +377,16 @@
                          <span class="absolute top-0 -translate-y-1/2 bg-teal-500 text-white text-xs font-bold px-4 py-1 rounded-full uppercase tracking-wider">Más Popular</span>
                         <h3 class="text-2xl font-bold text-gray-800">Cuento Premium</h3>
                         <p class="text-gray-500 mt-2 flex-grow">Co-crea un video-cuento premium con tus fotos, audios y detalles únicos.</p>
-                        <p class="text-sm text-teal-600 font-semibold mt-4">+ Opción de libro impreso</p>
+                        <!-- Tooltip Trigger -->
+                        <div class="relative mt-4">
+                            <span class="tooltip-trigger text-sm text-teal-600 font-semibold">
+                                + Opción de libro impreso
+                                <div class="tooltip-content absolute bottom-full mb-2 w-64 bg-gray-800 text-white text-xs rounded-lg p-3 shadow-lg z-10 left-1/2 -translate-x-1/2">
+                                    <strong class="font-bold block">¡Conviértelo en un tesoro!</strong>
+                                    Añade la versión impresa de tu cuento por $50.000. Tapa dura y calidad premium.
+                                </div>
+                            </span>
+                        </div>
                         <div class="my-6">
                             <span class="text-5xl font-extrabold" style="color: var(--color-teal);">$40.000</span>
                              <span class="text-gray-500 font-medium">/ único</span>
@@ -365,15 +401,38 @@
                 <div class="mt-16 bg-white rounded-2xl shadow-lg p-8 text-center border-2 border-dashed max-w-6xl mx-auto">
                     <h3 class="text-2xl font-bold" style="color: var(--color-dark-blue);">¿Eres una Empresa o Colegio?</h3>
                     <p class="text-gray-600 mt-2 max-w-xl mx-auto">Tenemos planes especiales para licencias por volumen y proyectos educativos. ¡Conversemos!</p>
-                    <button data-plan="empresas" class="mt-6 bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold py-3 px-8 rounded-lg transition-colors duration-300">
+                    <a href="https://wa.me/56998956864?text=Hola!%20Vengo%20desde%20la%20p%C3%A1gina%20web%20y%20me%20gustar%C3%ADa%20cotizar%20un%20plan%20para%20mi%20empresa%2Fcolegio." target="_blank" rel="noopener noreferrer" class="inline-block mt-6 bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold py-3 px-8 rounded-lg transition-colors duration-300">
                         Cotizar ahora
-                    </button>
+                    </a>
                 </div>
             </div>
         </section>
 
+        <!-- NEW: Printed Book Section -->
+        <section id="printed-book" class="py-20">
+            <div class="container mx-auto px-6">
+                <div class="grid md:grid-cols-2 gap-12 items-center bg-white p-12 rounded-2xl shadow-xl">
+                    <div class="md:order-2">
+                        <span class="font-bold uppercase" style="color: var(--color-dark-blue);">EL COMPLEMENTO PERFECTO</span>
+                        <h2 class="text-3xl md:text-4xl font-bold section-title my-4">Convierte su Cuento en un Tesoro Impreso</h2>
+                        <p class="text-lg text-gray-600 mb-6">La magia del video, ahora en sus manos. Transforma cualquier cuento personalizado ("A Medida" o "Premium") en un libro físico de alta calidad, con tapa dura y colores vibrantes. Un recuerdo tangible para atesorar en la biblioteca familiar.</p>
+                        <ul class="space-y-4">
+                            <li class="flex items-start"><span class="text-gold-500 font-bold mr-3 mt-1" style="color: var(--color-gold);">✓</span><div><strong class="text-gray-800">Calidad Premium:</strong> Tapa dura y papel de alto gramaje para máxima durabilidad.</div></li>
+                            <li class="flex items-start"><span class="text-gold-500 font-bold mr-3 mt-1" style="color: var(--color-gold);">✓</span><div><strong class="text-gray-800">Recuerdo para Siempre:</strong> Un objeto físico que podrán leer una y otra vez.</div></li>
+                            <li class="flex items-start"><span class="text-gold-500 font-bold mr-3 mt-1" style="color: var(--color-gold);">✓</span><div><strong class="text-gray-800">Regalo Inolvidable:</strong> El complemento ideal para un regalo de cumpleaños o una ocasión especial.</div></li>
+                        </ul>
+                        <a href="#faq-modal" id="more-info-printed" class="mt-8 inline-block btn btn-secondary font-bold py-3 px-8 rounded-full focus-ring">Saber más sobre la impresión</a>
+                    </div>
+                    <div class="md:order-1">
+                        <img src="https://placehold.co/600x450/FFECB3/0A2F5B?text=Libro+Impreso" alt="Un libro físico de Muna Booki abierto en una mesa" class="rounded-2xl shadow-xl w-full">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
         <!-- Testimonials -->
-        <section id="testimonials" class="py-20">
+        <section id="testimonials" class="py-20 bg-gray-50">
             <div class="container mx-auto px-6">
                 <h2 class="text-3xl md:text-4xl font-bold section-title mb-12 text-center">Familias que encontraron a su aliado en Muna Booki</h2>
                 <div class="grid md:grid-cols-3 gap-8 text-left">
@@ -601,104 +660,9 @@
         </div>
     </footer>
 
-    <a href="https://wa.me/5491112345678?text=Hola!%20Quisiera%20saber%20m%C3%A1s%20sobre%20c%C3%B3mo%20Muna%20Booki%20puede%20ayudarme%20en%20la%20crianza." 
+    <!-- Botón Flotante de WhatsApp -->
+    <a href="https://wa.me/56998956864?text=Hola!%20Me%20gustar%C3%ADa%20saber%20m%C3%A1s%20sobre%20Muna%20Booki." 
        target="_blank" rel="noopener noreferrer" class="whatsapp-float" aria-label="Contactar por WhatsApp">
         <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" viewBox="0 0 16 16">
-            <path d="M13.601 2.326A7.854 7.854 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.933 7.933 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.898 7.898 0 0 0 13.6 2.326zM7.994 14.521a6.573 6.573 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.557 6.557 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592zm3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.068-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.59-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.729.729 0 0 0-.529.247c-.182.198-.691.677-.691 1.654 0 .977.71 1.916.81 2.049.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232z"/>
-        </svg>
-    </a>
+            <path d="M13.601 2.326A7.854 7.854 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.933 7.933 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.898 7.898 0 0 0 13.6 2.326zM7.994 14.521a6.573 6.573 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.557 6.557 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592zm3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.068-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.59-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.729.729 0 0 0-.529.247c-.182.198-.691.677-.691 1.654 0 .977.71 1.916.81 2.049.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.I1... (9236 more characters)
 
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "Product",
-      "name": "Cuento Premium Personalizado - Muna Booki",
-      "image": "https://munabooki.com/og-image.jpg",
-      "description": "Un servicio de co-creación de un video-cuento personalizado para padres que buscan soluciones creativas a los desafíos de la crianza, con opción a libro impreso.",
-      "brand": { "@type": "Brand", "name": "Muna Booki" },
-      "offers": {
-        "@type": "Offer",
-        "url": "https://munabooki.com#plans",
-        "priceCurrency": "CLP",
-        "price": "40000",
-        "availability": "https://schema.org/InStock"
-      },
-      "aggregateRating": { "@type": "AggregateRating", "ratingValue": "5", "reviewCount": "3" }
-    }
-    </script>
-    
-    <script type="module">
-        // Firebase SDKs and Logic will be added in the next step
-    </script>
-    <script>
-       document.addEventListener('DOMContentLoaded', () => {
-            const modalTriggers = {
-                'faq-modal-trigger': 'faq-modal',
-                'header-faq-trigger': 'faq-modal',
-                'privacy-modal-trigger': 'privacy-modal',
-                'terms-modal-trigger': 'terms-modal'
-            };
-
-            const openModal = (modalId) => {
-                const modal = document.getElementById(modalId);
-                if (!modal) return;
-                modal.classList.remove('hidden');
-                setTimeout(() => {
-                    const content = modal.querySelector('.modal-content');
-                    modal.classList.remove('opacity-0');
-                    content.classList.remove('scale-95', 'opacity-0');
-                }, 10);
-            };
-
-            const closeModal = (modal) => {
-                const content = modal.querySelector('.modal-content');
-                content.classList.add('scale-95', 'opacity-0');
-                modal.classList.add('opacity-0');
-                setTimeout(() => {
-                    modal.classList.add('hidden');
-                }, 300);
-            };
-            
-            for (const triggerId in modalTriggers) {
-                const trigger = document.getElementById(triggerId);
-                if (trigger) {
-                    trigger.addEventListener('click', (e) => {
-                        e.preventDefault();
-                        openModal(modalTriggers[triggerId]);
-                    });
-                }
-            }
-
-            document.querySelectorAll('.modal-backdrop').forEach(backdrop => {
-                backdrop.addEventListener('click', (e) => {
-                    if (e.target === backdrop) closeModal(backdrop);
-                });
-            });
-            document.querySelectorAll('.close-modal-btn').forEach(btn => {
-                btn.addEventListener('click', () => closeModal(btn.closest('.modal-backdrop')));
-            });
-
-            const faqItems = document.querySelectorAll('.faq-item');
-            faqItems.forEach(item => {
-                const question = item.querySelector('.faq-question');
-                const answer = item.querySelector('.faq-answer');
-                const icon = question.querySelector('span');
-
-                question.addEventListener('click', () => {
-                    const isOpen = answer.style.maxHeight && answer.style.maxHeight !== '0px';
-                    
-                    faqItems.forEach(otherItem => {
-                         otherItem.querySelector('.faq-answer').style.maxHeight = '0px';
-                         otherItem.querySelector('.faq-question span').style.transform = 'rotate(0deg)';
-                    });
-
-                    if (!isOpen) {
-                        answer.style.maxHeight = answer.scrollHeight + 'px';
-                        icon.style.transform = 'rotate(45deg)';
-                    }
-                });
-            });
-        });
-    </script>
-</body>
-</html>
