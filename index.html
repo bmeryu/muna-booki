@@ -16,7 +16,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Pacifico&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;900&family=Pacifico&display=swap" rel="stylesheet">
     <style>
         :root {
             --color-dark-blue: #0A2F5B;
@@ -64,8 +64,8 @@
             transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
         .plan-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 25px rgba(10, 47, 91, 0.1);
+            transform: translateY(-8px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
         }
         .plan-featured {
             border: 2px solid var(--color-teal);
@@ -131,16 +131,6 @@
         .video-thumbnail:hover .play-icon {
             transform: translate(-50%, -50%) scale(1.1);
         }
-        .guarantee-badge {
-            font-size: 0.75rem;
-            font-weight: bold;
-            color: var(--color-teal);
-            border: 1px solid var(--color-teal);
-            padding: 2px 8px;
-            border-radius: 9999px;
-            display: inline-block;
-            margin-top: 1rem;
-        }
         /* Auth & Legal Modal Styles */
         .modal-backdrop {
             transition: opacity 0.3s ease;
@@ -167,7 +157,7 @@
                 </a>
             </div>
             <div class="hidden md:flex items-center space-x-8">
-                <a href="biblioteca.html" class="text-gray-600 hover:text-teal-500 font-semibold focus-ring rounded">Biblioteca</a>
+                <a href="#library" class="text-gray-600 hover:text-teal-500 font-semibold focus-ring rounded">Biblioteca</a>
                 <a href="#personalized" class="text-gray-600 hover:text-teal-500 font-semibold focus-ring rounded">Cuentos Personalizados</a>
                 <a href="#plans" class="text-gray-600 hover:text-teal-500 font-semibold focus-ring rounded">Planes</a>
                 <a href="#" id="header-faq-trigger" class="text-gray-600 hover:text-teal-500 font-semibold focus-ring rounded">FAQ</a>
@@ -204,13 +194,13 @@
                 <h2 class="text-4xl md:text-5xl font-bold section-title mb-6 leading-tight">Tu aliado para una crianza <br> más consciente y divertida</h2>
                 <p class="text-lg md:text-xl text-gray-700 max-w-3xl mx-auto mb-10">Sabemos que criar es un reto maravilloso. Por eso, creamos herramientas que te ayudan a conectar con tus hijos y a sembrar valores a través del poder de las historias. Descubre nuestras dos soluciones mágicas.</p>
                 <div class="flex justify-center gap-4 flex-wrap">
-                    <a href="biblioteca.html" class="btn btn-secondary text-lg font-bold py-3 px-8 rounded-full focus-ring">Conoce la Biblioteca</a>
+                    <a href="#library" class="btn btn-secondary text-lg font-bold py-3 px-8 rounded-full focus-ring">Conoce la Biblioteca</a>
                     <a href="#personalized" class="btn btn-primary text-lg font-bold py-3 px-8 rounded-full focus-ring">Crea un Cuento Personalizado</a>
                 </div>
             </div>
         </section>
 
-        <!-- NEW: Library Section -->
+        <!-- Library Section -->
         <section id="library" class="py-20">
             <div class="container mx-auto px-6">
                 <div class="grid md:grid-cols-2 gap-12 items-center">
@@ -232,7 +222,7 @@
             </div>
         </section>
 
-        <!-- NEW: Personalized Stories Section -->
+        <!-- Personalized Stories Section -->
         <section id="personalized" class="py-20 bg-gray-50">
             <div class="container mx-auto px-6">
                  <div class="grid md:grid-cols-2 gap-12 items-center">
@@ -316,62 +306,68 @@
 
         <!-- Pricing Plans Section (Updated) -->
         <section id="plans" class="py-20 bg-gray-50">
-            <div class="container mx-auto px-6 text-center">
-                <h2 class="text-3xl md:text-4xl font-bold section-title mb-4">Planes pensados para cada familia</h2>
-                <p class="text-lg text-gray-600 max-w-2xl mx-auto mb-12">Elige el plan que mejor se adapte a tus necesidades de crianza.</p>
-                <div class="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto items-start">
-                    
-                    <!-- Plan 1: Biblioteca Subscription -->
-                    <div class="plan-card bg-white p-8 rounded-2xl flex flex-col h-full">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-16">
+                    <h2 class="text-5xl font-bold section-title">
+                        Una <span class="font-cursive" style="color: var(--color-teal);">solución</span> para cada familia
+                    </h2>
+                    <p class="text-xl text-gray-600 mt-4 max-w-2xl mx-auto">
+                        Elige el plan que mejor se adapte a tu aventura en la crianza.
+                    </p>
+                </div>
+
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8 items-stretch max-w-6xl mx-auto">
+
+                    <!-- Plan 1: Acceso Biblioteca -->
+                    <div class="plan-card bg-white rounded-2xl shadow-lg p-8 flex flex-col text-center">
                         <h3 class="text-2xl font-bold text-gray-800">Biblioteca Mágica</h3>
-                        <p class="text-4xl font-bold my-4 section-title">$9<span class="text-lg font-normal text-gray-500">/mes</span></p>
-                        <p class="text-gray-500 mb-6 min-h-[48px]">Acceso ilimitado a nuestra creciente biblioteca de cuentos.</p>
-                        <ul class="text-left space-y-3 mb-8 text-gray-700">
-                            <li>✓ Acceso <span class="font-bold">ilimitado</span> a toda la biblioteca.</li>
-                            <li>✓ Nuevos cuentos agregados cada mes.</li>
-                            <li>✓ Guías y recursos para padres.</li>
-                            <li>✓ Cancela en cualquier momento.</li>
-                        </ul>
-                        <div class="mt-auto text-center">
-                           <a href="checkout.html?plan=biblioteca" class="btn bg-gray-200 text-gray-800 hover:bg-gray-300 font-bold py-3 px-6 rounded-full focus-ring w-full">Suscribirme Ahora</a>
-                           <span class="guarantee-badge">✓ Garantía de Satisfacción</span>
+                        <p class="text-gray-500 mt-2 flex-grow">Explora un universo de historias seguras y educativas.</p>
+                        <div class="my-6">
+                            <span class="text-5xl font-extrabold" style="color: var(--color-dark-blue);">$8.900</span>
+                            <span class="text-gray-500 font-medium">/ Mes</span>
                         </div>
-                    </div>
-                    
-                    <!-- Plan 2: Suscripción + Personalized (Featured) -->
-                    <div class="plan-card bg-white p-8 rounded-2xl flex flex-col h-full plan-featured relative">
-                        <span class="absolute top-0 -translate-y-1/2 bg-teal-500 text-white text-xs font-bold px-3 py-1 rounded-full uppercase">Más Popular</span>
-                        <h3 class="text-2xl font-bold text-gray-800">Aliado Mensual</h3>
-                        <p class="text-4xl font-bold my-4 section-title">$15<span class="text-lg font-normal text-gray-500">/mes</span></p>
-                        <p class="text-gray-500 mb-6 min-h-[48px]">La solución completa para los retos del día a día.</p>
-                        <ul class="text-left space-y-3 mb-8 text-gray-700">
-                            <li>✓ <span class="font-bold text-teal-600">1 Video-Cuento Personalizado al mes.</span></li>
-                            <li>✓ <span class="font-bold">Todo</span> lo del plan Biblioteca Mágica.</li>
-                            <li>✓ Soporte prioritario.</li>
-                            <li>✓ Cancela en cualquier momento.</li>
-                        </ul>
-                         <div class="mt-auto text-center">
-                           <a href="checkout.html?plan=aliado" class="btn btn-primary font-bold py-3 px-6 rounded-full focus-ring w-full">Elegir Plan Aliado</a>
-                           <span class="guarantee-badge">✓ Garantía de Satisfacción</span>
-                        </div>
+                        <button data-plan="biblioteca" class="w-full bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-3 px-6 rounded-lg transition-colors duration-300 mt-auto">
+                            Suscribirme
+                        </button>
                     </div>
 
-                    <!-- Plan 3: One-Time Personalized -->
-                    <div class="plan-card bg-white p-8 rounded-2xl flex flex-col h-full">
-                        <h3 class="text-2xl font-bold text-gray-800">Cuento Personalizado</h3>
-                        <p class="text-4xl font-bold my-4 section-title">$39<span class="text-lg font-normal text-gray-500"> pago único</span></p>
-                        <p class="text-gray-500 mb-6 min-h-[48px]">Un video-cuento único para una ocasión especial.</p>
-                        <ul class="text-left space-y-3 mb-8 text-gray-700">
-                            <li>✓ <span class="font-bold">1 Video-Cuento Personalizado</span> de alta calidad.</li>
-                            <li>✓ No requiere suscripción.</li>
-                            <li>✓ Perfecto para cumpleaños o retos específicos.</li>
-                            <li>✓ Entrega en menos de 24 horas.</li>
-                        </ul>
-                        <div class="mt-auto text-center">
-                           <a href="checkout.html?plan=personalizado" class="btn btn-secondary font-bold py-3 px-6 rounded-full focus-ring w-full">Crear mi Cuento</a>
-                           <span class="guarantee-badge">✓ Garantía de Satisfacción</span>
+                    <!-- Plan 2: Libro Estándar a Solicitud -->
+                    <div class="plan-card bg-white rounded-2xl shadow-lg p-8 flex flex-col text-center">
+                        <h3 class="text-2xl font-bold text-gray-800">Tu Cuento a Medida</h3>
+                        <p class="text-gray-500 mt-2 flex-grow">Un video-cuento único para un desafío o valor específico.</p>
+                         <p class="text-sm text-teal-600 font-semibold mt-4">+ Opción de libro impreso</p>
+                        <div class="my-6">
+                            <span class="text-5xl font-extrabold" style="color: var(--color-dark-blue);">$18.900</span>
+                            <span class="text-gray-500 font-medium">/ único</span>
                         </div>
+                        <button data-plan="estandar" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition-colors duration-300 mt-auto">
+                            Crear mi Cuento
+                        </button>
                     </div>
+
+                    <!-- Plan 3: Libro Personalizado (DESTACADO) -->
+                    <div class="plan-card bg-white rounded-2xl shadow-2xl p-8 flex flex-col text-center plan-featured relative">
+                         <span class="absolute top-0 -translate-y-1/2 bg-teal-500 text-white text-xs font-bold px-4 py-1 rounded-full uppercase tracking-wider">Más Popular</span>
+                        <h3 class="text-2xl font-bold text-gray-800">Cuento Premium</h3>
+                        <p class="text-gray-500 mt-2 flex-grow">Co-crea un video-cuento premium con tus fotos, audios y detalles únicos.</p>
+                        <p class="text-sm text-teal-600 font-semibold mt-4">+ Opción de libro impreso</p>
+                        <div class="my-6">
+                            <span class="text-5xl font-extrabold" style="color: var(--color-teal);">$40.000</span>
+                             <span class="text-gray-500 font-medium">/ único</span>
+                        </div>
+                        <button data-plan="personalizado" class="w-full font-bold py-3 px-6 rounded-lg transition-colors duration-300 mt-auto" style="background-color: var(--color-teal); color: white;">
+                            Diseñar Cuento Premium
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Plan Empresas -->
+                <div class="mt-16 bg-white rounded-2xl shadow-lg p-8 text-center border-2 border-dashed max-w-6xl mx-auto">
+                    <h3 class="text-2xl font-bold" style="color: var(--color-dark-blue);">¿Eres una Empresa o Colegio?</h3>
+                    <p class="text-gray-600 mt-2 max-w-xl mx-auto">Tenemos planes especiales para licencias por volumen y proyectos educativos. ¡Conversemos!</p>
+                    <button data-plan="empresas" class="mt-6 bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold py-3 px-8 rounded-lg transition-colors duration-300">
+                        Cotizar ahora
+                    </button>
                 </div>
             </div>
         </section>
@@ -464,38 +460,38 @@
                 <div class="space-y-6">
                     <div class="faq-item border-b pb-4">
                         <div class="faq-question flex justify-between items-center py-2">
-                            <h3 class="text-lg font-semibold text-gray-800">¿Cómo funciona la personalización?</h3>
+                            <h3 class="text-lg font-semibold text-gray-800">¿Cuál es la diferencia entre "Cuento a Medida" y "Cuento Premium"?</h3>
                             <span class="transform transition-transform duration-300 text-teal-500 font-bold text-2xl">+</span>
                         </div>
                         <div class="faq-answer text-gray-600 pt-2 pr-8">
-                            <p>Al elegir un plan de video personalizado, te haremos preguntas clave sobre el desafío, el nombre de tu hijo/a, sus gustos y características. Nuestro equipo de pedagogos y creativos usa esa información para crear una historia única donde tu pequeño es el héroe.</p>
+                            <p>El "Cuento a Medida" es ideal para abordar un desafío o valor específico de forma rápida. Nos das el tema y nosotros creamos la historia. El "Cuento Premium" es una experiencia de co-creación: puedes incluir detalles específicos, nombres de familiares, anécdotas, fotos e incluso la voz de tu hijo/a para un resultado final mucho más personal y emotivo.</p>
                         </div>
                     </div>
                     <div class="faq-item border-b pb-4">
+                        <div class="faq-question flex justify-between items-center py-2">
+                            <h3 class="text-lg font-semibold text-gray-800">¿Cómo funciona la opción de libro impreso?</h3>
+                             <span class="transform transition-transform duration-300 text-teal-500 font-bold text-2xl">+</span>
+                        </div>
+                        <div class="faq-answer text-gray-600 pt-2 pr-8">
+                            <p>La impresión es un complemento que puedes añadir a tu "Cuento a Medida" o "Cuento Premium". Una vez que apruebes el video-cuento final, te daremos la opción de adquirir una versión física, impresa en alta calidad y tapa dura, para que se convierta en un tesoro familiar. El costo es de $50.000 CLP adicionales y el envío se calcula aparte.</p>
+                        </div>
+                    </div>
+                     <div class="faq-item border-b pb-4">
                         <div class="faq-question flex justify-between items-center py-2">
                             <h3 class="text-lg font-semibold text-gray-800">¿En cuánto tiempo recibo mi video-cuento?</h3>
                              <span class="transform transition-transform duration-300 text-teal-500 font-bold text-2xl">+</span>
                         </div>
                         <div class="faq-answer text-gray-600 pt-2 pr-8">
-                            <p>Recibirás tu video-cuento personalizado en tu correo electrónico en menos de 24 horas después de haber completado el formulario de personalización.</p>
-                        </div>
-                    </div>
-                     <div class="faq-item border-b pb-4">
-                        <div class="faq-question flex justify-between items-center py-2">
-                            <h3 class="text-lg font-semibold text-gray-800">¿Qué incluye la Garantía de Satisfacción?</h3>
-                             <span class="transform transition-transform duration-300 text-teal-500 font-bold text-2xl">+</span>
-                        </div>
-                        <div class="faq-answer text-gray-600 pt-2 pr-8">
-                            <p>Para los cuentos personalizados, te permite solicitar una ronda de ajustes menores dentro de las 48 horas posteriores a la entrega. Para las suscripciones, ofrecemos un reembolso completo si cancelas dentro de los primeros 7 días.</p>
+                            <p>¡Muy rápido! Recibirás tu video-cuento personalizado en tu correo electrónico en menos de 24 horas después de haber completado el formulario de personalización.</p>
                         </div>
                     </div>
                     <div class="faq-item border-b pb-4">
                         <div class="faq-question flex justify-between items-center py-2">
-                            <h3 class="text-lg font-semibold text-gray-800">¿Puedo cancelar mi suscripción cuando quiera?</h3>
+                            <h3 class="text-lg font-semibold text-gray-800">¿Puedo cancelar mi suscripción a la Biblioteca Mágica?</h3>
                              <span class="transform transition-transform duration-300 text-teal-500 font-bold text-2xl">+</span>
                         </div>
                         <div class="faq-answer text-gray-600 pt-2 pr-8">
-                            <p>¡Por supuesto! Puedes cancelar tu suscripción en cualquier momento desde tu panel de usuario, sin preguntas ni penalizaciones.</p>
+                            <p>¡Por supuesto! Puedes cancelar tu suscripción mensual en cualquier momento desde tu panel de usuario, sin preguntas ni penalizaciones. Seguirás teniendo acceso hasta el final de tu ciclo de facturación.</p>
                         </div>
                     </div>
                 </div>
@@ -514,7 +510,7 @@
                 <button class="text-gray-400 hover:text-gray-700 text-3xl close-modal-btn">&times;</button>
             </div>
             <div class="p-8 overflow-y-auto prose">
-                <p class="text-sm text-gray-500">Última actualización: 18 de septiembre de 2025</p>
+                <p class="text-sm text-gray-500">Última actualización: 30 de Septiembre de 2025</p>
                 <p>En Muna Booki, tu privacidad y la seguridad de tus datos son fundamentales. Esta Política de Privacidad describe cómo recopilamos, usamos y protegemos tu información.</p>
                 <h2>1. Información que Recopilamos</h2>
                 <ul>
@@ -539,7 +535,7 @@
                 <button class="text-gray-400 hover:text-gray-700 text-3xl close-modal-btn">&times;</button>
             </div>
             <div class="p-8 overflow-y-auto prose">
-                <p class="text-sm text-gray-500">Última actualización: 18 de septiembre de 2025</p>
+                <p class="text-sm text-gray-500">Última actualización: 30 de Septiembre de 2025</p>
                 <p>Al acceder y utilizar nuestro sitio web, aceptas cumplir con los siguientes términos.</p>
                 <h2>1. Cuentas de Usuario</h2>
                 <p>Eres responsable de mantener la confidencialidad de tu contraseña. Debes ser mayor de 18 años para crear una cuenta y realizar compras.</p>
@@ -567,7 +563,7 @@
                     </div>
                     <p class="text-gray-300 text-sm">Tu aliado en la crianza, transformando desafíos en historias mágicas.</p>
                     <div class="flex space-x-4 mt-6">
-                        <a href="#" class="text-gray-300 hover:text-white" aria-label="Instagram"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.85s-.011 3.584-.069 4.85c-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07s-3.584-.012-4.85-.07c-3.252-.148-4.771-1.691-4.919-4.919-.058-1.265-.069-1.645-.069-4.85s.011-3.584.069-4.85c.149-3.225 1.664-4.771 4.919-4.919 1.266-.057 1.644-.07 4.85-.07zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948s.014 3.667.072 4.947c.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072s3.667-.014 4.947-.072c4.358-.2 6.78-2.618 6.98-6.98.059-1.281.073-1.689.073-4.948s-.014-3.667-.072-4.947c-.2-4.358-2.618-6.78-6.98-6.98-1.281-.058-1.689-.072-4.948-.072zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.162 6.162 6.162 6.162-2.759 6.162-6.162-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4s1.791-4 4-4 4 1.79 4 4-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44 1.441-.645 1.441-1.44-.645-1.44-1.441-1.44z"/></svg></a>
+                        <a href="#" class="text-gray-300 hover:text-white" aria-label="Instagram"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.85s-.011 3.584-.069 4.85c-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07s-3.584-.012-4.85-.07c-3.252-.148-4.771-1.691-4.919-4.919-.058-1.265-.069-1.645-.069-4.85s.011-3.584.069-4.85c.149-3.225 1.664 4.771 4.919-4.919 1.266-.057 1.644-.07 4.85-.07zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948s.014 3.667.072 4.947c.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072s3.667-.014 4.947-.072c4.358-.2 6.78-2.618 6.98-6.98.059-1.281.073-1.689.073-4.948s-.014-3.667-.072-4.947c-.2-4.358-2.618-6.78-6.98-6.98-1.281-.058-1.689-.072-4.948-.072zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.162 6.162 6.162 6.162-2.759 6.162-6.162-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4s1.791-4 4-4 4 1.79 4 4-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44 1.441-.645 1.441-1.44-.645-1.44-1.441-1.44z"/></svg></a>
                         <a href="#" class="text-gray-300 hover:text-white" aria-label="Facebook"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M9 8h-3v4h3v12h5v-12h3.642l.358-4h-4v-1.667c0-.955.192-1.333 1.115-1.333h2.885v-5h-3.808c-3.596 0-5.192 1.583-5.192 4.615v3.385z"/></svg></a>
                         <a href="#" class="text-gray-300 hover:text-white" aria-label="YouTube"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg></a>
                     </div>
@@ -575,7 +571,7 @@
                 <div class="lg:col-span-1">
                     <h4 class="font-bold text-lg mb-4 text-white uppercase tracking-wider">Muna Booki</h4>
                     <ul class="space-y-3">
-                        <li><a href="biblioteca.html" class="text-gray-300 hover:text-white transition-colors duration-300">Biblioteca Mágica</a></li>
+                        <li><a href="#library" class="text-gray-300 hover:text-white transition-colors duration-300">Biblioteca Mágica</a></li>
                         <li><a href="#personalized" class="text-gray-300 hover:text-white transition-colors duration-300">Cuentos Personalizados</a></li>
                         <li><a href="#plans" class="text-gray-300 hover:text-white transition-colors duration-300">Nuestros Planes</a></li>
                     </ul>
@@ -600,7 +596,7 @@
                 </div>
             </div>
             <div class="text-center text-gray-400 mt-12 border-t border-gray-700 pt-8 text-sm">
-                © 2024 Muna Booki - Todos los derechos reservados.
+                © 2025 Muna Booki - Todos los derechos reservados.
             </div>
         </div>
     </footer>
@@ -616,16 +612,15 @@
     {
       "@context": "https://schema.org",
       "@type": "Product",
-      "name": "Suscripción Aliado Mensual - Muna Booki",
+      "name": "Cuento Premium Personalizado - Muna Booki",
       "image": "https://munabooki.com/og-image.jpg",
-      "description": "Un servicio de suscripción para padres que buscan soluciones creativas a los desafíos de la crianza. Incluye un video-cuento personalizado al mes y acceso ilimitado a nuestra biblioteca de contenidos.",
+      "description": "Un servicio de co-creación de un video-cuento personalizado para padres que buscan soluciones creativas a los desafíos de la crianza, con opción a libro impreso.",
       "brand": { "@type": "Brand", "name": "Muna Booki" },
       "offers": {
         "@type": "Offer",
         "url": "https://munabooki.com#plans",
-        "priceCurrency": "USD",
-        "price": "15.00",
-        "priceSpecification": { "@type": "PriceSpecification", "price": "15.00", "priceCurrency": "USD", "valueAddedTaxIncluded": "true", "billingIncrement": "1", "unitText": "MONTH" },
+        "priceCurrency": "CLP",
+        "price": "40000",
         "availability": "https://schema.org/InStock"
       },
       "aggregateRating": { "@type": "AggregateRating", "ratingValue": "5", "reviewCount": "3" }
@@ -633,56 +628,10 @@
     </script>
     
     <script type="module">
-        // Firebase SDKs and Logic
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-        import { 
-            getAuth, 
-            onAuthStateChanged, 
-            GoogleAuthProvider, 
-            signInWithPopup,
-            createUserWithEmailAndPassword,
-            signInWithEmailAndPassword,
-            signOut
-        } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyBivlKO0Ijt1hvMNyH9aIGXf_7WZwE2tA4",
-            authDomain: "munabooki.firebaseapp.com",
-            projectId: "munabooki",
-            storageBucket: "munabooki.appspot.com",
-            messagingSenderId: "1413588186",
-            appId: "1:1413588186:web:8d3f18e95c1794711f1225"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        
-        // --- Auth Logic ---
-        // (Existing auth code remains here)
-        const googleProvider = new GoogleAuthProvider();
-        const authContainer = document.getElementById('auth-container');
-        const authModalBackdrop = document.getElementById('auth-modal-backdrop');
-        const authModalContent = document.getElementById('auth-modal-content');
-        const closeAuthModalBtn = document.getElementById('close-auth-modal-btn');
-        // ... all other auth UI elements
-        
-        onAuthStateChanged(auth, user => {
-            if (user) {
-                renderLoggedInUI(user);
-                closeAuthModal();
-            } else {
-                renderLoggedOutUI();
-            }
-        });
-        
-        function renderLoggedInUI(user) { /* ... */ }
-        function renderLoggedOutUI() { /* ... */ }
-        function openAuthModal(mode = 'login') { /* ... */ }
-        function closeAuthModal() { /* ... */ }
-        // ... all other auth functions
-
-        // --- New Modal Logic ---
-        document.addEventListener('DOMContentLoaded', () => {
+        // Firebase SDKs and Logic will be added in the next step
+    </script>
+    <script>
+       document.addEventListener('DOMContentLoaded', () => {
             const modalTriggers = {
                 'faq-modal-trigger': 'faq-modal',
                 'header-faq-trigger': 'faq-modal',
@@ -693,29 +642,23 @@
             const openModal = (modalId) => {
                 const modal = document.getElementById(modalId);
                 if (!modal) return;
-
-                const backdrop = modal;
-                const content = modal.querySelector('.modal-content');
-
-                backdrop.classList.remove('hidden');
+                modal.classList.remove('hidden');
                 setTimeout(() => {
-                    backdrop.classList.remove('opacity-0');
+                    const content = modal.querySelector('.modal-content');
+                    modal.classList.remove('opacity-0');
                     content.classList.remove('scale-95', 'opacity-0');
                 }, 10);
             };
 
             const closeModal = (modal) => {
-                const backdrop = modal;
                 const content = modal.querySelector('.modal-content');
-                
                 content.classList.add('scale-95', 'opacity-0');
-                backdrop.classList.add('opacity-0');
+                modal.classList.add('opacity-0');
                 setTimeout(() => {
-                    backdrop.classList.add('hidden');
+                    modal.classList.add('hidden');
                 }, 300);
             };
             
-            // Event listeners for triggers
             for (const triggerId in modalTriggers) {
                 const trigger = document.getElementById(triggerId);
                 if (trigger) {
@@ -726,28 +669,15 @@
                 }
             }
 
-            // Event listeners for closing modals
             document.querySelectorAll('.modal-backdrop').forEach(backdrop => {
                 backdrop.addEventListener('click', (e) => {
-                    if (e.target === backdrop) {
-                        closeModal(backdrop);
-                    }
+                    if (e.target === backdrop) closeModal(backdrop);
                 });
             });
             document.querySelectorAll('.close-modal-btn').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    closeModal(btn.closest('.modal-backdrop'));
-                });
+                btn.addEventListener('click', () => closeModal(btn.closest('.modal-backdrop')));
             });
 
-            // Check for URL params to open a modal on load
-            const urlParams = new URLSearchParams(window.location.search);
-            const modalToShow = urlParams.get('show');
-            if (modalToShow && ['faq', 'privacy', 'terms'].includes(modalToShow)) {
-                openModal(modalToShow + '-modal');
-            }
-            
-            // FAQ Accordion Logic (inside FAQ modal)
             const faqItems = document.querySelectorAll('.faq-item');
             faqItems.forEach(item => {
                 const question = item.querySelector('.faq-question');
@@ -756,10 +686,13 @@
 
                 question.addEventListener('click', () => {
                     const isOpen = answer.style.maxHeight && answer.style.maxHeight !== '0px';
-                    if (isOpen) {
-                        answer.style.maxHeight = '0px';
-                        icon.style.transform = 'rotate(0deg)';
-                    } else {
+                    
+                    faqItems.forEach(otherItem => {
+                         otherItem.querySelector('.faq-answer').style.maxHeight = '0px';
+                         otherItem.querySelector('.faq-question span').style.transform = 'rotate(0deg)';
+                    });
+
+                    if (!isOpen) {
                         answer.style.maxHeight = answer.scrollHeight + 'px';
                         icon.style.transform = 'rotate(45deg)';
                     }
@@ -769,4 +702,3 @@
     </script>
 </body>
 </html>
-
