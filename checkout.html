@@ -55,8 +55,27 @@
                     <form id="register-form" class="space-y-4 hidden">
                         <input type="email" placeholder="Correo electrónico" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500">
                         <input type="password" placeholder="Crear contraseña" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500">
-                        <button type="submit" class="w-full btn-primary font-bold py-3 rounded-lg">Crear Cuenta</y>
+                        <button type="submit" class="w-full btn-primary font-bold py-3 rounded-lg">Crear Cuenta</button>
                     </form>
+
+                    <!-- Separador y Logins Sociales -->
+                    <div class="my-6 flex items-center">
+                        <div class="flex-grow border-t border-gray-300"></div>
+                        <span class="mx-4 text-gray-500 text-sm">o</span>
+                        <div class="flex-grow border-t border-gray-300"></div>
+                    </div>
+
+                    <div class="space-y-3">
+                        <button id="google-signin-btn" class="w-full flex items-center justify-center bg-white border border-gray-300 text-gray-700 font-semibold py-3 px-4 rounded-lg hover:bg-gray-50 transition">
+                            <svg class="w-6 h-6 mr-3" viewBox="0 0 48 48"><defs><path id="a" d="M44.5 20H24v8.5h11.8C34.7 33.9 30.1 37 24 37c-7.2 0-13-5.8-13-13s5.8-13 13-13c3.1 0 5.9 1.1 8.1 2.9l6.4-6.4C34.6 4.1 29.6 2 24 2 11.8 2 2 11.8 2 24s9.8 22 22 22c11 0 21-8 21-22 0-1.3-.2-2.7-.5-4z"/></defs><clipPath id="b"><use xlink:href="#a" overflow="visible"/></clipPath><path clip-path="url(#b)" fill="#FBBC05" d="M0 37V11l17 13z"/><path clip-path="url(#b)" fill="#EA4335" d="M0 11l17 13 7-6.1L48 14V0H0z"/><path clip-path="url(#b)" fill="#34A853" d="M0 37l30-23 7.9 1L48 0v48H0z"/><path clip-path="url(#b)" fill="#4285F4" d="M48 48L17 24l-4-3 35-10z"/></svg>
+                            Continuar con Google
+                        </button>
+                        <button id="facebook-signin-btn" class="w-full flex items-center justify-center bg-blue-800 text-white font-semibold py-3 px-4 rounded-lg hover:bg-blue-900 transition">
+                            <svg class="w-6 h-6 mr-3" fill="currentColor" viewBox="0 0 24 24"><path d="M9 8h-3v4h3v12h5v-12h3.642l.358-4h-4v-1.667c0-.955.192-1.333 1.115-1.333h2.885v-5h-3.808c-3.596 0-5.192 1.583-5.192 4.615v3.385z"/></svg>
+                            Continuar con Facebook
+                        </button>
+                    </div>
+
                 </div>
 
                 <!-- Sección de Pago (Aparece después del login) -->
@@ -178,8 +197,13 @@
                 paymentButton.disabled = !termsCheckbox.checked;
             });
 
+            // Simulación de login exitoso para todos los botones
+            const socialLoginGoogle = document.getElementById('google-signin-btn');
+            const socialLoginFacebook = document.getElementById('facebook-signin-btn');
             loginForm.addEventListener('submit', (e) => { e.preventDefault(); setTimeout(onLoginSuccess, 500); });
             registerForm.addEventListener('submit', (e) => { e.preventDefault(); setTimeout(onLoginSuccess, 500); });
+            socialLoginGoogle.addEventListener('click', (e) => { e.preventDefault(); setTimeout(onLoginSuccess, 500); });
+            socialLoginFacebook.addEventListener('click', (e) => { e.preventDefault(); setTimeout(onLoginSuccess, 500); });
             
             const termsModal = document.getElementById('terms-modal');
             const termsTrigger = document.getElementById('terms-trigger');
