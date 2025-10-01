@@ -47,14 +47,16 @@
                         <button id="register-tab-btn" class="flex-1 py-2 font-semibold text-gray-500">Registrarse</button>
                     </div>
 
+                    <p id="auth-error-message" class="text-red-500 text-sm text-center mb-4 h-5"></p>
+
                     <form id="login-form" class="space-y-4">
-                        <input type="email" placeholder="Correo electrónico" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500">
-                        <input type="password" placeholder="Contraseña" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500">
+                        <input name="email" type="email" placeholder="Correo electrónico" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500">
+                        <input name="password" type="password" placeholder="Contraseña" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500">
                         <button type="submit" class="w-full btn-primary font-bold py-3 rounded-lg">Ingresar</button>
                     </form>
                     <form id="register-form" class="space-y-4 hidden">
-                        <input type="email" placeholder="Correo electrónico" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500">
-                        <input type="password" placeholder="Crear contraseña" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500">
+                        <input name="email" type="email" placeholder="Correo electrónico" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500">
+                        <input name="password" type="password" placeholder="Crear contraseña" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500">
                         <button type="submit" class="w-full btn-primary font-bold py-3 rounded-lg">Crear Cuenta</button>
                     </form>
 
@@ -138,7 +140,31 @@
     </div>
 
 
-    <script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { 
+            getAuth, 
+            signInWithPopup, 
+            GoogleAuthProvider, 
+            FacebookAuthProvider,
+            createUserWithEmailAndPassword,
+            signInWithEmailAndPassword
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+
+        // ---- CONFIGURACIÓN DE FIREBASE ----
+        // En un entorno real, esta configuración será inyectada automáticamente.
+        // Asegúrate de tener tu proyecto de Firebase configurado.
+        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' 
+            ? __firebase_config 
+            : '{ "apiKey": "TU_API_KEY", "authDomain": "TU_AUTH_DOMAIN", "projectId": "TU_PROJECT_ID" }');
+        
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const googleProvider = new GoogleAuthProvider();
+        const facebookProvider = new FacebookAuthProvider();
+
+
+        // ---- LÓGICA DE LA PÁGINA ----
         document.addEventListener('DOMContentLoaded', () => {
             const params = new URLSearchParams(window.location.search);
             const plan = params.get('plan');
@@ -148,6 +174,7 @@
             const paymentButton = document.getElementById('payment-button');
             const clausesContainer = document.getElementById('clauses-container');
             const welcomeMessage = document.getElementById('welcome-message');
+            const authErrorMessage = document.getElementById('auth-error-message');
 
             const planDetails = {
                 biblioteca: { name: 'Suscripción Biblioteca Mágica', price: '$8.900 CLP / Mes', description: 'Acceso ilimitado a todos nuestros video-cuentos.', image: 'https://placehold.co/600x400/E0F2F1/0A2F5B?text=Biblioteca', custom: false },
@@ -182,7 +209,8 @@
                 loginForm.classList.add('hidden');
             });
 
-            function onLoginSuccess(userName = 'Mago/a') {
+            function onLoginSuccess(user) {
+                const userName = user.displayName || user.email.split('@')[0];
                 welcomeMessage.textContent = `¡Hola, ${userName}!`;
                 document.getElementById('auth-section').classList.add('hidden');
                 document.getElementById('payment-section').classList.remove('hidden');
@@ -195,18 +223,51 @@
                 }
             }
             
+            function showAuthError(message) {
+                authErrorMessage.textContent = message;
+            }
+
             termsCheckbox.addEventListener('change', () => {
                 paymentButton.disabled = !termsCheckbox.checked;
             });
 
-            // Simulación de login exitoso para todos los botones
-            const socialLoginGoogle = document.getElementById('google-signin-btn');
-            const socialLoginFacebook = document.getElementById('facebook-signin-btn');
-            loginForm.addEventListener('submit', (e) => { e.preventDefault(); setTimeout(() => onLoginSuccess('Valeria'), 500); });
-            registerForm.addEventListener('submit', (e) => { e.preventDefault(); setTimeout(() => onLoginSuccess('Valeria'), 500); });
-            socialLoginGoogle.addEventListener('click', (e) => { e.preventDefault(); setTimeout(() => onLoginSuccess('Valeria'), 500); });
-            socialLoginFacebook.addEventListener('click', (e) => { e.preventDefault(); setTimeout(() => onLoginSuccess('Valeria'), 500); });
+            // ---- MANEJADORES DE EVENTOS DE FIREBASE ----
             
+            // Google Sign-In
+            document.getElementById('google-signin-btn').addEventListener('click', () => {
+                signInWithPopup(auth, googleProvider)
+                    .then(result => onLoginSuccess(result.user))
+                    .catch(error => showAuthError("Error al iniciar con Google. Intenta de nuevo."));
+            });
+            
+            // Facebook Sign-In
+            document.getElementById('facebook-signin-btn').addEventListener('click', () => {
+                signInWithPopup(auth, facebookProvider)
+                    .then(result => onLoginSuccess(result.user))
+                    .catch(error => showAuthError("Error al iniciar con Facebook. Intenta de nuevo."));
+            });
+            
+            // Email/Password Registration
+            registerForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const email = e.target.email.value;
+                const password = e.target.password.value;
+                createUserWithEmailAndPassword(auth, email, password)
+                    .then(result => onLoginSuccess(result.user))
+                    .catch(error => showAuthError("No se pudo registrar. Verifica tus datos."));
+            });
+
+            // Email/Password Login
+            loginForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const email = e.target.email.value;
+                const password = e.target.password.value;
+                signInWithEmailAndPassword(auth, email, password)
+                    .then(result => onLoginSuccess(result.user))
+                    .catch(error => showAuthError("Email o contraseña incorrectos."));
+            });
+
+            // ---- Lógica del Modal de Términos ----
             const termsModal = document.getElementById('terms-modal');
             const termsTrigger = document.getElementById('terms-trigger');
             const closeTermsModal = document.getElementById('close-terms-modal');
