@@ -152,12 +152,17 @@
         } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
         // ---- CONFIGURACIÓN DE FIREBASE ----
-        // En un entorno real, esta configuración será inyectada automáticamente.
-        // Asegúrate de tener tu proyecto de Firebase configurado.
-        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' 
-            ? __firebase_config 
-            : '{ "apiKey": "TU_API_KEY", "authDomain": "TU_AUTH_DOMAIN", "projectId": "TU_PROJECT_ID" }');
-        
+        // Tus datos de configuración de Firebase.
+        const firebaseConfig = {
+            apiKey: "AIzaSyBivlKO0Ijt1hvMNyH9aIGXf_7WZwE2tA4",
+            authDomain: "munabooki.firebaseapp.com",
+            projectId: "munabooki",
+            storageBucket: "munabooki.appspot.com", // Corregido para compatibilidad
+            messagingSenderId: "585414544600",
+            appId: "1:585414544600:web:77026db4856b0111249bad",
+            measurementId: "G-HBM4Y2FKMF"
+        };
+
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const googleProvider = new GoogleAuthProvider();
@@ -237,14 +242,20 @@
             document.getElementById('google-signin-btn').addEventListener('click', () => {
                 signInWithPopup(auth, googleProvider)
                     .then(result => onLoginSuccess(result.user))
-                    .catch(error => showAuthError("Error al iniciar con Google. Intenta de nuevo."));
+                    .catch(error => {
+                        console.error("Error Google SignIn:", error);
+                        showAuthError("Error al iniciar con Google. Intenta de nuevo.");
+                    });
             });
             
             // Facebook Sign-In
             document.getElementById('facebook-signin-btn').addEventListener('click', () => {
                 signInWithPopup(auth, facebookProvider)
                     .then(result => onLoginSuccess(result.user))
-                    .catch(error => showAuthError("Error al iniciar con Facebook. Intenta de nuevo."));
+                    .catch(error => {
+                        console.error("Error Facebook SignIn:", error);
+                        showAuthError("Error al iniciar con Facebook. Intenta de nuevo.");
+                    });
             });
             
             // Email/Password Registration
@@ -254,7 +265,10 @@
                 const password = e.target.password.value;
                 createUserWithEmailAndPassword(auth, email, password)
                     .then(result => onLoginSuccess(result.user))
-                    .catch(error => showAuthError("No se pudo registrar. Verifica tus datos."));
+                    .catch(error => {
+                        console.error("Error Registration:", error);
+                        showAuthError("No se pudo registrar. Verifica tus datos.");
+                    });
             });
 
             // Email/Password Login
@@ -264,7 +278,10 @@
                 const password = e.target.password.value;
                 signInWithEmailAndPassword(auth, email, password)
                     .then(result => onLoginSuccess(result.user))
-                    .catch(error => showAuthError("Email o contraseña incorrectos."));
+                    .catch(error => {
+                        console.error("Error Login:", error);
+                        showAuthError("Email o contraseña incorrectos.");
+                    });
             });
 
             // ---- Lógica del Modal de Términos ----
