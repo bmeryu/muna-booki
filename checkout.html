@@ -134,7 +134,7 @@
         };
 
         const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app); // Lite
+        const db = getFirestore(app, 'munabooki');; // Lite
         const auth = getAuth(app);
         const googleProvider = new GoogleAuthProvider();
         
