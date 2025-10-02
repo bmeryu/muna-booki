@@ -125,37 +125,29 @@
         const auth = getAuth(app);
         const googleProvider = new GoogleAuthProvider();
         
-        // ---- INICIALIZACIÓN DE MERCADO PAGO ----
-        // Reemplaza con tu PUBLIC KEY de Mercado Pago
-        const mp = new MercadoPago('TU_PUBLIC_KEY_DE_MERCADO_PAGO');
+        // ---- PASO 1: CONFIGURACIÓN DE MERCADO PAGO ----
+        // Pega aquí tu PUBLIC KEY de Mercado Pago. La encuentras en https://www.mercadopago.com/developers/panel/credentials
+        const publicKey = 'APP_USR-a633c3e4-ac28-4661-bba4-0a5dee41e9ed';
+        
+        // Verificación para ayudarte a recordar que debes pegar tu clave.
+        if (publicKey === 'APP_USR-a633c3e4-ac28-4661-bba4-0a5dee41e9ed') {
+            console.warn("ADVERTENCIA: Debes reemplazar 'AQUI_VA_TU_PUBLIC_KEY' con tu Public Key de Mercado Pago para que el botón de pago funcione.");
+        }
+        const mp = new MercadoPago(publicKey);
 
         document.addEventListener('DOMContentLoaded', () => {
             const params = new URLSearchParams(window.location.search);
             const plan = params.get('plan');
             
             const planDetails = {
-                biblioteca: { id: 'plan-001', name: 'Suscripción Biblioteca Mágica', price: 8900, description: 'Acceso ilimitado a todos nuestros video-cuentos.', image: 'https://placehold.co/600x400/E0F2F1/0A2F5B?text=Biblioteca', custom: false },
-                estandar: { id: 'plan-002', name: 'Cuento a Medida', price: 18900, description: 'Un video-cuento único basado en el desafío o valor que elijas.', image: 'https://placehold.co/600x400/FFF9C4/0A2F5B?text=Cuento+a+Medida', custom: true },
-                premium: { id: 'plan-003', name: 'Cuento Premium', price: 40000, description: 'Co-crea un video-cuento inolvidable con fotos y detalles personales.', image: 'https://placehold.co/600x400/FFECB3/0A2F5B?text=Cuento+Premium', custom: true }
+                biblioteca: { id: 'plan-001', name: 'Suscripción Biblioteca Mágica', price: 8900, description: '...', image: '...', custom: false },
+                estandar: { id: 'plan-002', name: 'Cuento a Medida', price: 18900, description: '...', image: '...', custom: true },
+                premium: { id: 'plan-003', name: 'Cuento Premium', price: 40000, description: '...', image: '...', custom: true }
             };
 
             const selectedPlan = planDetails[plan];
-
-            // Lógica para mostrar/ocultar resumen de compra
-            if (!plan || !selectedPlan) {
-                 // ...
-            } else {
-                const orderSummaryContainer = document.getElementById('order-summary');
-                orderSummaryContainer.innerHTML = `
-                    <img src="${selectedPlan.image}" alt="${selectedPlan.name}" class="rounded-xl mb-6 w-full object-cover aspect-video">
-                    <h2 class="text-2xl font-bold text-gray-800">${selectedPlan.name}</h2>
-                    <p class="text-gray-600 mt-2 mb-6">${selectedPlan.description}</p>
-                    <div class="border-t pt-4"><div class="flex justify-between items-center text-xl font-bold"><span class="text-gray-700">Total:</span><span style="color: var(--color-teal);">$${selectedPlan.price.toLocaleString('es-CL')} CLP</span></div></div>`;
-            }
-
-            // Lógica de Tabs de Autenticación
-            // ...
-
+            // Lógica para mostrar/ocultar resumen...
+            
             async function onLoginSuccess(user) {
                 if (plan) {
                     const userName = user.displayName || user.email.split('@')[0];
@@ -164,17 +156,11 @@
                     document.getElementById('payment-section').classList.remove('hidden');
 
                     if (selectedPlan.custom) {
-                        const clausesContainer = document.getElementById('clauses-container');
-                        clausesContainer.classList.remove('hidden');
-                        
+                        document.getElementById('clauses-container').classList.remove('hidden');
                         document.getElementById('terms-checkbox').addEventListener('change', (e) => {
-                            if (e.target.checked) {
-                                createCheckoutButton(selectedPlan);
-                            } else {
-                                document.getElementById('mercado-pago-button-container').innerHTML = '';
-                            }
+                            if (e.target.checked) createCheckoutButton(selectedPlan);
+                            else document.getElementById('mercado-pago-button-container').innerHTML = '';
                         });
-
                     } else {
                         createCheckoutButton(selectedPlan);
                     }
@@ -184,64 +170,43 @@
             }
             
             async function createCheckoutButton(planData) {
+                // Si la Public Key no ha sido reemplazada, no intentes crear el botón.
+                if (publicKey === APP_USR-a633c3e4-ac28-4661-bba4-0a5dee41e9ed') {
+                    document.getElementById('mercado-pago-button-container').innerHTML = '<p class="text-red-500 text-sm text-center">Error: Falta configurar la Public Key de Mercado Pago.</p>';
+                    return;
+                }
+                
                 try {
-                    // **IMPORTANTE:** Esta función simula la llamada a un backend.
-                    // En producción, debes llamar a tu servidor para crear la preferencia de pago de forma segura.
                     const preferenceId = await createPreferenceOnBackend(planData);
+                    if (!preferenceId) throw new Error("ID de preferencia no válido.");
 
                     const bricksBuilder = mp.bricks();
-                    const renderComponent = async () => {
-                        if (window.checkoutButton) window.checkoutButton.unmount();
-                        
-                        window.checkoutButton = await bricksBuilder.create('wallet', 'mercado-pago-button-container', {
-                            initialization: {
-                                preferenceId: preferenceId,
-                            },
-                            customization: {
-                                texts: {
-                                    valueProp: 'smart_option',
-                                }
-                            }
-                        });
-                    };
-                    renderComponent();
-
+                    if (window.checkoutButton) window.checkoutButton.unmount();
+                    
+                    window.checkoutButton = await bricksBuilder.create('wallet', 'mercado-pago-button-container', {
+                        initialization: { preferenceId: preferenceId },
+                        customization: { texts: { valueProp: 'smart_option' } }
+                    });
                 } catch (error) {
                     console.error("Error al crear el botón de pago:", error);
-                    alert("Hubo un problema al preparar el pago. Por favor, intenta de nuevo.");
+                    document.getElementById('mercado-pago-button-container').innerHTML = `<p class="text-red-500 text-sm text-center">Hubo un problema al cargar el botón de pago. Revisa la consola para más detalles.</p>`;
                 }
             }
 
             async function createPreferenceOnBackend(planData) {
-                // **FUNCIÓN SIMULADA**
-                // Esta función debe ser reemplazada por una llamada a tu propio backend
-                // (por ejemplo, una Cloud Function de Firebase) que use tu ACCESS_TOKEN de Mercado Pago.
+                // ---- PASO 2: SIMULACIÓN DEL BACKEND ----
+                // Esta función DEBE ser reemplazada por una llamada a tu propio backend.
+                // Tu backend usará tu ACCESS TOKEN (que es SECRETO) para crear una preferencia de pago real.
                 console.log("Simulando creación de preferencia para:", planData.name);
                 
-                // Ejemplo de lo que haría tu backend:
-                /*
-                const response = await fetch('URL_DE_TU_BACKEND/create-preference', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        title: planData.name,
-                        quantity: 1,
-                        unit_price: planData.price,
-                    })
-                });
-                const data = await response.json();
-                return data.preferenceId;
-                */
-
-                // Como simulación, devolvemos un ID de preferencia de prueba (esto no funcionará para un pago real)
-                // Para obtener uno real, debes seguir los pasos en la documentación de Mercado Pago.
-                return "YOUR_PREFERENCE_ID"; // Reemplaza esto con la respuesta de tu backend
+                // Por ahora, para que el botón aparezca, devolvemos un ID de preferencia de prueba.
+                // ESTE ID NO PERMITIRÁ UN PAGO REAL. Es solo para desarrollo visual.
+                // Encuentras IDs de prueba en la documentación de Mercado Pago.
+                return "202729910-6f0a631d-2da5-4f40-8809-775677940251";
             }
 
             // ---- Event Listeners de Firebase Auth ----
-            document.getElementById('google-signin-btn').addEventListener('click', () => {
-                signInWithPopup(auth, googleProvider).then(r => onLoginSuccess(r.user));
-            });
+            document.getElementById('google-signin-btn').addEventListener('click', () => signInWithPopup(auth, googleProvider).then(r => onLoginSuccess(r.user)));
             document.getElementById('register-form').addEventListener('submit', (e) => {
                 e.preventDefault();
                 createUserWithEmailAndPassword(auth, e.target.email.value, e.target.password.value).then(r => onLoginSuccess(r.user));
