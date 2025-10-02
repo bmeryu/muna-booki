@@ -114,24 +114,35 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInWithPopup, GoogleAuthProvider, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { 
+          getAuth, signInWithPopup, GoogleAuthProvider, 
+          createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged 
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { 
+          initializeFirestore, doc, getDoc 
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBivlKO0Ijt1hvMNyH9aIGXf_7WZwE2tA4",
             authDomain: "munabooki.firebaseapp.com",
             projectId: "munabooki",
-            storageBucket: "munabooki.appspot.com",
+            storageBucket: "munabooki.firebasestorage.app",
             messagingSenderId: "585414544600",
             appId: "1:585414544600:web:77026db4856b0111249bad",
             measurementId: "G-HBM4Y2FKMF"
         };
 
         const app = initializeApp(firebaseConfig);
+
+        // 🔧 Evitar errores 400 Listen en GitHub Pages / ambientes con COOP/COEP
+        const db = initializeFirestore(app, {
+          experimentalForceLongPolling: true,
+          useFetchStreams: false
+        });
+
         const auth = getAuth(app);
         const googleProvider = new GoogleAuthProvider();
-        const db = getFirestore(app);
-
+        
         // ¡IMPORTANTE! Reemplaza esto con tu PUBLIC KEY de PRODUCCIÓN de Mercado Pago.
         const publicKey = 'APP_USR-a633c3e4-ac28-4661-bba4-0a5dee41e9ed'; 
         if (publicKey === 'APP_USR-a633c3e4-ac28-4661-bba4-0a5dee41e9ed') {
@@ -150,6 +161,11 @@
             };
 
             const selectedPlan = planDetails[plan];
+
+            // Si ya viene logueado por una pestaña previa, disparar flujo igual
+            onAuthStateChanged(auth, (user) => {
+              if (user) onLoginSuccess(user);
+            });
             
             async function onLoginSuccess(user) {
                 if (plan) {
@@ -175,14 +191,17 @@
                     }
 
                     // Flujo normal de pago
-                    if (selectedPlan.custom) {
+                    if (selectedPlan?.custom) {
                         document.getElementById('clauses-container').classList.remove('hidden');
                         document.getElementById('terms-checkbox').addEventListener('change', (e) => {
                             if (e.target.checked) createCheckoutButton(selectedPlan);
                             else document.getElementById('mercado-pago-button-container').innerHTML = '';
                         });
-                    } else {
+                    } else if (selectedPlan) {
                         createCheckoutButton(selectedPlan);
+                    } else {
+                        // Sin plan, redirige
+                        window.location.href = 'mi-cuenta.html';
                     }
                 } else {
                     window.location.href = 'mi-cuenta.html';
@@ -214,8 +233,9 @@
             }
 
             async function createPreferenceOnBackend(planData) {
+                // CORRECCIÓN: La URL se construye automáticamente usando el ID de tu proyecto.
                 const projectId = firebaseConfig.projectId;
-                const functionRegion = 'us-central1'; 
+                const functionRegion = 'us-central1'; // Región por defecto de Firebase Functions
                 const functionName = 'createMercadoPagoPreference';
                 const functionUrl = `https://${functionRegion}-${projectId}.cloudfunctions.net/${functionName}`;
                 
@@ -242,7 +262,9 @@
             }
 
             // ---- Event Listeners de Firebase Auth ----
-            document.getElementById('google-signin-btn').addEventListener('click', () => signInWithPopup(auth, googleProvider).then(r => onLoginSuccess(r.user)));
+            document.getElementById('google-signin-btn').addEventListener('click', () => 
+              signInWithPopup(auth, googleProvider).then(r => onLoginSuccess(r.user))
+            );
             document.getElementById('register-form').addEventListener('submit', (e) => {
                 e.preventDefault();
                 createUserWithEmailAndPassword(auth, e.target.email.value, e.target.password.value).then(r => onLoginSuccess(r.user));
