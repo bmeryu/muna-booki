@@ -125,14 +125,7 @@
         const auth = getAuth(app);
         const googleProvider = new GoogleAuthProvider();
         
-        // ---- PASO 1: CONFIGURACIÓN DE MERCADO PAGO ----
-        // Pega aquí tu PUBLIC KEY de Mercado Pago. La encuentras en https://www.mercadopago.com/developers/panel/credentials
         const publicKey = 'APP_USR-a633c3e4-ac28-4661-bba4-0a5dee41e9ed';
-        
-        // Verificación para ayudarte a recordar que debes pegar tu clave.
-        if (publicKey === 'APP_USR-a633c3e4-ac28-4661-bba4-0a5dee41e9ed') {
-            console.warn("ADVERTENCIA: Debes reemplazar 'AQUI_VA_TU_PUBLIC_KEY' con tu Public Key de Mercado Pago para que el botón de pago funcione.");
-        }
         const mp = new MercadoPago(publicKey);
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -170,15 +163,30 @@
             }
             
             async function createCheckoutButton(planData) {
-                // Si la Public Key no ha sido reemplazada, no intentes crear el botón.
-                if (publicKey === APP_USR-a633c3e4-ac28-4661-bba4-0a5dee41e9ed') {
-                    document.getElementById('mercado-pago-button-container').innerHTML = '<p class="text-red-500 text-sm text-center">Error: Falta configurar la Public Key de Mercado Pago.</p>';
-                    return;
-                }
+                const buttonContainer = document.getElementById('mercado-pago-button-container');
+                buttonContainer.innerHTML = '<p class="text-sm text-center text-gray-500">Cargando botón de pago...</p>';
                 
                 try {
+                    // ======================================================================================
+                    // MODO DE PRUEBA VISUAL (Usa esto hasta que tu backend esté listo)
+                    // ======================================================================================
+                    // Usamos un ID de preferencia de prueba para que el botón se dibuje.
+                    // ESTO NO FUNCIONARÁ PARA UN PAGO REAL.
+                    const preferenceId = "202729910-6f0a631d-2da5-4f40-8809-775677940251"; // ID de prueba
+                    console.log("Usando ID de preferencia de prueba para desarrollo visual.");
+
+                    // ======================================================================================
+                    // MODO DE PRODUCCIÓN REAL (Descomenta esto cuando tu backend esté desplegado)
+                    // ======================================================================================
+                    /*
+                    console.log("Llamando al backend para crear una preferencia real...");
                     const preferenceId = await createPreferenceOnBackend(planData);
-                    if (!preferenceId) throw new Error("ID de preferencia no válido.");
+                    if (!preferenceId) {
+                        throw new Error("No se pudo obtener el ID de preferencia desde el backend.");
+                    }
+                    */
+                    // ======================================================================================
+
 
                     const bricksBuilder = mp.bricks();
                     if (window.checkoutButton) window.checkoutButton.unmount();
@@ -189,20 +197,37 @@
                     });
                 } catch (error) {
                     console.error("Error al crear el botón de pago:", error);
-                    document.getElementById('mercado-pago-button-container').innerHTML = `<p class="text-red-500 text-sm text-center">Hubo un problema al cargar el botón de pago. Revisa la consola para más detalles.</p>`;
+                    buttonContainer.innerHTML = `<p class="text-red-500 text-sm text-center">Hubo un problema al cargar el botón de pago. Revisa la consola para más detalles.</p>`;
                 }
             }
 
             async function createPreferenceOnBackend(planData) {
-                // ---- PASO 2: SIMULACIÓN DEL BACKEND ----
-                // Esta función DEBE ser reemplazada por una llamada a tu propio backend.
-                // Tu backend usará tu ACCESS TOKEN (que es SECRETO) para crear una preferencia de pago real.
-                console.log("Simulando creación de preferencia para:", planData.name);
-                
-                // Por ahora, para que el botón aparezca, devolvemos un ID de preferencia de prueba.
-                // ESTE ID NO PERMITIRÁ UN PAGO REAL. Es solo para desarrollo visual.
-                // Encuentras IDs de prueba en la documentación de Mercado Pago.
-                return "202729910-6f0a631d-2da5-4f40-8809-775677940251";
+                // Reemplaza esta URL con la URL de tu Cloud Function una vez que la despliegues.
+                const functionUrl = 'https://console.firebase.google.com/project/munabooki/overview'; 
+
+                if (functionUrl === 'https://console.firebase.google.com/project/munabooki/overview') {
+                    console.error("Error: Debes configurar la URL de tu Cloud Function.");
+                    return null;
+                }
+
+                try {
+                    const response = await fetch(functionUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            title: planData.name,
+                            quantity: 1,
+                            unit_price: planData.price,
+                        })
+                    });
+
+                    if (!response.ok) throw new Error(`El servidor respondió con el estado: ${response.status}`);
+                    const data = await response.json();
+                    return data.preferenceId;
+                } catch (error) {
+                    console.error("Error al llamar a la Cloud Function:", error);
+                    return null;
+                }
             }
 
             // ---- Event Listeners de Firebase Auth ----
