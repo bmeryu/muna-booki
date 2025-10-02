@@ -130,7 +130,7 @@
         const db = getFirestore(app);
         const googleProvider = new GoogleAuthProvider();
         
-        const publicKey = 'APP_USR-a633c3e4-ac28-4661-bba4-0a5dee41e9ed';
+        const publicKey = 'APP_USR-a633c3e4-ac28-4661-bba4-0a5dee41e9ed'; // ¡Mantenemos tu clave!
         let mp;
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -155,7 +155,6 @@
             const orderSummaryColumn = document.getElementById('order-summary-column');
             const authColumn = document.getElementById('auth-column');
             const authTitle = document.getElementById('auth-title');
-            const authErrorMessage = document.getElementById('auth-error-message');
 
             if (plan && selectedPlan) {
                 orderSummaryContainer.innerHTML = `
@@ -183,7 +182,7 @@
                     if (allowlistSnap.exists()) {
                         console.log("Usuario en allowlist. Redirigiendo a mi-cuenta.html");
                         window.location.href = 'mi-cuenta.html';
-                        return;
+                        return; // Detiene la ejecución para que no continúe al pago
                     }
                 } catch (error) {
                     console.error("Error al verificar la allowlist:", error);
@@ -254,50 +253,18 @@
                 }
             }
 
-            function showAuthError(message) {
-                authErrorMessage.textContent = message;
-            }
-
-            // ---- Event Listeners de Firebase Auth (CORREGIDOS) ----
-            document.getElementById('google-signin-btn').addEventListener('click', () => {
-                signInWithPopup(auth, googleProvider)
-                    .then(r => onLoginSuccess(r.user))
-                    .catch(error => {
-                        console.error("Error con Google Sign-In:", error);
-                        showAuthError("No se pudo iniciar sesión con Google.");
-                    });
-            });
-
+            // ---- Event Listeners de Firebase Auth ----
+            document.getElementById('google-signin-btn').addEventListener('click', () => signInWithPopup(auth, googleProvider).then(r => onLoginSuccess(r.user)));
             document.getElementById('register-form').addEventListener('submit', (e) => {
                 e.preventDefault();
-                showAuthError('');
-                createUserWithEmailAndPassword(auth, e.target.email.value, e.target.password.value)
-                    .then(r => onLoginSuccess(r.user))
-                    .catch(error => {
-                        console.error("Error en registro:", error);
-                        if (error.code === 'auth/email-already-in-use') {
-                            showAuthError("Este correo ya está registrado.");
-                        } else if (error.code === 'auth/weak-password') {
-                            showAuthError("La contraseña debe tener al menos 6 caracteres.");
-                        } else {
-                            showAuthError("Error al registrar la cuenta.");
-                        }
-                    });
+                createUserWithEmailAndPassword(auth, e.target.email.value, e.target.password.value).then(r => onLoginSuccess(r.user));
             });
-
             document.getElementById('login-form').addEventListener('submit', (e) => {
                 e.preventDefault();
-                showAuthError('');
-                signInWithEmailAndPassword(auth, e.target.email.value, e.target.password.value)
-                    .then(r => onLoginSuccess(r.user))
-                    .catch(error => {
-                        console.error("Error en login:", error);
-                        showAuthError("Correo o contraseña incorrectos.");
-                    });
+                signInWithEmailAndPassword(auth, e.target.email.value, e.target.password.value).then(r => onLoginSuccess(r.user));
             });
         });
     </script>
 
 </body>
 </html>
-
