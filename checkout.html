@@ -172,74 +172,133 @@
                 document.getElementById('auth-title').textContent = "Accede a tu cuenta";
             }
             
-            async function onLoginSuccess(user) {
-                if (!plan) {
-                    window.location.href = 'mi-cuenta.html';
-                    return;
-                }
-                
-                const allowlistRef = doc(db, "allowlist", user.email);
-                const allowlistSnap = await getDoc(allowlistRef);
+            async function handleSuccessfulLogin(user) {
+                try {
+                    // --- CORRECCIÓN CLAVE: Lógica unificada post-login ---
+                    // Escenario 1: El usuario solo quiere iniciar sesión (no hay plan en la URL)
+                    if (!plan) {
+                        window.location.href = 'mi-cuenta.html';
+                        return;
+                    }
 
-                if (allowlistSnap.exists()) {
-                    console.log("Usuario en allowlist, redirigiendo a mi-cuenta.html");
-                    window.location.href = 'mi-cuenta.html';
-                    return;
-                }
-                
-                const userName = user.displayName || user.email.split('@')[0];
-                document.getElementById('welcome-message').textContent = `¡Hola, ${userName}!`;
-                document.getElementById('auth-section').classList.add('hidden');
-                document.getElementById('payment-section').classList.remove('hidden');
+                    // Escenario 2: El usuario seleccionó un plan, revisamos si tiene acceso especial (allowlist)
+                    const allowlistRef = doc(db, "allowlist", user.email);
+                    const allowlistSnap = await getDoc(allowlistRef);
 
-                if (selectedPlan.custom) {
-                    document.getElementById('clauses-container').classList.remove('hidden');
-                    document.getElementById('terms-checkbox').addEventListener('change', (e) => {
-                        if (e.target.checked) createCheckoutButton(selectedPlan);
-                        else document.getElementById('mercado-pago-button-container').innerHTML = '';
-                    });
-                } else {
-                    createCheckoutButton(selectedPlan);
+                    if (allowlistSnap.exists()) {
+                        console.log("Usuario en allowlist, redirigiendo a mi-cuenta.html");
+                        window.location.href = 'mi-cuenta.html';
+                        return;
+                    }
+                    
+                    // Escenario 3: Usuario normal que seleccionó un plan -> Mostrar sección de pago
+                    console.log("Usuario normal, mostrando sección de pago.");
+                    const userName = user.displayName || user.email.split('@')[0];
+                    document.getElementById('welcome-message').textContent = `¡Hola, ${userName}!`;
+                    document.getElementById('auth-section').classList.add('hidden');
+                    document.getElementById('payment-section').classList.remove('hidden');
+
+                    if (selectedPlan.custom) {
+                        document.getElementById('clauses-container').classList.remove('hidden');
+                        document.getElementById('terms-checkbox').addEventListener('change', (e) => {
+                            if (e.target.checked) createCheckoutButton(selectedPlan);
+                            else document.getElementById('mercado-pago-button-container').innerHTML = '';
+                        });
+                    } else {
+                        createCheckoutButton(selectedPlan);
+                    }
+                } catch (error) {
+                    console.error("Error grave en el flujo post-login:", error);
+                    authError.textContent = "Error al procesar tu cuenta. Intenta de nuevo.";
+                    // Asegurarse de que los botones se reactiven si algo falla aquí
+                    loginButton.disabled = false;
+                    loginButton.textContent = originalLoginText;
+                    registerButton.disabled = false;
+                    registerButton.textContent = originalRegisterText;
                 }
             }
             
             async function createCheckoutButton(planData) {
-                // ... (código sin cambios)
+                const buttonContainer = document.getElementById('mercado-pago-button-container');
+                buttonContainer.innerHTML = '<p class="text-sm text-center text-gray-500">Generando link de pago seguro...</p>';
+                try {
+                    const preferenceId = await createPreferenceOnBackend(planData);
+                    if (!preferenceId) throw new Error("No se pudo obtener el ID de preferencia.");
+                    
+                    const bricksBuilder = mp.bricks();
+                    if (window.checkoutButton) window.checkoutButton.unmount();
+                    window.checkoutButton = await bricksBuilder.create('wallet', 'mercado-pago-button-container', {
+                        initialization: { preferenceId: preferenceId },
+                        customization: { texts: { valueProp: 'smart_option' } }
+                    });
+                } catch (error) {
+                    console.error("Error al crear el botón de pago:", error);
+                    buttonContainer.innerHTML = `<p class="text-red-500 text-sm text-center">Hubo un problema al cargar el botón de pago.</p>`;
+                }
             }
 
             async function createPreferenceOnBackend(planData) {
-                // ... (código sin cambios)
+                const projectId = firebaseConfig.projectId;
+                const functionRegion = 'us-central1';
+                const functionName = 'createMercadoPagoPreference';
+                const functionUrl = `https://${functionRegion}-${projectId}.cloudfunctions.net/${functionName}`;
+                try {
+                    const response = await fetch(functionUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ title: planData.name, quantity: 1, unit_price: planData.price })
+                    });
+                    if (!response.ok) throw new Error(`El servidor respondió con el estado: ${response.status}`);
+                    const data = await response.json();
+                    return data.preferenceId;
+                } catch (error) {
+                    console.error("Error al llamar a la Cloud Function:", error);
+                    return null;
+                }
             }
 
-            // ---- Lógica de Tabs y Event Listeners ----
             const loginTab = document.getElementById('login-tab-btn');
             const registerTab = document.getElementById('register-tab-btn');
             const loginForm = document.getElementById('login-form');
             const registerForm = document.getElementById('register-form');
             const authError = document.getElementById('auth-error-message');
-            // --- COMENTARIO DE CORRECCIÓN ---
-            // Se obtienen los botones para poder cambiar su estado a "cargando".
             const loginButton = loginForm.querySelector('button');
             const registerButton = registerForm.querySelector('button');
             const originalLoginText = loginButton.textContent;
             const originalRegisterText = registerButton.textContent;
 
-
-            loginTab.addEventListener('click', () => { /* ... (código sin cambios) ... */ });
-            registerTab.addEventListener('click', () => { /* ... (código sin cambios) ... */ });
+            loginTab.addEventListener('click', () => {
+                loginTab.classList.add('text-teal-600', 'border-teal-600');
+                registerTab.classList.remove('text-teal-600', 'border-teal-600');
+                loginForm.classList.remove('hidden');
+                registerForm.classList.add('hidden');
+            });
+            registerTab.addEventListener('click', () => {
+                registerTab.classList.add('text-teal-600', 'border-teal-600');
+                loginTab.classList.remove('text-teal-600', 'border-teal-600');
+                registerForm.classList.remove('hidden');
+                loginForm.classList.add('hidden');
+            });
 
             const handleAuthError = (error) => {
-                // ... (código sin cambios)
+                 switch (error.code) {
+                    case 'auth/wrong-password':
+                        authError.textContent = 'La contraseña es incorrecta.'; break;
+                    case 'auth/user-not-found':
+                        authError.textContent = 'No se encontró un usuario con ese correo.'; break;
+                    case 'auth/email-already-in-use':
+                        authError.textContent = 'Este correo ya está registrado. Intenta iniciar sesión.'; break;
+                    default:
+                        authError.textContent = 'Ocurrió un error. Inténtalo de nuevo.';
+                }
             };
             
             document.getElementById('google-signin-btn').addEventListener('click', () => {
                 signInWithPopup(auth, googleProvider)
-                    .then(result => onLoginSuccess(result.user))
+                    .then(result => handleSuccessfulLogin(result.user))
                     .catch(handleAuthError);
             });
             
-            // --- COMENTARIO DE CORRECCIÓN ---
-            // Se actualiza el listener del formulario de REGISTRO para incluir el estado de carga y un manejo de errores más robusto.
             registerForm.addEventListener('submit', (e) => {
                 e.preventDefault();
                 authError.textContent = '';
@@ -247,17 +306,14 @@
                 registerButton.textContent = 'Creando cuenta...';
 
                 createUserWithEmailAndPassword(auth, e.target.email.value, e.target.password.value)
-                    .then(result => onLoginSuccess(result.user))
+                    .then(result => handleSuccessfulLogin(result.user))
                     .catch(error => {
                         handleAuthError(error);
-                        // Se resetea el botón solo si hay un error
                         registerButton.disabled = false;
                         registerButton.textContent = originalRegisterText;
                     });
             });
 
-            // --- COMENTARIO DE CORRECCIÓN ---
-            // Se actualiza el listener del formulario de LOGIN para incluir el estado de carga y un manejo de errores más robusto.
             loginForm.addEventListener('submit', (e) => {
                 e.preventDefault();
                 authError.textContent = '';
@@ -265,10 +321,9 @@
                 loginButton.textContent = 'Ingresando...';
                 
                 signInWithEmailAndPassword(auth, e.target.email.value, e.target.password.value)
-                    .then(result => onLoginSuccess(result.user))
+                    .then(result => handleSuccessfulLogin(result.user))
                     .catch(error => {
                         handleAuthError(error);
-                        // Se resetea el botón solo si hay un error, porque si tiene éxito, la página redirige o cambia.
                         loginButton.disabled = false;
                         loginButton.textContent = originalLoginText;
                     });
