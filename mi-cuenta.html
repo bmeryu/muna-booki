@@ -53,7 +53,7 @@
                     <h2 class="text-2xl font-bold text-gray-800 border-b pb-4 mb-6">Mis Cuentos Personalizados</h2>
                     <div class="bg-white p-8 rounded-2xl shadow-lg text-center">
                         <h3 class="text-xl font-bold text-gray-700">¡Es hora de crear magia!</h3>
-                        <p class="text-gray-600 my-4 max-w-md mx-auto">Compraste un cuento personalizado. Completa el formulario para que nuestro equipo pueda empezar a darle vida a tu historia.</p>
+                        <p class="text-gray-600 my-4 max-w-md mx-auto" id="custom-story-text">Compraste un cuento personalizado. Completa el formulario para que nuestro equipo pueda empezar a darle vida a tu historia.</p>
                         <a href="crear-cuento.html" class="inline-block btn-primary font-bold py-3 px-8 rounded-full transition-transform hover:scale-105">
                             Empezar a Crear mi Cuento
                         </a>
@@ -120,20 +120,17 @@
                 const userName = user.displayName || user.email.split('@')[0];
                 userGreeting.textContent = `Hola, ${userName}`;
                 
-                // Verificar si el usuario está en la "allowlist"
                 try {
                     const allowlistRef = doc(db, "allowlist", user.email);
                     const allowlistSnap = await getDoc(allowlistRef);
 
                     if (allowlistSnap.exists()) {
-                        // El< usuario está en la lista: mostrar todo
-                        customStoriesSection.querySelector('p').textContent = "Tienes acceso especial para crear un cuento personalizado. ¡Completa el formulario para empezar!";
+                        document.getElementById('custom-story-text').textContent = "Tienes acceso especial para crear un cuento personalizado. ¡Completa el formulario para empezar!";
                         customStoriesSection.classList.remove('hidden');
                         librarySection.classList.remove('hidden');
                     } else {
-                        // El usuario no está en la lista:
-                        // Aquí iría la lógica para cargar los productos COMPRADOS por el usuario.
-                        // Como aún no está implementada, mostraremos el mensaje de "sin productos".
+                        // Aquí iría la lógica futura para cargar los productos COMPRADOS por el usuario.
+                        // Como aún no está implementada, mostramos el mensaje de "sin productos".
                         noProductsMessage.classList.remove('hidden');
                     }
                 } catch (error) {
@@ -144,12 +141,14 @@
                 loadingState.classList.add('hidden');
                 accountContent.classList.remove('hidden');
             } else {
+                // Nadie ha iniciado sesión, redirigir a la página de inicio
                 window.location.href = 'index.html';
             }
         });
 
         logoutBtn.addEventListener('click', () => {
             signOut(auth).then(() => {
+                // Cierre de sesión exitoso
                 window.location.href = 'index.html';
             }).catch((error) => {
                 console.error("Error al cerrar sesión:", error);
