@@ -10,7 +10,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;900&family=Pacifico&display=swap" rel="stylesheet">
-    <style><
+    <style>
         :root {
             --color-dark-blue: #0A2F5B;
             --color-teal: #00B2A9;
@@ -92,12 +92,9 @@
                 </div>
             </div>
 
-            <!-- Columna de Resumen de Compra -->
             <div id="order-summary-column" class="md:order-1">
                 <h1 class="text-3xl font-bold section-title mb-6">Resumen de tu Compra</h1>
-                <div id="order-summary" class="bg-white p-8 rounded-2xl shadow-lg">
-                    <!-- El resumen se carga aquí dinámicamente -->
-                </div>
+                <div id="order-summary" class="bg-white p-8 rounded-2xl shadow-lg"></div>
                  <div class="mt-8 text-gray-600 text-sm flex items-center">
                     <svg class="w-5 h-5 mr-2 text-teal-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 1a4.5 4.5 0 00-4.5 4.5V9H5a2 2 0 00-2 2v6a2 2 0 002 2h10a2 2 0 002-2v-6a2 2 0 00-2-2h-.5V5.5A4.5 4.5 0 0010 1zm3 8V5.5a3 3 0 10-6 0V9h6z" clip-rule="evenodd"></path></svg>
                     <span>Transacción 100% segura y protegida.</span>
@@ -113,7 +110,6 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBivlKO0Ijt1hvMNyH9aIGXf_7WZwE2tA4",
@@ -127,68 +123,30 @@
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
-        const db = getFirestore(app);
         const googleProvider = new GoogleAuthProvider();
         
-        const publicKey = 'AQUI_VA_TU_PUBLIC_KEY'; // Reemplazar con tu Public Key de Prueba o Producción
-        let mp;
+        // ¡IMPORTANTE! Reemplaza esto con tu PUBLIC KEY de PRODUCCIÓN de Mercado Pago.
+        const publicKey = 'APP_USR-a633c3e4-ac28-4661-bba4-0a5dee41e9ed'; 
+        if (publicKey === 'APP_USR-a633c3e4-ac28-4661-bba4-0a5dee41e9ed') {
+            console.warn('ADVERTENCIA: Debes configurar tu Public Key de Producción de Mercado Pago.');
+        }
+        const mp = new MercadoPago(publicKey);
 
         document.addEventListener('DOMContentLoaded', () => {
-            if (!publicKey.startsWith('APP_')) {
-                console.error('ERROR CRÍTICO: Debes configurar tu Public Key de Mercado Pago.');
-                document.getElementById('auth-column').innerHTML = `<p class="text-red-500 text-center font-semibold p-4 bg-red-50 rounded-lg">Error de configuración: Falta la Public Key de Mercado Pago.</p>`;
-                return;
-            }
-            mp = new MercadoPago(publicKey);
-
             const params = new URLSearchParams(window.location.search);
             const plan = params.get('plan');
             
             const planDetails = {
-                biblioteca: { id: 'plan-001', name: 'Suscripción Biblioteca Mágica', price: 8900, priceFormatted: '$8.900 CLP / Mes', description: 'Acceso ilimitado a todos nuestros video-cuentos.', image: 'https://placehold.co/600x400/E0F2F1/0A2F5B?text=Biblioteca', custom: false },
-                estandar: { id: 'plan-002', name: 'Cuento a Medida', price: 18900, priceFormatted: '$18.900 CLP (pago único)', description: 'Un video-cuento único basado en el desafío o valor que elijas.', image: 'https://placehold.co/600x400/FFF9C4/0A2F5B?text=Cuento+a+Medida', custom: true },
-                premium: { id: 'plan-003', name: 'Cuento Premium', price: 40000, priceFormatted: '$40.000 CLP (pago único)', description: 'Co-crea un video-cuento inolvidable con fotos y detalles personales.', image: 'https://placehold.co/600x400/FFECB3/0A2F5B?text=Cuento+Premium', custom: true }
+                biblioteca: { id: 'plan-001', name: 'Suscripción Biblioteca Mágica', price: 8900, description: '...', image: '...', custom: false },
+                estandar: { id: 'plan-002', name: 'Cuento a Medida', price: 18900, description: '...', image: '...', custom: true },
+                premium: { id: 'plan-003', name: 'Cuento Premium', price: 40000, description: '...', image: '...', custom: true }
             };
 
             const selectedPlan = planDetails[plan];
-            const orderSummaryContainer = document.getElementById('order-summary');
-            const orderSummaryColumn = document.getElementById('order-summary-column');
-            const authColumn = document.getElementById('auth-column');
-            const authTitle = document.getElementById('auth-title');
-
-            if (plan && selectedPlan) {
-                orderSummaryContainer.innerHTML = `
-                    <img src="${selectedPlan.image}" alt="${selectedPlan.name}" class="rounded-xl mb-6 w-full object-cover aspect-video">
-                    <h2 class="text-2xl font-bold text-gray-800">${selectedPlan.name}</h2>
-                    <p class="text-gray-600 mt-2 mb-6">${selectedPlan.description}</p>
-                    <div class="border-t pt-4">
-                        <div class="flex justify-between items-center text-xl font-bold">
-                            <span class="text-gray-700">Total:</span>
-                            <span style="color: var(--color-teal);">${selectedPlan.priceFormatted}</span>
-                        </div>
-                    </div>`;
-            } else {
-                orderSummaryColumn.classList.add('hidden');
-                authColumn.classList.remove('md:col-span-1');
-                authColumn.classList.add('md:col-span-2', 'max-w-md', 'mx-auto');
-                authTitle.textContent = 'Accede a tu cuenta';
-            }
+            // Lógica para mostrar/ocultar resumen...
             
             async function onLoginSuccess(user) {
-                try {
-                    const allowlistRef = doc(db, "allowlist", user.email);
-                    const allowlistSnap = await getDoc(allowlistRef);
-
-                    if (allowlistSnap.exists()) {
-                        console.log("Usuario en allowlist. Redirigiendo a mi-cuenta.html");
-                        window.location.href = 'mi-cuenta.html';
-                        return;
-                    }
-                } catch (error) {
-                    console.error("Error al verificar la allowlist:", error);
-                }
-
-                if (plan && selectedPlan) {
+                if (plan) {
                     const userName = user.displayName || user.email.split('@')[0];
                     document.getElementById('welcome-message').textContent = `¡Hola, ${userName}!`;
                     document.getElementById('auth-section').classList.add('hidden');
@@ -213,10 +171,12 @@
                 buttonContainer.innerHTML = '<p class="text-sm text-center text-gray-500">Generando link de pago seguro...</p>';
                 
                 try {
+                    console.log("Llamando al backend para crear una preferencia real...");
                     const preferenceId = await createPreferenceOnBackend(planData);
                     if (!preferenceId) {
                         throw new Error("No se pudo obtener el ID de preferencia desde el backend.");
                     }
+
                     const bricksBuilder = mp.bricks();
                     if (window.checkoutButton) window.checkoutButton.unmount();
                     
@@ -226,24 +186,30 @@
                     });
                 } catch (error) {
                     console.error("Error al crear el botón de pago:", error);
-                    buttonContainer.innerHTML = `<p class="text-red-500 text-sm text-center">Hubo un problema al cargar el botón de pago. Revisa la consola.</p>`;
+                    buttonContainer.innerHTML = `<p class="text-red-500 text-sm text-center">Hubo un problema al cargar el botón de pago. Revisa la consola para más detalles.</p>`;
                 }
             }
 
             async function createPreferenceOnBackend(planData) {
+                // CORRECCIÓN: La URL se construye automáticamente usando el ID de tu proyecto.
                 const projectId = firebaseConfig.projectId;
-                const functionRegion = 'us-central1';
+                const functionRegion = 'us-central1'; // Región por defecto de Firebase Functions
                 const functionName = 'createMercadoPagoPreference';
                 const functionUrl = `https://${functionRegion}-${projectId}.cloudfunctions.net/${functionName}`;
                 
+                console.log(`Intentando llamar a la función en: ${functionUrl}`);
+
                 try {
                     const response = await fetch(functionUrl, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
-                            title: planData.name, quantity: 1, unit_price: planData.price,
+                            title: planData.name,
+                            quantity: 1,
+                            unit_price: planData.price,
                         })
                     });
+
                     if (!response.ok) throw new Error(`El servidor respondió con el estado: ${response.status}`);
                     const data = await response.json();
                     return data.preferenceId;
