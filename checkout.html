@@ -1,5 +1,4 @@
-# Create an updated HTML that switches to Firestore *Lite* to avoid WebChannel/Listen 400s.
-html_content = """<!DOCTYPE html> 
+#"<!DOCTYPE html> 
 <html lang="es" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
@@ -22,6 +21,7 @@ html_content = """<!DOCTYPE html>
         .section-title { color: var(--color-dark-blue); }
         .btn-primary { background-color: var(--color-teal); color: white; }
         .btn-primary:hover { background-color: #009a92; }
+        #debug-allowlist { display:none; font-size:12px; color:#64748b; }
     </style>
 </head>
 <body class="bg-gray-50">
@@ -80,9 +80,10 @@ html_content = """<!DOCTYPE html>
                      <p class="text-center text-gray-600 mb-6">Completa tu compra de forma segura.</p>
 
                      <!-- 🚨 Bloque de acceso sin pago -->
-                     <div id="free-msg" class="text-center text-green-600 font-bold mb-4 hidden">
+                     <div id="free-msg" class="text-center text-green-600 font-bold mb-2 hidden">
                         🎉 Estás en la lista. No necesitas pagar.
                      </div>
+                     <div id="debug-allowlist" class="text-center mb-4"></div>
 
                      <div id="clauses-container" class="mb-6 space-y-2 hidden">
                         <div class="flex items-start bg-gray-100 p-4 rounded-lg">
@@ -119,7 +120,7 @@ html_content = """<!DOCTYPE html>
           getAuth, signInWithPopup, GoogleAuthProvider, 
           createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged 
         } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        // 🔄 Usamos Firestore *Lite* (HTTP) para evitar Listen/WebChannel 400s
+        // 🔄 Firestore Lite (sin Listen)
         import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore-lite.js";
 
         const firebaseConfig = {
@@ -133,16 +134,23 @@ html_content = """<!DOCTYPE html>
         };
 
         const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app); // Lite = no Listen, no WebChannel
+        const db = getFirestore(app); // Lite
         const auth = getAuth(app);
         const googleProvider = new GoogleAuthProvider();
         
-        // Clave pública de MP
         const publicKey = 'APP_USR-a633c3e4-ac28-4661-bba4-0a5dee41e9ed'; 
-        if (publicKey === 'APP_USR-a633c3e4-ac28-4661-bba4-0a5dee41e9ed') {
-            console.warn('ADVERTENCIA: Debes configurar tu Public Key de Producción de Mercado Pago.');
-        }
         const mp = new MercadoPago(publicKey);
+
+        const qs = new URLSearchParams(location.search);
+        const DEBUG = qs.has('debug');
+
+        function showDebug(msg) {
+          if (!DEBUG) return;
+          const el = document.getElementById('debug-allowlist');
+          el.style.display = 'block';
+          el.textContent = msg;
+          console.log('[ALLOWLIST]', msg);
+        }
 
         document.addEventListener('DOMContentLoaded', () => {
             const params = new URLSearchParams(window.location.search);
@@ -156,58 +164,69 @@ html_content = """<!DOCTYPE html>
 
             const selectedPlan = planDetails[plan];
 
-            // ⚠️ Manejar una sola vez el post-login
             let handledUid = null;
             onAuthStateChanged(auth, (user) => {
               if (!user) return;
-              if (handledUid === user.uid) return;  // evita dobles disparos
+              if (handledUid === user.uid) return;
               handledUid = user.uid;
               onLoginSuccess(user);
             });
             
             async function onLoginSuccess(user) {
-                if (plan) {
-                    const userName = user.displayName || user.email.split('@')[0];
-                    document.getElementById('welcome-message').textContent = `¡Hola, ${userName}!`;
-                    document.getElementById('auth-section').classList.add('hidden');
-                    document.getElementById('payment-section').classList.remove('hidden');
+                if (!plan) { window.location.href = 'mi-cuenta.html'; return; }
 
-                    // 🚨 Revisar allowlist en Firestore (doc id = email en minúsculas)
-                    const emailId = (user.email || '').toLowerCase();
-                    try {
-                        const ref = doc(db, 'allowlist', emailId);
-                        const snap = await getDoc(ref);
+                const userName = user.displayName || user.email.split('@')[0];
+                document.getElementById('welcome-message').textContent = `¡Hola, ${userName}!`;
+                document.getElementById('auth-section').classList.add('hidden');
+                document.getElementById('payment-section').classList.remove('hidden');
 
-                        if (snap.exists() && snap.data().active === true) {
-                            // Usuario en allowlist → acceso gratis
-                            document.getElementById('free-msg').classList.remove('hidden');
-                            document.getElementById('mercado-pago-button-container').innerHTML = '';
-                            return;
-                        } else {
-                            console.log('Allowlist: no está o no activo', { exists: snap.exists(), data: snap.data?.() });
-                        }
-                    } catch (err) {
-                        console.error("Error revisando allowlist:", err?.code, err?.message || err);
+                // 🚨 Revisar allowlist intentando *dos IDs*: lower y exacto
+                const emailExact = (user.email || '');
+                const emailLower = emailExact.toLowerCase();
+                showDebug(`Email login: ${emailExact}`);
+
+                try {
+                    // 1) Lowercase
+                    let ref = doc(db, 'allowlist', emailLower);
+                    let snap = await getDoc(ref);
+                    let data = snap.exists() ? snap.data() : null;
+
+                    // 2) Fallback a exacto si no existe
+                    if (!snap.exists()) {
+                        showDebug(`Doc no encontrado en lower (${emailLower}). Probando exacto...`);
+                        ref = doc(db, 'allowlist', emailExact);
+                        snap = await getDoc(ref);
+                        data = snap.exists() ? snap.data() : null;
                     }
 
-                    // Flujo normal de pago
-                    if (selectedPlan?.custom) {
-                        document.getElementById('clauses-container').classList.remove('hidden');
-                        const terms = document.getElementById('terms-checkbox');
+                    const activeVal = data?.active;
+                    const isActive = activeVal === true || activeVal === 'true' || activeVal === 1;
 
-                        // adjuntar UNA sola vez
-                        if (!terms.dataset.listenerAttached) {
-                          terms.addEventListener('change', (e) => {
-                              if (e.target.checked) createCheckoutButton(selectedPlan);
-                              else document.getElementById('mercado-pago-button-container').innerHTML = '';
-                          });
-                          terms.dataset.listenerAttached = 'true';
-                        }
-                    } else if (selectedPlan) {
-                        createCheckoutButton(selectedPlan);
-                    } else {
-                        window.location.href = 'mi-cuenta.html';
+                    showDebug(`exists=${snap.exists()} | active=${JSON.stringify(activeVal)} | usandoID=${snap.exists() ? (ref.id) : 'ninguno'}`);
+
+                    if (snap.exists() && isActive) {
+                        document.getElementById('free-msg').classList.remove('hidden');
+                        document.getElementById('mercado-pago-button-container').innerHTML = '';
+                        return; // ⛔️ no renders MP
                     }
+                } catch (err) {
+                    console.error("Error revisando allowlist:", err);
+                    showDebug(`Error leyendo allowlist: ${err?.code || ''} ${err?.message || err}`);
+                }
+
+                // Flujo normal de pago
+                if (selectedPlan?.custom) {
+                    document.getElementById('clauses-container').classList.remove('hidden');
+                    const terms = document.getElementById('terms-checkbox');
+                    if (!terms.dataset.listenerAttached) {
+                      terms.addEventListener('change', (e) => {
+                          if (e.target.checked) createCheckoutButton(selectedPlan);
+                          else document.getElementById('mercado-pago-button-container').innerHTML = '';
+                      });
+                      terms.dataset.listenerAttached = 'true';
+                    }
+                } else if (selectedPlan) {
+                    createCheckoutButton(selectedPlan);
                 } else {
                     window.location.href = 'mi-cuenta.html';
                 }
@@ -215,30 +234,22 @@ html_content = """<!DOCTYPE html>
             
             async function createCheckoutButton(planData) {
                 const buttonContainer = document.getElementById('mercado-pago-button-container');
-
-                // ✅ Evita crear el Wallet dos veces
                 if (window.__creatingWallet) return;
                 window.__creatingWallet = true;
-
-                // limpiar contenedor antes de montar
                 buttonContainer.innerHTML = '';
 
                 try {
                     const preferenceId = await createPreferenceOnBackend(planData);
                     if (!preferenceId) throw new Error("No se pudo obtener el ID de preferencia desde el backend.");
-
                     const bricksBuilder = mp.bricks();
-                    if (window.checkoutButton) {
-                      try { await window.checkoutButton.unmount(); } catch {}
-                    }
-                    
+                    if (window.checkoutButton) { try { await window.checkoutButton.unmount(); } catch {} }
                     window.checkoutButton = await bricksBuilder.create('wallet', 'mercado-pago-button-container', {
                         initialization: { preferenceId },
                         customization: { texts: { valueProp: 'smart_option' } }
                     });
                 } catch (error) {
                     console.error("Error al crear el botón de pago:", error);
-                    buttonContainer.innerHTML = `<p class="text-red-500 text-sm text-center">Hubo un problema al cargar el botón de pago. Revisa la consola para más detalles.</p>`;
+                    buttonContainer.innerHTML = `<p class="text-red-500 text-sm text-center">Hubo un problema al cargar el botón de pago. Revisa la consola.</p>`;
                 } finally {
                     window.__creatingWallet = false;
                 }
@@ -260,7 +271,6 @@ html_content = """<!DOCTYPE html>
                             unit_price: planData.price,
                         })
                     });
-
                     if (!response.ok) throw new Error(`Estado: ${response.status}`);
                     const data = await response.json();
                     return data.preferenceId;
@@ -301,7 +311,7 @@ html_content = """<!DOCTYPE html>
 </body>
 </html>
 """
-path = "/mnt/data/checkout_allowlist_fix_lite.html"
+path = "/mnt/data/checkout_allowlist_fix_lite_v2.html"
 with open(path, "w", encoding="utf-8") as f:
-    f.write(html_content)
+    f.write(html)
 path
