@@ -171,16 +171,11 @@
                 buttonContainer.innerHTML = '<p class="text-sm text-center text-gray-500">Generando link de pago seguro...</p>';
                 
                 try {
-                    // ======================================================================================
-                    // MODO DE PRODUCCIÓN REAL - ¡ACTIVADO!
-                    // =================================="""
                     console.log("Llamando al backend para crear una preferencia real...");
                     const preferenceId = await createPreferenceOnBackend(planData);
                     if (!preferenceId) {
                         throw new Error("No se pudo obtener el ID de preferencia desde el backend.");
                     }
-                    // ======================================================================================
-
 
                     const bricksBuilder = mp.bricks();
                     if (window.checkoutButton) window.checkoutButton.unmount();
@@ -196,13 +191,13 @@
             }
 
             async function createPreferenceOnBackend(planData) {
-                // ¡IMPORTANTE! Reemplaza esta URL con la URL de tu Cloud Function una vez que la despliegues.
-                const functionUrl = 'https://console.firebase.google.com/project/munabooki/overview'; 
-
-                if (functionUrl === 'https://console.firebase.google.com/project/munabooki/overview') {
-                    console.error("Error: Debes configurar la URL de tu Cloud Function.");
-                    return null;
-                }
+                // CORRECCIÓN: La URL se construye automáticamente usando el ID de tu proyecto.
+                const projectId = firebaseConfig.projectId;
+                const functionRegion = 'us-central1'; // Región por defecto de Firebase Functions
+                const functionName = 'createMercadoPagoPreference';
+                const functionUrl = `https://${functionRegion}-${projectId}.cloudfunctions.net/${functionName}`;
+                
+                console.log(`Intentando llamar a la función en: ${functionUrl}`);
 
                 try {
                     const response = await fetch(functionUrl, {
