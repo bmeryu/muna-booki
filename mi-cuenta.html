@@ -1,180 +1,159 @@
+#1
 <!DOCTYPE html>
 <html lang="es" class="scroll-smooth">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mi Cuenta - Muna Booki</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;900&family=Pacifico&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --color-dark-blue: #0A2F5B;
-            --color-teal: #00B2A9;
-            --color-gold: #FFC845;
-        }
-        body { font-family: 'Poppins', sans-serif; }
-        .font-cursive { font-family: 'Pacifico', cursive; }
-        .section-title { color: var(--color-dark-blue); }
-        .btn-primary { background-color: var(--color-teal); color: white; }
-        .btn-primary:hover { background-color: #009a92; }
-        .btn-secondary { background-color: var(--color-gold); color: var(--color-dark-blue); }
-        .btn-secondary:hover { background-color: #e6b43e; }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Mi Cuenta - Muna Booki</title>
+  <!-- (Opcional) en producción instala Tailwind por CLI/PostCSS para quitar el warning -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;900&family=Pacifico&display=swap" rel="stylesheet">
+  <style>
+    :root{--color-dark-blue:#0A2F5B;--color-teal:#00B2A9;--color-gold:#FFC845}
+    body{font-family:'Poppins',sans-serif}
+    .font-cursive{font-family:'Pacifico',cursive}
+    .section-title{color:var(--color-dark-blue)}
+    .btn-primary{background:#00B2A9;color:#fff}.btn-primary:hover{background:#009a92}
+    .btn-secondary{background:#FFC845;color:#0A2F5B}.btn-secondary:hover{background:#e6b43e}
+  </style>
 </head>
 <body class="bg-gray-50">
+<header class="bg-white shadow-sm">
+  <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+    <a href="index.html"><img src="https://bmeryu.github.io/muna-booki/Logo_MunaBooki.png" alt="Logo de Muna Booki" class="h-16"></a>
+    <div><span id="user-greeting" class="text-gray-700 mr-4"></span>
+      <button id="logout-btn" class="text-sm font-semibold text-red-600 hover:text-red-800">Cerrar Sesión</button>
+    </div>
+  </nav>
+</header>
 
-    <!-- Header -->
-    <header class="bg-white shadow-sm">
-        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
-            <a href="index.html">
-                <img src="https://bmeryu.github.io/muna-booki/Logo_MunaBooki.png" alt="Logo de Muna Booki" class="h-16">
-            </a>
-            <div>
-                 <span id="user-greeting" class="text-gray-700 mr-4"></span>
-                 <button id="logout-btn" class="text-sm font-semibold text-red-600 hover:text-red-800">Cerrar Sesión</button>
-            </div>
-        </nav>
-    </header>
+<main class="container mx-auto px-6 py-16">
+  <div id="loading-state" class="text-center">
+    <p class="text-lg text-gray-600">Cargando tu información...</p>
+  </div>
 
-    <main class="container mx-auto px-6 py-16">
-        <div id="loading-state" class="text-center">
-            <p class="text-lg text-gray-600">Cargando tu información...</p>
+  <div id="account-content" class="hidden">
+    <h1 class="text-4xl font-bold section-title mb-10">Mi Cuenta</h1>
+
+    <section id="custom-stories-section" class="mb-12 hidden">
+      <h2 class="text-2xl font-bold text-gray-800 border-b pb-4 mb-6">Mis Cuentos Personalizados</h2>
+      <div class="bg-white p-8 rounded-2xl shadow-lg text-center">
+        <h3 class="text-xl font-bold text-gray-700">¡Es hora de crear magia!</h3>
+        <p class="text-gray-600 my-4 max-w-md mx-auto" id="custom-story-text">
+          Tienes acceso para crear un cuento personalizado. Completa el formulario para que nuestro equipo empiece tu historia.
+        </p>
+        <a href="crear-cuento.html" class="inline-block btn-primary font-bold py-3 px-8 rounded-full transition-transform hover:scale-105">
+          Empezar a Crear mi Cuento
+        </a>
+      </div>
+    </section>
+
+    <section id="library-section" class="hidden">
+      <h2 class="text-2xl font-bold text-gray-800 border-b pb-4 mb-6">Mi Biblioteca Mágica</h2>
+      <div class="bg-white p-8 rounded-2xl shadow-lg">
+        <h3 class="text-xl font-bold text-gray-700 mb-4">¡Bienvenido a tu universo de historias!</h3>
+        <p class="text-gray-600 mb-6">Aquí encontrarás los video-cuentos de tu suscripción.</p>
+        <div class="grid md:grid-cols-3 gap-6">
+          <div class="border rounded-lg overflow-hidden"><div class="bg-teal-200 aspect-video flex items-center justify-center font-bold text-teal-700">[Video del Cuento]</div><div class="p-4"><h4 class="font-bold">El Misterio del Juguete Perdido</h4><p class="text-sm text-gray-500">Responsabilidad.</p></div></div>
+          <div class="border rounded-lg overflow-hidden"><div class="bg-yellow-200 aspect-video flex items-center justify-center font-bold text-yellow-700">[Video del Cuento]</div><div class="p-4"><h4 class="font-bold">La Carrera de Caracoles</h4><p class="text-sm text-gray-500">Perseverancia.</p></div></div>
+          <div class="border rounded-lg overflow-hidden text-center flex flex-col justify-center bg-gray-50"><h4 class="font-bold text-gray-700">¡Y muchos más!</h4><p class="text-sm text-gray-500">Nuevas historias cada mes.</p></div>
         </div>
-        
-        <div id="account-content" class="hidden">
-            <h1 class="text-4xl font-bold section-title mb-10">Mi Cuenta</h1>
+      </div>
+    </section>
 
-            <div id="products-container">
-                <!-- Sección Cuentos Personalizados -->
-                <section id="custom-stories-section" class="mb-12 hidden">
-                    <h2 class="text-2xl font-bold text-gray-800 border-b pb-4 mb-6">Mis Cuentos Personalizados</h2>
-                    <div class="bg-white p-8 rounded-2xl shadow-lg text-center">
-                        <h3 class="text-xl font-bold text-gray-700">¡Es hora de crear magia!</h3>
-                        <p class="text-gray-600 my-4 max-w-md mx-auto" id="custom-story-text">Tienes acceso para crear un cuento personalizado. Completa el formulario para que nuestro equipo pueda empezar a darle vida a tu historia.</p>
-                        <a href="crear-cuento.html" class="inline-block btn-primary font-bold py-3 px-8 rounded-full transition-transform hover:scale-105">
-                            Empezar a Crear mi Cuento
-                        </a>
-                    </div>
-                </section>
+    <div id="no-products-message" class="hidden text-center bg-white p-8 rounded-2xl shadow-lg">
+      <h3 class="text-xl font-bold text-gray-700">Aún no tienes productos Muna Booki</h3>
+      <p class="text-gray-600 my-4 max-w-md mx-auto">Explora nuestros planes y empieza hoy.</p>
+      <a href="index.html#plans" class="inline-block btn-secondary font-bold py-3 px-8 rounded-full transition-transform hover:scale-105">Ver Planes</a>
+    </div>
+  </div>
+</main>
 
-                <!-- Sección Biblioteca -->
-                <section id="library-section" class="hidden">
-                     <h2 class="text-2xl font-bold text-gray-800 border-b pb-4 mb-6">Mi Biblioteca Mágica</h2>
-                     <div class="bg-white p-8 rounded-2xl shadow-lg">
-                        <h3 class="text-xl font-bold text-gray-700 mb-4">¡Bienvenido a tu universo de historias!</h3>
-                        <p class="text-gray-600 mb-6">Aquí encontrarás todos los video-cuentos de tu suscripción. ¡Listos para ver en cualquier momento!</p>
-                        <div class="grid md:grid-cols-3 gap-6">
-                            <div class="border rounded-lg overflow-hidden"><div class="bg-teal-200 aspect-video flex items-center justify-center font-bold text-teal-700">[Video del Cuento]</div><div class="p-4"><h4 class="font-bold">El Misterio del Juguete Perdido</h4><p class="text-sm text-gray-500">Un cuento sobre la responsabilidad.</p></div></div>
-                            <div class="border rounded-lg overflow-hidden"><div class="bg-yellow-200 aspect-video flex items-center justify-center font-bold text-yellow-700">[Video del Cuento]</div><div class="p-4"><h4 class="font-bold">La Carrera de Caracoles</h4><p class="text-sm text-gray-500">Una historia sobre la perseverancia.</p></div></div>
-                            <div class="border rounded-lg overflow-hidden text-center flex flex-col justify-center bg-gray-50"><h4 class="font-bold text-gray-700">¡Y muchos más!</h4><p class="text-sm text-gray-500">Nuevas historias cada mes.</p></div>
-                        </div>
-                     </div>
-                </section>
-            </div>
-            
-            <div id="no-products-message" class="hidden text-center bg-white p-8 rounded-2xl shadow-lg">
-                <h3 class="text-xl font-bold text-gray-700">Aún no tienes productos Muna Booki</h3>
-                <p class="text-gray-600 my-4 max-w-md mx-auto">¡Es un gran momento para empezar! Explora nuestros planes y descubre cómo la magia de los cuentos puede ayudarte en la crianza.</p>
-                <a href="index.html#plans" class="inline-block btn-secondary font-bold py-3 px-8 rounded-full transition-transform hover:scale-105">
-                    Ver Planes
-                </a>
-            </div>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+  // 🔁 Lite = sin canales Listen → lecturas más rápidas/estables
+  import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore-lite.js";
 
-        </div>
-    </main>
+  const firebaseConfig = {
+    apiKey: "AIzaSyBivlKO0Ijt1hvMNyH9aIGXf_7WZwE2tA4",
+    authDomain: "munabooki.firebaseapp.com",
+    projectId: "munabooki",
+    storageBucket: "munabooki.appspot.com",
+    messagingSenderId: "585414544600",
+    appId: "1:585414544600:web:77026db4856b0111249bad",
+    measurementId: "G-HBM4Y2FKMF"
+  };
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyBivlKO0Ijt1hvMNyH9aIGXf_7WZwE2tA4",
-            authDomain: "munabooki.firebaseapp.com",
-            projectId: "munabooki",
-            storageBucket: "munabooki.appspot.com",
-            messagingSenderId: "585414544600",
-            appId: "1:585414544600:web:77026db4856b0111249bad",
-            measurementId: "G-HBM4Y2FKMF"
-        };
+  const loadingState = document.getElementById('loading-state');
+  const accountContent = document.getElementById('account-content');
+  const userGreeting = document.getElementById('user-greeting');
+  const logoutBtn = document.getElementById('logout-btn');
 
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
+  const customStoriesSection = document.getElementById('custom-stories-section');
+  const librarySection = document.getElementById('library-section');
+  const noProductsMessage = document.getElementById('no-products-message');
 
-        const loadingState = document.getElementById('loading-state');
-        const accountContent = document.getElementById('account-content');
-        const userGreeting = document.getElementById('user-greeting');
-        const logoutBtn = document.getElementById('logout-btn');
+  const truthy = (v) => v === true || v === 'true' || v === 1;
 
-        const customStoriesSection = document.getElementById('custom-stories-section');
-        const librarySection = document.getElementById('library-section');
-        const noProductsMessage = document.getElementById('no-products-message');
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) { window.location.href = 'index.html'; return; }
 
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                const userName = user.displayName || user.email.split('@')[0];
-                userGreeting.textContent = `Hola, ${userName}`;
-                
-                // --- LÓGICA DE PRODUCTOS MEJORADA ---
-                let hasProducts = false;
-                
-                try {
-                    // 1. Revisar si el usuario está en la lista de acceso especial (allowlist)
-                    const allowlistRef = doc(db, "allowlist", user.email);
-                    const allowlistSnap = await getDoc(allowlistRef);
+    userGreeting.textContent = `Hola, ${user.displayName || user.email.split('@')[0]}`;
 
-                    if (allowlistSnap.exists()) {
-                        console.log("Usuario con acceso especial detectado.");
-                        customStoriesSection.classList.remove('hidden');
-                        librarySection.classList.remove('hidden');
-                        hasProducts = true;
-                    } else {
-                        // 2. Si no está en la allowlist, buscar sus productos comprados
-                        const userProductsRef = doc(db, "user_products", user.uid);
-                        const userProductsSnap = await getDoc(userProductsRef);
+    const emailExact = user.email || '';
+    const emailLower = emailExact.toLowerCase();
 
-                        if (userProductsSnap.exists()) {
-                            const products = userProductsSnap.data().products || [];
-                            console.log("Productos del usuario:", products);
-                            if (products.includes('plan-001')) { // ID de la Biblioteca
-                                librarySection.classList.remove('hidden');
-                                hasProducts = true;
-                            }
-                            if (products.includes('plan-002') || products.includes('plan-003')) { // IDs de cuentos personalizados
-                                customStoriesSection.classList.remove('hidden');
-                                hasProducts = true;
-                            }
-                        }
-                    }
+    try {
+      // Lecturas en paralelo
+      const allowLowerRef = doc(db, 'allowlist', emailLower);
+      const allowExactRef = emailLower !== emailExact ? doc(db, 'allowlist', emailExact) : null;
+      const userProductsRef = doc(db, 'user_products', user.uid);
 
-                    // 3. Si después de todas las revisiones no tiene productos, mostrar el mensaje
-                    if (!hasProducts) {
-                        noProductsMessage.classList.remove('hidden');
-                    }
+      const [snapLower, snapExact, snapProducts] = await Promise.all([
+        getDoc(allowLowerRef),
+        allowExactRef ? getDoc(allowExactRef) : Promise.resolve(null),
+        getDoc(userProductsRef)
+      ]);
 
-                } catch (error) {
-                    console.error("Error al cargar los productos del usuario:", error);
-                    noProductsMessage.classList.remove('hidden'); // En caso de error, es más seguro no mostrar nada.
-                }
-                
-                loadingState.classList.add('hidden');
-                accountContent.classList.remove('hidden');
-            } else {
-                window.location.href = 'index.html';
-            }
-        });
+      const allowSnap = (snapLower && snapLower.exists()) ? snapLower : (snapExact && snapExact.exists()) ? snapExact : null;
 
-        logoutBtn.addEventListener('click', () => {
-            signOut(auth).then(() => {
-                window.location.href = 'index.html';
-            }).catch((error) => {
-                console.error("Error al cerrar sesión:", error);
-            });
-        });
+      let hasProducts = false;
 
-    </script>
+      // Allowlist = acceso total
+      if (allowSnap && truthy(allowSnap.data()?.active)) {
+        customStoriesSection.classList.remove('hidden');
+        librarySection.classList.remove('hidden');
+        hasProducts = true;
+      }
+
+      // Productos comprados
+      if (!hasProducts && snapProducts && snapProducts.exists()) {
+        const products = snapProducts.data().products || [];
+        if (products.includes('plan-001')) { librarySection.classList.remove('hidden'); hasProducts = true; }
+        if (products.includes('plan-002') || products.includes('plan-003')) { customStoriesSection.classList.remove('hidden'); hasProducts = true; }
+      }
+
+      if (!hasProducts) noProductsMessage.classList.remove('hidden');
+
+    } catch (e) {
+      console.error('Error cargando productos:', e);
+      noProductsMessage.classList.remove('hidden');
+    } finally {
+      loadingState.classList.add('hidden');
+      accountContent.classList.remove('hidden');
+    }
+  });
+
+  logoutBtn.addEventListener('click', () => {
+    signOut(auth).then(() => window.location.href = 'index.html');
+  });
+</script>
 </body>
 </html>
