@@ -10,7 +10,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;900&family=Pacifico&display=swap" rel="stylesheet">
-    <style><
+    <style>
         :root {
             --color-dark-blue: #0A2F5B;
             --color-teal: #00B2A9;
@@ -130,7 +130,7 @@
         const db = getFirestore(app);
         const googleProvider = new GoogleAuthProvider();
         
-        const publicKey = 'AQUI_VA_TU_PUBLIC_KEY'; // Reemplazar con tu Public Key de Prueba o Producción
+        const publicKey = 'APP_USR-a633c3e4-ac28-4661-bba4-0a5dee41e9ed'; // ¡Mantenemos tu clave!
         let mp;
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -182,7 +182,7 @@
                     if (allowlistSnap.exists()) {
                         console.log("Usuario en allowlist. Redirigiendo a mi-cuenta.html");
                         window.location.href = 'mi-cuenta.html';
-                        return;
+                        return; // Detiene la ejecución para que no continúe al pago
                     }
                 } catch (error) {
                     console.error("Error al verificar la allowlist:", error);
