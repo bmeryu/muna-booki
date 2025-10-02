@@ -72,6 +72,7 @@
         import { getAuth, onAuthStateChanged, signInWithPopup, GoogleAuthProvider, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
+        // IMPORTANTE: REEMPLAZA ESTO CON LA CONFIGURACIÓN DE TU NUEVO PROYECTO
         const firebaseConfig = {
             apiKey: "AIzaSyBivlKO0Ijt1hvMNyH9aIGXf_7WZwE2tA4",
             authDomain: "munabooki.firebaseapp.com",
@@ -90,27 +91,7 @@
         const publicKey = 'APP_USR-a633c3e4-ac28-4661-bba4-0a5dee41e9ed'; 
         const mp = new MercadoPago(publicKey);
 
-        // ==================================================================
-        // INICIO DE LA PRUEBA DE CONEXIÓN
-        // Esto intentará conectarse a Firestore apenas cargue la página.
-        // Revisa la consola para ver si aparece el error 400 inmediatamente.
-        // ==================================================================
-        (async () => {
-            console.log("Iniciando prueba de conexión forzada al cargar la página...");
-            try {
-                const testRef = doc(db, "connectivity_test", "can_connect");
-                await getDoc(testRef);
-                console.log("%cPrueba de conexión INICIAL exitosa.", "color: green; font-weight: bold;");
-            } catch (error) {
-                console.error("%cPrueba de conexión INICIAL fallida. Esto confirma un problema de configuración del proyecto.", "color: red; font-weight: bold;", error);
-            }
-        })();
-        // ==================================================================
-        // FIN DE LA PRUEBA DE CONEXIÓN
-        // ==================================================================
-
         document.addEventListener('DOMContentLoaded', () => {
-            // Lógica de UI (planes, resumen, etc. sin cambios)
             const params = new URLSearchParams(window.location.search);
             const plan = params.get('plan');
             const planDetails = { biblioteca: { id: 'plan-001', name: 'Suscripción Biblioteca Mágica', price: 8900, description: 'Acceso ilimitado a todos nuestros cuentos publicados.', image: 'https://bmeryu.github.io/muna-booki/biblioteca.png', custom: false }, estandar: { id: 'plan-002', name: 'Cuento a Medida', price: 18900, description: 'Un cuento personalizado basado en tus ideas.', image: 'https://bmeryu.github.io/muna-booki/crea.png', custom: true }, premium: { id: 'plan-003', name: 'Cuento Premium Ilustrado', price: 40000, description: 'Tu cuento personalizado con ilustraciones únicas.', image: 'https://bmeryu.github.io/muna-booki/premium.png', custom: true } };
@@ -125,11 +106,9 @@
                     const allowlistRef = doc(db, 'allowlist', user.email);
                     const allowlistSnap = await getDoc(allowlistRef);
 
-                    // Lógica de allowlist corregida
                     if (allowlistSnap.exists()) {
                         console.log("Acceso concedido por allowlist.");
                         authError.textContent = ''; 
-                        // Lógica para mostrar pago (sin cambios)
                         if (plan) { const userName = user.displayName || user.email.split('@')[0]; document.getElementById('welcome-message').textContent = `¡Hola, ${userName}!`; document.getElementById('auth-section').classList.add('hidden'); document.getElementById('payment-section').classList.remove('hidden'); if (selectedPlan.custom) { document.getElementById('clauses-container').classList.remove('hidden'); const termsCheckbox = document.getElementById('terms-checkbox'); termsCheckbox.checked = false;  termsCheckbox.addEventListener('change', (e) => { if (e.target.checked) createCheckoutButton(selectedPlan); else document.getElementById('mercado-pago-button-container').innerHTML = ''; }); } else { createCheckoutButton(selectedPlan); } } else { window.location.href = 'mi-cuenta.html'; }
                     } else {
                         console.log("Acceso denegado. El usuario no está en la allowlist.");
@@ -143,7 +122,6 @@
                 }
             }
 
-            // Resto del script (createCheckoutButton, createPreferenceOnBackend, UI listeners, Auth listeners) sin cambios
             async function createCheckoutButton(planData) { const buttonContainer = document.getElementById('mercado-pago-button-container'); buttonContainer.innerHTML = '<p class="text-sm text-center text-gray-500">Generando link de pago seguro...</p>'; try { const preferenceId = await createPreferenceOnBackend(planData); if (!preferenceId) throw new Error("No se pudo obtener el ID de preferencia."); const bricksBuilder = mp.bricks(); if (window.checkoutButton) window.checkoutButton.unmount(); window.checkoutButton = await bricksBuilder.create('wallet', 'mercado-pago-button-container', { initialization: { preferenceId: preferenceId }, customization: { texts: { valueProp: 'smart_option' } } }); } catch (error) { console.error("Error al crear el botón de pago:", error); buttonContainer.innerHTML = `<p class="text-red-500 text-sm text-center">Hubo un problema al cargar el botón de pago.</p>`; } }
             async function createPreferenceOnBackend(planData) { const functionUrl = `https://us-central1-munabooki.cloudfunctions.net/createMercadoPagoPreference`; try { const response = await fetch(functionUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title: planData.name, quantity: 1, unit_price: planData.price, }) }); if (!response.ok) throw new Error(`El servidor respondió con el estado: ${response.status}`); const data = await response.json(); return data.preferenceId; } catch (error) { console.error("Error al llamar a la Cloud Function:", error); return null; } }
             const loginTab = document.getElementById('login-tab-btn'), registerTab = document.getElementById('register-tab-btn'), loginForm = document.getElementById('login-form'), registerForm = document.getElementById('register-form');
