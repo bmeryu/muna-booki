@@ -128,6 +128,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, signInWithPopup, GoogleAuthProvider, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-functions.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBivlKO0Ijt1hvMNyH9aIGXf_7WZwE2tA4",
@@ -142,6 +143,7 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
+        const functions = getFunctions(app);
         const googleProvider = new GoogleAuthProvider();
         
         const publicKey = 'APP_USR-a633c3e4-ac28-4661-bba4-0a5dee41e9ed'; 
@@ -247,22 +249,15 @@
             }
 
             async function createPreferenceOnBackend(planData) {
-                const functionUrl = `https://us-central1-munabooki.cloudfunctions.net/createMercadoPagoPreference`;
-                
+                const createMercadoPagoPreference = httpsCallable(functions, 'createMercadoPagoPreference');
                 try {
-                    const response = await fetch(functionUrl, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            title: planData.name,
-                            quantity: 1,
-                            unit_price: planData.price,
-                        })
+                    const result = await createMercadoPagoPreference({
+                        title: planData.name,
+                        quantity: 1,
+                        unit_price: planData.price,
                     });
-
-                    if (!response.ok) throw new Error(`El servidor respondió con el estado: ${response.status}`);
-                    const data = await response.json();
-                    return data.preferenceId;
+                    // La respuesta de la función callable está en result.data
+                    return result.data.preferenceId;
                 } catch (error) {
                     console.error("Error al llamar a la Cloud Function:", error);
                     return null;
