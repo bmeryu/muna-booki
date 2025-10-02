@@ -43,7 +43,7 @@
                 <div id="auth-section" class="bg-white p-8 rounded-2xl shadow-lg">
                     <h2 id="auth-title" class="text-2xl font-bold text-center section-title mb-2">Casi listo para la magia...</h2>
                     <p class="text-center text-gray-600 mb-6">Inicia sesión o crea tu cuenta para continuar.</p>
-                    
+
                     <div class="flex border-b mb-6">
                         <button id="login-tab-btn" class="flex-1 py-2 font-semibold text-teal-600 border-b-2 border-teal-600">Iniciar Sesión</button>
                         <button id="register-tab-btn" class="flex-1 py-2 font-semibold text-gray-500">Registrarse</button>
@@ -91,7 +91,7 @@
                             </label>
                         </div>
                     </div>
-                     
+
                      <!-- Contenedor para el botón de Mercado Pago -->
                      <div id="mercado-pago-button-container"></div>
                 </div>
@@ -107,7 +107,7 @@
             </div>
         </div>
     </main>
-    
+
     <div id="terms-modal" class="fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center p-4 hidden">
         <!-- Contenido del modal sin cambios -->
     </div>
@@ -126,7 +126,7 @@
             apiKey: "AIzaSyBivlKO0Ijt1hvMNyH9aIGXf_7WZwE2tA4",
             authDomain: "munabooki.firebaseapp.com",
             projectId: "munabooki",
-            storageBucket: "munabooki.firebasestorage.app",  // solicitado
+            storageBucket: "munabooki.firebasestorage.app",
             messagingSenderId: "585414544600",
             appId: "1:585414544600:web:77026db4856b0111249bad",
             measurementId: "G-HBM4Y2FKMF"
@@ -142,7 +142,7 @@
 
         const auth = getAuth(app);
         const googleProvider = new GoogleAuthProvider();
-        
+
         // Clave pública de MP
         const publicKey = 'APP_USR-a633c3e4-ac28-4661-bba4-0a5dee41e9ed'; 
         if (publicKey === 'APP_USR-a633c3e4-ac28-4661-bba4-0a5dee41e9ed') {
@@ -153,7 +153,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             const params = new URLSearchParams(window.location.search);
             const plan = params.get('plan');
-            
+
             const planDetails = {
                 biblioteca: { id: 'plan-001', name: 'Suscripción Biblioteca Mágica', price: 8900, description: '...', image: '...', custom: false },
                 estandar: { id: 'plan-002', name: 'Cuento a Medida', price: 18900, description: '...', image: '...', custom: true },
@@ -170,7 +170,7 @@
               handledUid = user.uid;
               onLoginSuccess(user);
             });
-            
+
             async function onLoginSuccess(user) {
                 if (plan) {
                     const userName = user.displayName || user.email.split('@')[0];
@@ -216,7 +216,7 @@
                     window.location.href = 'mi-cuenta.html';
                 }
             }
-            
+
             async function createCheckoutButton(planData) {
                 const buttonContainer = document.getElementById('mercado-pago-button-container');
 
@@ -235,7 +235,7 @@
                     if (window.checkoutButton) {
                       try { await window.checkoutButton.unmount(); } catch {}
                     }
-                    
+
                     window.checkoutButton = await bricksBuilder.create('wallet', 'mercado-pago-button-container', {
                         initialization: { preferenceId },
                         customization: { texts: { valueProp: 'smart_option' } }
@@ -253,7 +253,7 @@
                 const functionRegion = 'us-central1';
                 const functionName = 'createMercadoPagoPreference';
                 const functionUrl = `https://${functionRegion}-${projectId}.cloudfunctions.net/${functionName}`;
-                
+
                 try {
                     const response = await fetch(functionUrl, {
                         method: 'POST',
