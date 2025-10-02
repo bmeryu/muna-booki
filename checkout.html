@@ -184,7 +184,7 @@
                 const emailExact = (user.email || '');
                 const emailLower = emailExact.toLowerCase();
                 showDebug(`Email login: ${emailExact}`);
-
+try { await auth.currentUser?.getIdToken(true); } catch {}
                 try {
                     // 1) Lowercase
                     let ref = doc(db, 'allowlist', emailLower);
