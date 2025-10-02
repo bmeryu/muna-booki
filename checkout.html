@@ -1,4 +1,4 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html lang="es" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
@@ -21,6 +21,7 @@
         .section-title { color: var(--color-dark-blue); }
         .btn-primary { background-color: var(--color-teal); color: white; }
         .btn-primary:hover { background-color: #009a92; }
+        .btn-primary:disabled { background-color: #00b2a9a1; cursor: not-allowed; }
     </style>
 </head>
 <body class="bg-gray-50">
@@ -87,14 +88,14 @@
                         </div>
                     </div>
                      
-                     <!-- Contenedor para el botón de Mercado Pago -->
                      <div id="mercado-pago-button-container"></div>
                 </div>
             </div>
 
             <div id="order-summary-column" class="md:order-1">
                 <h1 class="text-3xl font-bold section-title mb-6">Resumen de tu Compra</h1>
-                <div id="order-summary" class="bg-white p-8 rounded-2xl shadow-lg"></div>
+                <div id="order-summary" class="bg-white p-8 rounded-2xl shadow-lg">
+                </div>
                  <div class="mt-8 text-gray-600 text-sm flex items-center">
                     <svg class="w-5 h-5 mr-2 text-teal-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 1a4.5 4.5 0 00-4.5 4.5V9H5a2 2 0 00-2 2v6a2 2 0 002 2h10a2 2 0 002-2v-6a2 2 0 00-2-2h-.5V5.5A4.5 4.5 0 0010 1zm3 8V5.5a3 3 0 10-6 0V9h6z" clip-rule="evenodd"></path></svg>
                     <span>Transacción 100% segura y protegida.</span>
@@ -104,12 +105,13 @@
     </main>
     
     <div id="terms-modal" class="fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center p-4 hidden">
-        <!-- Contenido del modal sin cambios -->
+        <!-- Contenido del modal -->
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBivlKO0Ijt1hvMNyH9aIGXf_7WZwE2tA4",
@@ -123,9 +125,9 @@
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
+        const db = getFirestore(app);
         const googleProvider = new GoogleAuthProvider();
         
-        // ¡IMPORTANTE! Reemplaza esto con tu PUBLIC KEY de PRODUCCIÓN de Mercado Pago.
         const publicKey = 'APP_USR-a633c3e4-ac28-4661-bba4-0a5dee41e9ed'; 
         if (publicKey === 'APP_USR-a633c3e4-ac28-4661-bba4-0a5dee41e9ed') {
             console.warn('ADVERTENCIA: Debes configurar tu Public Key de Producción de Mercado Pago.');
@@ -137,16 +139,62 @@
             const plan = params.get('plan');
             
             const planDetails = {
-                biblioteca: { id: 'plan-001', name: 'Suscripción Biblioteca Mágica', price: 8900, description: '...', image: '...', custom: false },
-                estandar: { id: 'plan-002', name: 'Cuento a Medida', price: 18900, description: '...', image: '...', custom: true },
-                premium: { id: 'plan-003', name: 'Cuento Premium', price: 40000, description: '...', image: '...', custom: true }
+                biblioteca: { id: 'plan-001', name: 'Suscripción Biblioteca Mágica', price: 8900, custom: false },
+                estandar: { id: 'plan-002', name: 'Cuento a Medida', price: 18900, custom: true },
+                premium: { id: 'plan-003', name: 'Cuento Premium', price: 40000, custom: true }
             };
 
             const selectedPlan = planDetails[plan];
-            // Lógica para mostrar/ocultar resumen...
             
-            async function onLoginSuccess(user) {
-                if (plan) {
+            const orderSummaryDiv = document.getElementById('order-summary');
+            if (selectedPlan) {
+                orderSummaryDiv.innerHTML = `
+                    <div class="flex items-center space-x-4">
+                        <div class="w-20 h-20 bg-teal-100 rounded-lg flex items-center justify-center">
+                           <svg class="w-10 h-10 text-teal-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
+                           </svg>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-bold text-gray-800">${selectedPlan.name}</h3>
+                            <p class="text-gray-500">${selectedPlan.custom ? 'Pago único' : 'Suscripción mensual'}</p>
+                        </div>
+                        <div class="ml-auto text-lg font-bold text-gray-800">
+                            $${selectedPlan.price.toLocaleString('es-CL')}
+                        </div>
+                    </div>
+                `;
+            } else {
+                document.getElementById('order-summary-column').classList.add('hidden');
+                const authColumn = document.getElementById('auth-column');
+                authColumn.classList.remove('md:col-span-1');
+                authColumn.classList.add('md:col-span-2');
+                document.getElementById('auth-title').textContent = "Accede a tu cuenta";
+            }
+            
+            async function handleSuccessfulLogin(user) {
+                try {
+                    // --- LÓGICA UNIFICADA Y CORREGIDA ---
+                    
+                    // Escenario 1: El usuario seleccionó un plan, revisamos si tiene acceso especial (allowlist)
+                    // La estructura de DB correcta es una colección "allowlist" con documentos cuyo ID es el email.
+                    const allowlistRef = doc(db, "allowlist", user.email);
+                    const allowlistSnap = await getDoc(allowlistRef);
+
+                    if (allowlistSnap.exists()) {
+                        console.log("Usuario en allowlist, redirigiendo a mi-cuenta.html");
+                        window.location.href = 'mi-cuenta.html';
+                        return; // Termina la ejecución aquí para usuarios con acceso especial.
+                    }
+                    
+                    // Escenario 2: El usuario solo quiere iniciar sesión (no hay plan en la URL)
+                    if (!plan) {
+                        window.location.href = 'mi-cuenta.html';
+                        return;
+                    }
+                    
+                    // Escenario 3: Usuario normal que seleccionó un plan -> Mostrar sección de pago
+                    console.log("Usuario normal, mostrando sección de pago.");
                     const userName = user.displayName || user.email.split('@')[0];
                     document.getElementById('welcome-message').textContent = `¡Hola, ${userName}!`;
                     document.getElementById('auth-section').classList.add('hidden');
@@ -161,55 +209,43 @@
                     } else {
                         createCheckoutButton(selectedPlan);
                     }
-                } else {
-                    window.location.href = 'mi-cuenta.html';
+                } catch (error) {
+                    console.error("Error grave en el flujo post-login:", error);
+                    authError.textContent = "Error al procesar tu cuenta. Intenta de nuevo.";
+                    setLoading(false); // Reactivar botones en caso de error
                 }
             }
             
             async function createCheckoutButton(planData) {
                 const buttonContainer = document.getElementById('mercado-pago-button-container');
                 buttonContainer.innerHTML = '<p class="text-sm text-center text-gray-500">Generando link de pago seguro...</p>';
-                
                 try {
-                    console.log("Llamando al backend para crear una preferencia real...");
                     const preferenceId = await createPreferenceOnBackend(planData);
-                    if (!preferenceId) {
-                        throw new Error("No se pudo obtener el ID de preferencia desde el backend.");
-                    }
-
+                    if (!preferenceId) throw new Error("No se pudo obtener el ID de preferencia.");
+                    
                     const bricksBuilder = mp.bricks();
                     if (window.checkoutButton) window.checkoutButton.unmount();
-                    
                     window.checkoutButton = await bricksBuilder.create('wallet', 'mercado-pago-button-container', {
                         initialization: { preferenceId: preferenceId },
                         customization: { texts: { valueProp: 'smart_option' } }
                     });
                 } catch (error) {
                     console.error("Error al crear el botón de pago:", error);
-                    buttonContainer.innerHTML = `<p class="text-red-500 text-sm text-center">Hubo un problema al cargar el botón de pago. Revisa la consola para más detalles.</p>`;
+                    buttonContainer.innerHTML = `<p class="text-red-500 text-sm text-center">Hubo un problema al cargar el botón de pago.</p>`;
                 }
             }
 
             async function createPreferenceOnBackend(planData) {
-                // CORRECCIÓN: La URL se construye automáticamente usando el ID de tu proyecto.
                 const projectId = firebaseConfig.projectId;
-                const functionRegion = 'us-central1'; // Región por defecto de Firebase Functions
+                const functionRegion = 'us-central1';
                 const functionName = 'createMercadoPagoPreference';
                 const functionUrl = `https://${functionRegion}-${projectId}.cloudfunctions.net/${functionName}`;
-                
-                console.log(`Intentando llamar a la función en: ${functionUrl}`);
-
                 try {
                     const response = await fetch(functionUrl, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            title: planData.name,
-                            quantity: 1,
-                            unit_price: planData.price,
-                        })
+                        body: JSON.stringify({ title: planData.name, quantity: 1, unit_price: planData.price })
                     });
-
                     if (!response.ok) throw new Error(`El servidor respondió con el estado: ${response.status}`);
                     const data = await response.json();
                     return data.preferenceId;
@@ -219,18 +255,81 @@
                 }
             }
 
-            // ---- Event Listeners de Firebase Auth ----
-            document.getElementById('google-signin-btn').addEventListener('click', () => signInWithPopup(auth, googleProvider).then(r => onLoginSuccess(r.user)));
-            document.getElementById('register-form').addEventListener('submit', (e) => {
-                e.preventDefault();
-                createUserWithEmailAndPassword(auth, e.target.email.value, e.target.password.value).then(r => onLoginSuccess(r.user));
+            const loginTab = document.getElementById('login-tab-btn');
+            const registerTab = document.getElementById('register-tab-btn');
+            const loginForm = document.getElementById('login-form');
+            const registerForm = document.getElementById('register-form');
+            const authError = document.getElementById('auth-error-message');
+            const loginButton = loginForm.querySelector('button');
+            const registerButton = registerForm.querySelector('button');
+            const originalLoginText = loginButton.textContent;
+            const originalRegisterText = registerButton.textContent;
+
+            const setLoading = (isLoading) => {
+                loginButton.disabled = isLoading;
+                registerButton.disabled = isLoading;
+                loginButton.textContent = isLoading ? 'Cargando...' : originalLoginText;
+                registerButton.textContent = isLoading ? 'Cargando...' : originalRegisterText;
+            };
+
+            loginTab.addEventListener('click', () => {
+                loginTab.classList.add('text-teal-600', 'border-teal-600');
+                registerTab.classList.remove('text-teal-600', 'border-teal-600');
+                loginForm.classList.remove('hidden');
+                registerForm.classList.add('hidden');
             });
-            document.getElementById('login-form').addEventListener('submit', (e) => {
+            registerTab.addEventListener('click', () => {
+                registerTab.classList.add('text-teal-600', 'border-teal-600');
+                loginTab.classList.remove('text-teal-600', 'border-teal-600');
+                registerForm.classList.remove('hidden');
+                loginForm.classList.add('hidden');
+            });
+
+            const handleAuthError = (error) => {
+                 switch (error.code) {
+                    case 'auth/wrong-password':
+                        authError.textContent = 'La contraseña es incorrecta.'; break;
+                    case 'auth/user-not-found':
+                        authError.textContent = 'No se encontró un usuario con ese correo.'; break;
+                    case 'auth/email-already-in-use':
+                        authError.textContent = 'Este correo ya está registrado. Intenta iniciar sesión.'; break;
+                    default:
+                        authError.textContent = 'Ocurrió un error. Inténtalo de nuevo.';
+                }
+            };
+            
+            document.getElementById('google-signin-btn').addEventListener('click', () => {
+                setLoading(true);
+                signInWithPopup(auth, googleProvider)
+                    .then(result => handleSuccessfulLogin(result.user))
+                    .catch(handleAuthError)
+                    .finally(() => setLoading(false));
+            });
+            
+            registerForm.addEventListener('submit', (e) => {
                 e.preventDefault();
-                signInWithEmailAndPassword(auth, e.target.email.value, e.target.password.value).then(r => onLoginSuccess(r.user));
+                authError.textContent = '';
+                setLoading(true);
+
+                createUserWithEmailAndPassword(auth, e.target.email.value, e.target.password.value)
+                    .then(result => handleSuccessfulLogin(result.user))
+                    .catch(handleAuthError)
+                    .finally(() => setLoading(false));
+            });
+
+            loginForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                authError.textContent = '';
+                setLoading(true);
+                
+                signInWithEmailAndPassword(auth, e.target.email.value, e.target.password.value)
+                    .then(result => handleSuccessfulLogin(result.user))
+                    .catch(handleAuthError)
+                    .finally(() => setLoading(false));
             });
         });
     </script>
 
 </body>
 </html>
+
