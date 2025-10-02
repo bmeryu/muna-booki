@@ -1,159 +1,742 @@
-#1
+#2
+# ✅ Plan completo: carrito con varios productos, preferencia única en Mercado Pago y “Mi Cuenta” que refleja compras
+
+Te dejo **todo listo**: pasos claros y **código completo** (HTMLs + Functions + Reglas). Sigue el orden.
+
+---
+
+## 0) Requisitos previos
+
+* Proyecto Firebase: **munabooki** (Firestore ya creado).
+* Autenticación habilitada (Google + email/clave) y **dominio** donde sirves el sitio agregado en *Authentication → Settings → Authorized domains* (por ejemplo: `bmeryu.github.io`, `munabooki.web.app`).
+* Cuenta de Mercado Pago con **Access Token de Producción**.
+
+> **Importante:** usa siempre el **mismo `projectId`** en el front y en las Functions: `munabooki`.
+
+---
+
+## 1) Reglas de Firestore
+
+Publica estas reglas (Firestore → Rules → **Publish**):
+
+```rules
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Lista blanca por email exacto (id del doc = email en minúsculas)
+    match /allowlist/{email} {
+      allow get: if request.auth != null && request.auth.token.email == email;
+      allow list, create, update, delete: if false;
+    }
+
+    // Estado de compras por usuario (id del doc = uid)
+    match /user_products/{uid} {
+      allow get: if request.auth != null && request.auth.uid == uid;
+      allow list, create, update, delete: if false;
+    }
+  }
+}
+```
+
+> **Cómo crear la allowlist:** en *Firestore → Data*, colección `allowlist`, documento con **ID = correo en minúsculas** (ej: `bmeryu@gmail.com`), con campo `active: true`.
+
+---
+
+## 2) Functions (backend)
+
+Crea/actualiza tu carpeta `functions/` con estos archivos. Las Functions hacen 2 cosas:
+
+1. **createMercadoPagoPreference** — recibe `productIds` y crea la preferencia con varios ítems.
+2. **mercadoPagoWebhook** — recibe la confirmación de pago de Mercado Pago y escribe en `user_products/{uid}`.
+
+### 2.1 `functions/package.json`
+
+```json
+{
+  "name": "munabooki-functions",
+  "engines": { "node": "20" },
+  "main": "index.js",
+  "type": "commonjs",
+  "dependencies": {
+    "firebase-admin": "^12.5.0",
+    "firebase-functions": "^5.1.1",
+    "mercadopago": "^2.1.21"
+  }
+}
+```
+
+### 2.2 `functions/index.js`
+
+```js
+const { onRequest } = require("firebase-functions/v2/https");
+const { defineSecret } = require("firebase-functions/params");
+const admin = require("firebase-admin");
+const mercadopago = require("mercadopago");
+
+// 🔐 Secret: setéalo con `firebase functions:secrets:set MP_ACCESS_TOKEN`
+const MP_ACCESS_TOKEN = defineSecret("MP_ACCESS_TOKEN");
+
+// Inicializa Admin
+try { admin.app(); } catch { admin.initializeApp(); }
+const db = admin.firestore();
+
+// 🛒 Catálogo centralizado (puedes moverlo a Firestore si quieres editar precios sin redeploy)
+const CATALOG = {
+  "plan-001": { name: "Suscripción Biblioteca Mágica", price: 8900, type: "library" },
+  "plan-002": { name: "Cuento a Medida",               price: 18900, type: "custom" },
+  "plan-003": { name: "Cuento Premium",                price: 40000, type: "premium" }
+};
+
+// Dominios permitidos para llamadas desde el navegador
+const CORS_ORIGINS = [
+  "https://bmeryu.github.io",
+  "https://munabooki.web.app",
+  "https://munabooki.firebaseapp.com"
+];
+
+function allowOrigin(origin) {
+  return CORS_ORIGINS.includes(origin) ? origin : "*"; // relajado para pruebas, ajusta en prod
+}
+
+exports.createMercadoPagoPreference = onRequest({ secrets: [MP_ACCESS_TOKEN] }, async (req, res) => {
+  const origin = req.headers.origin || "*";
+  res.set("Access-Control-Allow-Origin", allowOrigin(origin));
+  res.set("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  res.set("Access-Control-Allow-Methods", "POST, OPTIONS");
+  if (req.method === "OPTIONS") return res.status(204).send("");
+
+  try {
+    const { productIds, uid } = req.body || {};
+    if (!Array.isArray(productIds) || productIds.length === 0) {
+      return res.status(400).json({ error: "productIds vacío" });
+    }
+    if (!uid) return res.status(401).json({ error: "uid requerido" });
+
+    mercadopago.configure({ access_token: MP_ACCESS_TOKEN.value() });
+
+    const items = productIds.map((id) => {
+      const p = CATALOG[id];
+      if (!p) throw new Error(`Producto inválido: ${id}`);
+      return {
+        id,
+        title: p.name,
+        quantity: 1,
+        unit_price: p.price,
+        currency_id: "CLP"
+      };
+    });
+
+    const orderId = `ord_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+
+    const preference = {
+      items,
+      metadata: { uid, productIds },
+      external_reference: orderId,
+      notification_url: `https://us-central1-${process.env.GCLOUD_PROJECT}.cloudfunctions.net/mercadoPagoWebhook`,
+      back_urls: {
+        success: "https://bmeryu.github.io/muna-booki/mi-cuenta.html",
+        failure: "https://bmeryu.github.io/muna-booki/checkout.html?status=failure",
+        pending: "https://bmeryu.github.io/muna-booki/mi-cuenta.html"
+      },
+      auto_return: "approved"
+    };
+
+    const mpResp = await mercadopago.preferences.create(preference);
+    return res.json({ preferenceId: mpResp.body.id });
+  } catch (e) {
+    console.error("createMercadoPagoPreference error", e);
+    return res.status(500).json({ error: "internal" });
+  }
+});
+
+// Webhook público para notificaciones de MP
+exports.mercadoPagoWebhook = onRequest({ secrets: [MP_ACCESS_TOKEN] }, async (req, res) => {
+  try {
+    mercadopago.configure({ access_token: MP_ACCESS_TOKEN.value() });
+
+    // MP puede enviar el id por query o body. Tomamos de ambos lados.
+    const type = req.query.type || req.body.type;
+    const dataId = (req.query["data.id"] || req.body?.data?.id || req.body?.data?.id) || req.query.id || req.body.id;
+
+    if (type !== "payment" || !dataId) {
+      // MP reintenta; responde 200 para no generar loops
+      return res.status(200).send("ok");
+    }
+
+    const paymentResp = await mercadopago.payment.findById(dataId);
+    const pay = paymentResp.body;
+
+    if (pay.status !== "approved") return res.status(200).send("not approved");
+
+    const { metadata, external_reference, transaction_amount, id } = pay;
+    const uid = metadata?.uid;
+    const productIds = metadata?.productIds || [];
+    if (!uid || !productIds.length) return res.status(200).send("missing metadata");
+
+    const ref = db.doc(`user_products/${uid}`);
+    await db.runTransaction(async (tx) => {
+      const snap = await tx.get(ref);
+      const prev = snap.exists ? (snap.data() || {}) : {};
+      const newProducts = new Set([...(prev.products || []), ...productIds]);
+      const purchases = prev.purchases || [];
+
+      // Idempotencia: si ya existe ese orderId, no duplicar
+      if (!purchases.some((p) => p.orderId === external_reference)) {
+        purchases.push({
+          orderId: external_reference,
+          productIds,
+          amount: transaction_amount,
+          paymentId: id,
+          at: admin.firestore.FieldValue.serverTimestamp()
+        });
+      }
+
+      tx.set(ref, { products: Array.from(newProducts), purchases }, { merge: true });
+    });
+
+    return res.status(200).send("ok");
+  } catch (e) {
+    console.error("webhook error", e);
+    // Siempre responder 200 para que MP no reintente eternamente
+    return res.status(200).send("ok");
+  }
+});
+```
+
+### 2.3 Comandos para desplegar
+
+```bash
+# En la raíz del proyecto Firebase
+firebase login
+firebase use munabooki
+
+# Instala deps en functions/
+cd functions
+npm install
+
+# Guarda el Access Token de Mercado Pago como secret
+firebase functions:secrets:set MP_ACCESS_TOKEN
+# Pega el valor cuando lo pida (tu Access Token de PRODUCCIÓN)
+
+# Vuelve a la raíz o quédate en functions, da igual
+firebase deploy --only functions
+```
+
+> Al terminar, toma nota de las URLs:
+>
+> * `https://us-central1-munabooki.cloudfunctions.net/createMercadoPagoPreference`
+> * `https://us-central1-munabooki.cloudfunctions.net/mercadoPagoWebhook`
+
+---
+
+## 3) Frontend — `checkout.html` (carrito + allowlist + pago)
+
+Copia/pega **completo**. Cambié:
+
+* Checkbox de **varios productos**.
+* Suma de total.
+* Si estás en **allowlist**, redirige a `mi-cuenta.html` (sin mostrar MP).
+* Usa **Firestore Lite** para lecturas (evita errores de *Listen*).
+
+```html
 <!DOCTYPE html>
 <html lang="es" class="scroll-smooth">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Mi Cuenta - Muna Booki</title>
-  <!-- (Opcional) en producción instala Tailwind por CLI/PostCSS para quitar el warning -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Checkout - Muna Booki</title>
+  <script src="https://sdk.mercadopago.com/js/v2"></script>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;900&family=Pacifico&display=swap" rel="stylesheet">
   <style>
-    :root{--color-dark-blue:#0A2F5B;--color-teal:#00B2A9;--color-gold:#FFC845}
-    body{font-family:'Poppins',sans-serif}
+    :root { --color-dark-blue:#0A2F5B; --color-teal:#00B2A9; --color-gold:#FFC845; }
+    body { font-family:'Poppins',sans-serif; }
     .font-cursive{font-family:'Pacifico',cursive}
     .section-title{color:var(--color-dark-blue)}
-    .btn-primary{background:#00B2A9;color:#fff}.btn-primary:hover{background:#009a92}
-    .btn-secondary{background:#FFC845;color:#0A2F5B}.btn-secondary:hover{background:#e6b43e}
+    .btn-primary{background-color:var(--color-teal);color:#fff}
+    .btn-primary:hover{background-color:#009a92}
+    #debug-allowlist{display:none;font-size:12px;color:#64748b}
   </style>
 </head>
 <body class="bg-gray-50">
-<header class="bg-white shadow-sm">
-  <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
-    <a href="index.html"><img src="https://bmeryu.github.io/muna-booki/Logo_MunaBooki.png" alt="Logo de Muna Booki" class="h-16"></a>
-    <div><span id="user-greeting" class="text-gray-700 mr-4"></span>
-      <button id="logout-btn" class="text-sm font-semibold text-red-600 hover:text-red-800">Cerrar Sesión</button>
-    </div>
-  </nav>
-</header>
+  <header class="bg-white shadow-sm">
+    <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+      <a href="index.html"><img src="https://bmeryu.github.io/muna-booki/Logo_MunaBooki.png" class="h-16" alt="Logo"></a>
+      <a href="index.html" class="text-gray-600 hover:text-teal-500 font-semibold">Volver al inicio</a>
+    </nav>
+  </header>
 
-<main class="container mx-auto px-6 py-16">
-  <div id="loading-state" class="text-center">
-    <p class="text-lg text-gray-600">Cargando tu información...</p>
-  </div>
+  <main class="container mx-auto px-6 py-10">
+    <div class="max-w-5xl mx-auto grid md:grid-cols-2 gap-8">
 
-  <div id="account-content" class="hidden">
-    <h1 class="text-4xl font-bold section-title mb-10">Mi Cuenta</h1>
+      <!-- Columna izquierda: Auth + Pago -->
+      <div id="auth-column" class="md:order-2 md:col-span-1">
+        <div id="auth-section" class="bg-white p-6 rounded-2xl shadow-lg">
+          <h2 class="text-2xl font-bold text-center section-title mb-2">Identifícate</h2>
+          <p class="text-center text-gray-600 mb-4">Inicia sesión o crea tu cuenta para continuar.</p>
 
-    <section id="custom-stories-section" class="mb-12 hidden">
-      <h2 class="text-2xl font-bold text-gray-800 border-b pb-4 mb-6">Mis Cuentos Personalizados</h2>
-      <div class="bg-white p-8 rounded-2xl shadow-lg text-center">
-        <h3 class="text-xl font-bold text-gray-700">¡Es hora de crear magia!</h3>
-        <p class="text-gray-600 my-4 max-w-md mx-auto" id="custom-story-text">
-          Tienes acceso para crear un cuento personalizado. Completa el formulario para que nuestro equipo empiece tu historia.
-        </p>
-        <a href="crear-cuento.html" class="inline-block btn-primary font-bold py-3 px-8 rounded-full transition-transform hover:scale-105">
-          Empezar a Crear mi Cuento
-        </a>
-      </div>
-    </section>
+          <div class="flex border-b mb-4">
+            <button id="login-tab-btn" class="flex-1 py-2 font-semibold text-teal-600 border-b-2 border-teal-600">Iniciar Sesión</button>
+            <button id="register-tab-btn" class="flex-1 py-2 font-semibold text-gray-500">Registrarse</button>
+          </div>
+          <p id="auth-error-message" class="text-red-500 text-sm text-center mb-2 h-5"></p>
 
-    <section id="library-section" class="hidden">
-      <h2 class="text-2xl font-bold text-gray-800 border-b pb-4 mb-6">Mi Biblioteca Mágica</h2>
-      <div class="bg-white p-8 rounded-2xl shadow-lg">
-        <h3 class="text-xl font-bold text-gray-700 mb-4">¡Bienvenido a tu universo de historias!</h3>
-        <p class="text-gray-600 mb-6">Aquí encontrarás los video-cuentos de tu suscripción.</p>
-        <div class="grid md:grid-cols-3 gap-6">
-          <div class="border rounded-lg overflow-hidden"><div class="bg-teal-200 aspect-video flex items-center justify-center font-bold text-teal-700">[Video del Cuento]</div><div class="p-4"><h4 class="font-bold">El Misterio del Juguete Perdido</h4><p class="text-sm text-gray-500">Responsabilidad.</p></div></div>
-          <div class="border rounded-lg overflow-hidden"><div class="bg-yellow-200 aspect-video flex items-center justify-center font-bold text-yellow-700">[Video del Cuento]</div><div class="p-4"><h4 class="font-bold">La Carrera de Caracoles</h4><p class="text-sm text-gray-500">Perseverancia.</p></div></div>
-          <div class="border rounded-lg overflow-hidden text-center flex flex-col justify-center bg-gray-50"><h4 class="font-bold text-gray-700">¡Y muchos más!</h4><p class="text-sm text-gray-500">Nuevas historias cada mes.</p></div>
+          <form id="login-form" class="space-y-3">
+            <input name="email" type="email" placeholder="Correo" required class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-teal-500">
+            <input name="password" type="password" placeholder="Contraseña" required class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-teal-500">
+            <button type="submit" class="w-full btn-primary font-bold py-3 rounded-lg">Ingresar</button>
+          </form>
+
+          <form id="register-form" class="space-y-3 hidden">
+            <input name="email" type="email" placeholder="Correo" required class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-teal-500">
+            <input name="password" type="password" placeholder="Crear contraseña" required class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-teal-500">
+            <button type="submit" class="w-full btn-primary font-bold py-3 rounded-lg">Crear Cuenta</button>
+          </form>
+
+          <div class="my-4 flex items-center">
+            <div class="flex-grow border-t"></div>
+            <span class="mx-3 text-gray-500 text-sm">o</span>
+            <div class="flex-grow border-t"></div>
+          </div>
+
+          <button id="google-signin-btn" class="w-full flex items-center justify-center bg-white border text-gray-700 font-semibold py-3 px-4 rounded-lg hover:bg-gray-50">
+            <svg class="w-6 h-6 mr-3" viewBox="0 0 48 48"><defs><path id="a" d="M44.5 20H24v8.5h11.8C34.7 33.9 30.1 37 24 37c-7.2 0-13-5.8-13-13s5.8-13 13-13c3.1 0 5.9 1.1 8.1 2.9l6.4-6.4C34.6 4.1 29.6 2 24 2 11.8 2 2 11.8 2 24s9.8 22 22 22c11 0 21-8 21-22 0-1.3-.2-2.7-.5-4z"/></defs><clipPath id="b"><use xlink:href="#a" overflow="visible"/></clipPath><path clip-path="url(#b)" fill="#FBBC05" d="M0 37V11l17 13z"/><path clip-path="url(#b)" fill="#EA4335" d="M0 11l17 13 7-6.1L48 14V0H0z"/><path clip-path="url(#b)" fill="#34A853" d="M0 37l30-23 7.9 1L48 0v48H0z"/><path clip-path="url(#b)" fill="#4285F4" d="M48 48L17 24l-4-3 35-10z"/></svg>
+            Continuar con Google
+          </button>
+        </div>
+
+        <div id="payment-section" class="bg-white p-6 rounded-2xl shadow-lg mt-6 hidden">
+          <h2 id="welcome-message" class="text-2xl font-bold text-center section-title mb-4">¡Hola!</h2>
+
+          <div id="free-msg" class="text-center text-green-600 font-bold mb-3 hidden">🎉 Estás en la lista. Te llevamos a tu cuenta…</div>
+          <div id="debug-allowlist" class="text-center mb-2"></div>
+
+          <div id="terms-box" class="mb-4 hidden">
+            <label class="flex items-start bg-gray-100 p-3 rounded-lg cursor-pointer">
+              <input id="terms-checkbox" type="checkbox" class="h-5 w-5 mt-1 mr-3">
+              <span class="text-sm text-gray-800">Acepto las <a href="#" class="text-teal-600 font-semibold">Cláusulas</a> para productos personalizados.</span>
+            </label>
+          </div>
+
+          <div id="mercado-pago-button-container"></div>
         </div>
       </div>
-    </section>
 
-    <div id="no-products-message" class="hidden text-center bg-white p-8 rounded-2xl shadow-lg">
-      <h3 class="text-xl font-bold text-gray-700">Aún no tienes productos Muna Booki</h3>
-      <p class="text-gray-600 my-4 max-w-md mx-auto">Explora nuestros planes y empieza hoy.</p>
-      <a href="index.html#plans" class="inline-block btn-secondary font-bold py-3 px-8 rounded-full transition-transform hover:scale-105">Ver Planes</a>
+      <!-- Columna derecha: Carrito -->
+      <div id="order-summary-column" class="md:order-1">
+        <h1 class="text-3xl font-bold section-title mb-4">Elige tus productos</h1>
+        <div id="order-summary" class="bg-white p-6 rounded-2xl shadow-lg"></div>
+        <div class="mt-4 text-gray-600 text-sm flex items-center">
+          <svg class="w-5 h-5 mr-2 text-teal-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 1a4.5 4.5 0 00-4.5 4.5V9H5a2 2 0 00-2 2v6a2 2 0 002 2h10a2 2 0 002-2v-6a2 2 0 00-2-2h-.5V5.5A4.5 4.5 0 0010 1zm3 8V5.5a3 3 0 10-6 0V9h6z" clip-rule="evenodd"></path></svg>
+          Transacción 100% segura y protegida.
+        </div>
+      </div>
     </div>
-  </div>
-</main>
+  </main>
 
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-  // 🔁 Lite = sin canales Listen → lecturas más rápidas/estables
-  import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore-lite.js";
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInWithPopup, GoogleAuthProvider, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore-lite.js";
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyBivlKO0Ijt1hvMNyH9aIGXf_7WZwE2tA4",
-    authDomain: "munabooki.firebaseapp.com",
-    projectId: "munabooki",
-    storageBucket: "munabooki.appspot.com",
-    messagingSenderId: "585414544600",
-    appId: "1:585414544600:web:77026db4856b0111249bad",
-    measurementId: "G-HBM4Y2FKMF"
-  };
+    const firebaseConfig = {
+      apiKey: "AIzaSyBivlKO0Ijt1hvMNyH9aIGXf_7WZwE2tA4",
+      authDomain: "munabooki.firebaseapp.com",
+      projectId: "munabooki",
+      storageBucket: "munabooki.appspot.com",
+      messagingSenderId: "585414544600",
+      appId: "1:585414544600:web:77026db4856b0111249bad",
+      measurementId: "G-HBM4Y2FKMF"
+    };
 
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const db = getFirestore(app);
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app); // Lite
+    const auth = getAuth(app);
+    const googleProvider = new GoogleAuthProvider();
 
-  const loadingState = document.getElementById('loading-state');
-  const accountContent = document.getElementById('account-content');
-  const userGreeting = document.getElementById('user-greeting');
-  const logoutBtn = document.getElementById('logout-btn');
+    // Mercado Pago
+    const publicKey = 'APP_USR-a633c3e4-ac28-4661-bba4-0a5dee41e9ed';
+    const mp = new MercadoPago(publicKey);
 
-  const customStoriesSection = document.getElementById('custom-stories-section');
-  const librarySection = document.getElementById('library-section');
-  const noProductsMessage = document.getElementById('no-products-message');
+    const qs = new URLSearchParams(location.search);
+    const DEBUG = qs.has('debug');
 
-  const truthy = (v) => v === true || v === 'true' || v === 1;
+    const CATALOG = {
+      'plan-001': { id:'plan-001', name:'Suscripción Biblioteca Mágica', price:8900, type:'library' },
+      'plan-002': { id:'plan-002', name:'Cuento a Medida',               price:18900, type:'custom'  },
+      'plan-003': { id:'plan-003', name:'Cuento Premium',                price:40000, type:'premium' }
+    };
 
-  onAuthStateChanged(auth, async (user) => {
-    if (!user) { window.location.href = 'index.html'; return; }
+    function showDebug(msg){ if(!DEBUG) return; const el=document.getElementById('debug-allowlist'); el.style.display='block'; el.textContent=msg; console.log('[ALLOWLIST]', msg); }
 
-    userGreeting.textContent = `Hola, ${user.displayName || user.email.split('@')[0]}`;
+    // Render del carrito (checkboxes + total)
+    function renderCart(){
+      const preselect = qs.get('plan'); // p.ej. "estandar" → marcamos plan-002
+      const mapAlias = { biblioteca:'plan-001', estandar:'plan-002', premium:'plan-003' };
+      const preId = mapAlias[preselect] || null;
 
-    const emailExact = user.email || '';
-    const emailLower = emailExact.toLowerCase();
+      const container = document.getElementById('order-summary');
+      container.innerHTML = '';
 
-    try {
-      // Lecturas en paralelo
-      const allowLowerRef = doc(db, 'allowlist', emailLower);
-      const allowExactRef = emailLower !== emailExact ? doc(db, 'allowlist', emailExact) : null;
-      const userProductsRef = doc(db, 'user_products', user.uid);
+      const list = document.createElement('div');
+      list.className = 'space-y-3';
 
-      const [snapLower, snapExact, snapProducts] = await Promise.all([
-        getDoc(allowLowerRef),
-        allowExactRef ? getDoc(allowExactRef) : Promise.resolve(null),
-        getDoc(userProductsRef)
-      ]);
+      Object.values(CATALOG).forEach(p => {
+        const row = document.createElement('label');
+        row.className = 'flex items-center justify-between border p-4 rounded-lg hover:bg-gray-50 cursor-pointer';
+        row.innerHTML = `
+          <div class="flex items-center">
+            <input type="checkbox" name="plan" value="${p.id}" class="mr-3 h-5 w-5">
+            <div>
+              <div class="font-semibold text-gray-800">${p.name}</div>
+              <div class="text-sm text-gray-500">${p.type === 'library' ? 'Acceso a Biblioteca' : 'Producto personalizado'}</div>
+            </div>
+          </div>
+          <div class="font-bold">$${p.price.toLocaleString('es-CL')}</div>
+        `;
+        list.appendChild(row);
+      });
 
-      const allowSnap = (snapLower && snapLower.exists()) ? snapLower : (snapExact && snapExact.exists()) ? snapExact : null;
+      const totalDiv = document.createElement('div');
+      totalDiv.className = 'flex justify-between items-center mt-4 pt-4 border-t';
+      totalDiv.innerHTML = `
+        <div class="text-lg font-bold">Total</div>
+        <div id="total-price" class="text-2xl font-extrabold text-teal-600">$0</div>
+      `;
 
-      let hasProducts = false;
+      const payBtn = document.createElement('button');
+      payBtn.id = 'go-pay';
+      payBtn.className = 'mt-4 w-full btn-primary font-bold py-3 rounded-lg';
+      payBtn.textContent = 'Ir a pagar';
 
-      // Allowlist = acceso total
-      if (allowSnap && truthy(allowSnap.data()?.active)) {
-        customStoriesSection.classList.remove('hidden');
-        librarySection.classList.remove('hidden');
-        hasProducts = true;
+      container.appendChild(list);
+      container.appendChild(totalDiv);
+      container.appendChild(payBtn);
+
+      // Marcar si viene con ?plan=
+      if (preId) {
+        const chk = container.querySelector(`input[value="${preId}"]`);
+        if (chk) chk.checked = true;
       }
 
-      // Productos comprados
-      if (!hasProducts && snapProducts && snapProducts.exists()) {
-        const products = snapProducts.data().products || [];
-        if (products.includes('plan-001')) { librarySection.classList.remove('hidden'); hasProducts = true; }
-        if (products.includes('plan-002') || products.includes('plan-003')) { customStoriesSection.classList.remove('hidden'); hasProducts = true; }
-      }
+      const updateTotal = () => {
+        const ids = getSelectedIds();
+        const total = ids.reduce((acc,id)=>acc + (CATALOG[id]?.price||0), 0);
+        document.getElementById('total-price').textContent = `$${total.toLocaleString('es-CL')}`;
+        // Si hay algún custom/premium → exigir términos
+        const needsTerms = ids.some(id => CATALOG[id].type !== 'library');
+        document.getElementById('terms-box').classList.toggle('hidden', !needsTerms);
+      };
 
-      if (!hasProducts) noProductsMessage.classList.remove('hidden');
+      const getSelectedIds = () => [...container.querySelectorAll('input[name="plan"]:checked')].map(ch => ch.value);
 
-    } catch (e) {
-      console.error('Error cargando productos:', e);
-      noProductsMessage.classList.remove('hidden');
-    } finally {
-      loadingState.classList.add('hidden');
-      accountContent.classList.remove('hidden');
+      container.addEventListener('change', (e)=>{
+        if (e.target?.name === 'plan') updateTotal();
+      });
+      updateTotal();
+
+      payBtn.addEventListener('click', async ()=>{
+        const user = auth.currentUser;
+        if (!user) {
+          alert('Primero inicia sesión');
+          return;
+        }
+        const ids = getSelectedIds();
+        if (ids.length === 0) { alert('Selecciona al menos un producto'); return; }
+        const needsTerms = ids.some(id => CATALOG[id].type !== 'library');
+        if (needsTerms && !document.getElementById('terms-checkbox').checked) {
+          alert('Debes aceptar las cláusulas para productos personalizados');
+          return;
+        }
+        await createCheckoutButton(ids, user.uid);
+      });
     }
-  });
 
-  logoutBtn.addEventListener('click', () => {
-    signOut(auth).then(() => window.location.href = 'index.html');
-  });
-</script>
+    async function createCheckoutButton(productIds, uid) {
+      const buttonContainer = document.getElementById('mercado-pago-button-container');
+      buttonContainer.innerHTML = '';
+      try {
+        const preferenceId = await createPreferenceOnBackend(productIds, uid);
+        if (!preferenceId) throw new Error('No se obtuvo preferenceId');
+        const bricksBuilder = mp.bricks();
+        if (window.checkoutButton) { try { await window.checkoutButton.unmount(); } catch {} }
+        window.checkoutButton = await bricksBuilder.create('wallet', 'mercado-pago-button-container', {
+          initialization: { preferenceId },
+          customization: { texts: { valueProp: 'smart_option' } }
+        });
+      } catch (e) {
+        console.error(e);
+        buttonContainer.innerHTML = `<p class="text-red-500 text-sm text-center">No pudimos cargar el botón de pago.</p>`;
+      }
+    }
+
+    async function createPreferenceOnBackend(productIds, uid){
+      const functionUrl = 'https://us-central1-munabooki.cloudfunctions.net/createMercadoPagoPreference';
+      try {
+        const resp = await fetch(functionUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ productIds, uid })
+        });
+        if (!resp.ok) throw new Error('HTTP '+resp.status);
+        const data = await resp.json();
+        return data.preferenceId;
+      } catch (e) {
+        console.error('createPreference error', e);
+        return null;
+      }
+    }
+
+    function showPaymentUI(user){
+      const userName = user.displayName || user.email.split('@')[0];
+      document.getElementById('welcome-message').textContent = `¡Hola, ${userName}!`;
+      document.getElementById('auth-section').classList.add('hidden');
+      document.getElementById('payment-section').classList.remove('hidden');
+    }
+
+    async function checkAllowlistAndMaybeRedirect(user){
+      const email = (user.email||'').toLowerCase();
+      try {
+        const ref = doc(db, 'allowlist', email);
+        const snap = await getDoc(ref);
+        const active = snap.exists() && (snap.data()?.active === true);
+        showDebug(`exists=${snap.exists()} active=${active}`);
+        if (active) {
+          const msg = document.getElementById('free-msg');
+          msg.classList.remove('hidden');
+          // Redirige en breve a Mi Cuenta
+          setTimeout(()=>{ location.href = 'mi-cuenta.html'; }, 900);
+          return true;
+        }
+      } catch (e) {
+        console.error('allowlist error', e);
+      }
+      return false;
+    }
+
+    // Eventos de Auth
+    document.getElementById('google-signin-btn').addEventListener('click', async ()=>{
+      try { await signInWithPopup(auth, googleProvider); } catch(e){ console.error(e); }
+    });
+    document.getElementById('register-form').addEventListener('submit', async (e)=>{
+      e.preventDefault();
+      try { await createUserWithEmailAndPassword(auth, e.target.email.value, e.target.password.value); }
+      catch (err){ console.error(err); document.getElementById('auth-error-message').textContent = 'No se pudo registrar.'; }
+    });
+    document.getElementById('login-form').addEventListener('submit', async (e)=>{
+      e.preventDefault();
+      try { await signInWithEmailAndPassword(auth, e.target.email.value, e.target.password.value); }
+      catch (err){ console.error(err); document.getElementById('auth-error-message').textContent = 'Email o contraseña incorrectos.'; }
+    });
+
+    // Tabs simples (estéticos)
+    document.getElementById('login-tab-btn').addEventListener('click', ()=>{
+      document.getElementById('register-form').classList.add('hidden');
+      document.getElementById('login-form').classList.remove('hidden');
+    });
+    document.getElementById('register-tab-btn').addEventListener('click', ()=>{
+      document.getElementById('login-form').classList.add('hidden');
+      document.getElementById('register-form').classList.remove('hidden');
+    });
+
+    // Start
+    renderCart();
+
+    let handledUid = null;
+    onAuthStateChanged(auth, async (user)=>{
+      if (!user) return;
+      if (handledUid === user.uid) return;
+      handledUid = user.uid;
+      showPaymentUI(user);
+      const isAllow = await checkAllowlistAndMaybeRedirect(user);
+      // Si NO está en allowlist, se queda y puede pagar
+    });
+  </script>
 </body>
 </html>
+```
+
+---
+
+## 4) Frontend — `mi-cuenta.html` (muestra acceso según allowlist y compras)
+
+* Lee `allowlist/{email}` y `user_products/{uid}`.
+* Usa **Firestore Lite** (solo lecturas puntuales).
+
+```html
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mi Cuenta - Muna Booki</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;900&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Poppins', sans-serif; }
+  </style>
+</head>
+<body class="bg-gray-50">
+  <header class="bg-white shadow-sm">
+    <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+      <a href="index.html" class="text-gray-600 hover:text-teal-500 font-semibold">Inicio</a>
+      <a href="checkout.html" class="text-gray-600 hover:text-teal-500 font-semibold">Comprar</a>
+    </nav>
+  </header>
+
+  <main class="container mx-auto px-6 py-10">
+    <div class="max-w-4xl mx-auto">
+      <h1 class="text-3xl font-bold text-gray-800 mb-6">Mi Cuenta</h1>
+
+      <div id="auth-box" class="bg-white p-6 rounded-2xl shadow mb-6">
+        <button id="google-signin" class="bg-white border px-4 py-2 rounded">Iniciar sesión con Google</button>
+      </div>
+
+      <div id="account-box" class="hidden space-y-6">
+        <div class="bg-white p-6 rounded-2xl shadow">
+          <h2 class="text-xl font-bold mb-2">Estado de acceso</h2>
+          <div id="access-state" class="text-gray-700">Cargando…</div>
+        </div>
+
+        <div class="bg-white p-6 rounded-2xl shadow">
+          <h2 class="text-xl font-bold mb-4">Tus productos</h2>
+          <ul id="products-list" class="list-disc pl-6 text-gray-700"></ul>
+        </div>
+
+        <div class="bg-white p-6 rounded-2xl shadow">
+          <h2 class="text-xl font-bold mb-4">Historial de compras</h2>
+          <div id="purchases" class="text-gray-700 text-sm">No hay compras registradas.</div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore-lite.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBivlKO0Ijt1hvMNyH9aIGXf_7WZwE2tA4",
+      authDomain: "munabooki.firebaseapp.com",
+      projectId: "munabooki",
+      storageBucket: "munabooki.appspot.com",
+      messagingSenderId: "585414544600",
+      appId: "1:585414544600:web:77026db4856b0111249bad",
+      measurementId: "G-HBM4Y2FKMF"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app); // Lite
+    const auth = getAuth(app);
+    const provider = new GoogleAuthProvider();
+
+    const authBox = document.getElementById('auth-box');
+    const accountBox = document.getElementById('account-box');
+    const accessState = document.getElementById('access-state');
+    const productsList = document.getElementById('products-list');
+    const purchasesDiv = document.getElementById('purchases');
+
+    document.getElementById('google-signin').addEventListener('click', async ()=>{
+      try { await signInWithPopup(auth, provider); } catch(e){ console.error(e); }
+    });
+
+    function renderProducts(products){
+      productsList.innerHTML = '';
+      if (!products?.length) {
+        productsList.innerHTML = '<li>No tienes productos aún.</li>';
+        return;
+      }
+      const names = {
+        'plan-001': 'Suscripción Biblioteca Mágica',
+        'plan-002': 'Cuento a Medida',
+        'plan-003': 'Cuento Premium'
+      };
+      for (const id of products) {
+        const li = document.createElement('li');
+        li.textContent = names[id] || id;
+        productsList.appendChild(li);
+      }
+    }
+
+    function renderPurchases(purchases){
+      if (!purchases?.length) { purchasesDiv.textContent = 'No hay compras registradas.'; return; }
+      const ul = document.createElement('ul');
+      ul.className = 'list-disc pl-6';
+      purchases.forEach(p=>{
+        const li = document.createElement('li');
+        li.textContent = `${(p.at?.toDate?.()||new Date()).toLocaleString()} — $${(p.amount||0).toLocaleString('es-CL')} — ${p.productIds?.join(', ')}`;
+        ul.appendChild(li);
+      });
+      purchasesDiv.innerHTML = '';
+      purchasesDiv.appendChild(ul);
+    }
+
+    onAuthStateChanged(auth, async (user)=>{
+      if (!user) { accountBox.classList.add('hidden'); authBox.classList.remove('hidden'); return; }
+      authBox.classList.add('hidden');
+      accountBox.classList.remove('hidden');
+
+      const email = (user.email||'').toLowerCase();
+      try {
+        // allowlist
+        const allowRef = doc(db, 'allowlist', email);
+        const allowSnap = await getDoc(allowRef);
+        const active = allowSnap.exists() && (allowSnap.data()?.active === true);
+        if (active) {
+          accessState.innerHTML = '<span class="text-green-700 font-semibold">Tienes acceso por lista blanca (Biblioteca y Cuentos).</span>';
+        } else {
+          accessState.textContent = 'Acceso según tus compras.';
+        }
+
+        // user_products
+        const ref = doc(db, 'user_products', user.uid);
+        const snap = await getDoc(ref);
+        const data = snap.exists() ? snap.data() : {};
+        renderProducts(data.products || (active ? ['plan-001','plan-002','plan-003'] : []));
+        renderPurchases(data.purchases || []);
+      } catch (e) {
+        console.error(e);
+        accessState.textContent = 'No pudimos cargar tus datos.';
+      }
+    });
+  </script>
+</body>
+</html>
+```
+
+---
+
+## 5) Paso a paso final (resumen ejecutable)
+
+1. **Rules**: pega las reglas de Firestore y pulsa **Publish**.
+2. **Allowlist**: crea `allowlist/{tu-email-en-minúsculas}` con `active: true` para probar.
+3. **Functions**:
+
+   * Copia `functions/package.json` e `index.js` tal cual.
+   * `npm install` dentro de `functions/`.
+   * `firebase functions:secrets:set MP_ACCESS_TOKEN` y pega tu **Access Token de Producción**.
+   * `firebase deploy --only functions`.
+4. **Frontend**:
+
+   * Sube/actualiza **checkout.html** y **mi-cuenta.html** con el código de arriba.
+   * Asegura tus dominios en *Auth → Authorized domains*.
+5. **Prueba**:
+
+   * Entra a `checkout.html?plan=estandar` (opcional).
+   * Inicia sesión.
+   * Si tu email está en allowlist ⇒ verás mensaje y redirección a `mi-cuenta.html`.
+   * Si no lo está ⇒ marca productos, acepta cláusulas si corresponde, y paga. Tras aprobar, el **webhook** guardará la compra y **Mi Cuenta** lo mostrará.
+
+---
+
+### Notas
+
+* Tailwind via CDN da un **warning** en consola; para producción real conviene build con CLI. No afecta la funcionalidad.
+* Si Mercado Pago no arma el botón, revisa la consola del navegador y el **log de Functions** (Firebase console → Functions → Logs).
+* Si no ves compras en *Mi Cuenta*, valida que el **webhook** recibió la notificación (Logs) y que el `payment.status` sea **approved**.
