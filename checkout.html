@@ -21,6 +21,8 @@
         .section-title { color: var(--color-dark-blue); }
         .btn-primary { background-color: var(--color-teal); color: white; }
         .btn-primary:hover { background-color: #009a92; }
+        .animate-fade-in { animation: fadeIn 0.3s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
     </style>
 </head>
 <body class="bg-gray-50">
@@ -43,7 +45,7 @@
                 <div id="auth-section" class="bg-white p-8 rounded-2xl shadow-lg">
                     <h2 id="auth-title" class="text-2xl font-bold text-center section-title mb-2">Casi listo para la magia...</h2>
                     <p class="text-center text-gray-600 mb-6">Inicia sesión o crea tu cuenta para continuar.</p>
-
+                    
                     <div class="flex border-b mb-6">
                         <button id="login-tab-btn" class="flex-1 py-2 font-semibold text-teal-600 border-b-2 border-teal-600">Iniciar Sesión</button>
                         <button id="register-tab-btn" class="flex-1 py-2 font-semibold text-gray-500">Registrarse</button>
@@ -78,9 +80,8 @@
                      <h2 id="welcome-message" class="text-2xl font-bold text-center section-title mb-6">¡Hola, [Nombre Usuario]!</h2>
                      <p class="text-center text-gray-600 mb-6">Completa tu compra de forma segura.</p>
 
-                     <!-- 🚨 Bloque de acceso sin pago -->
-                     <div id="free-msg" class="text-center text-green-600 font-bold mb-4 hidden">
-                        🎉 Estás en la lista. No necesitas pagar.
+                     <div id="free-access-message" class="text-center bg-green-100 text-green-700 font-semibold p-4 rounded-lg hidden">
+                        🎉 ¡Estás en la lista! Tienes acceso preferente. No necesitas pagar.
                      </div>
 
                      <div id="clauses-container" class="mb-6 space-y-2 hidden">
@@ -91,8 +92,7 @@
                             </label>
                         </div>
                     </div>
-
-                     <!-- Contenedor para el botón de Mercado Pago -->
+                     
                      <div id="mercado-pago-button-container"></div>
                 </div>
             </div>
@@ -107,20 +107,38 @@
             </div>
         </div>
     </main>
-
+    
     <div id="terms-modal" class="fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center p-4 hidden">
-        <!-- Contenido del modal sin cambios -->
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto p-8 relative animate-fade-in">
+            <button id="close-terms-modal" class="absolute top-4 right-4 text-gray-500 hover:text-gray-800">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+            <h2 class="text-2xl font-bold section-title mb-6">Cláusulas de Creación para Cuentos Personalizados</h2>
+            <div class="prose max-w-none text-gray-700">
+                <p>Al adquirir un cuento personalizado en Muna Booki, aceptas las siguientes condiciones que garantizan una experiencia mágica y segura para todos:</p>
+                <ol>
+                    <li><strong>Propósito y Contenido:</strong> El objetivo es crear cuentos infantiles que inspiren valores positivos. No se admitirán solicitudes que incluyan contenido violento, discriminatorio, para adultos o que infrinja derechos de autor. Muna Booki se reserva el derecho de rechazar temáticas que no se alineen con su misión.</li>
+                    <li><strong>Proceso de Personalización:</strong> Deberás proporcionar detalles claros para la creación del cuento (personajes, temáticas, valores). Nuestro equipo creativo utilizará esta información como base, aplicando su experiencia para producir la mejor historia posible.</li>
+                    <li><strong>Derechos de Autor:</strong> La obra final es propiedad intelectual de Muna Booki. Se te concede una licencia para uso personal e intransferible. Queda prohibida su reproducción, distribución o comercialización sin permiso explícito.</li>
+                    <li><strong>Revisiones y Aprobación:</strong> El servicio incluye una (1) ronda de revisión para ajustes menores sobre el borrador inicial. Cambios estructurales importantes podrían tener un costo adicional. La falta de respuesta en 5 días hábiles se considerará como una aprobación del borrador.</li>
+                    <li><strong>Plazos de Entrega:</strong> El tiempo estimado de entrega se comunicará al inicio del proyecto. Haremos todo lo posible por cumplirlo, pero no nos hacemos responsables por retrasos debidos a falta de información o feedback por parte del cliente.</li>
+                    <li><strong>Política de Reembolso:</strong> Dado el carácter personalizado del producto, no se realizarán reembolsos una vez iniciado el proceso creativo. Si no estás satisfecho, contáctanos para encontrar una solución.</li>
+                </ol>
+                <p>¡Estamos emocionados de crear un mundo de fantasía solo para ti!</p>
+            </div>
+        </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { 
-          getAuth, signInWithPopup, GoogleAuthProvider, 
-          createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged 
+          getAuth, onAuthStateChanged, signInWithPopup, GoogleAuthProvider, 
+          createUserWithEmailAndPassword, signInWithEmailAndPassword 
         } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { 
           initializeFirestore, doc, getDoc 
         } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-functions.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBivlKO0Ijt1hvMNyH9aIGXf_7WZwE2tA4",
@@ -133,170 +151,208 @@
         };
 
         const app = initializeApp(firebaseConfig);
-
-        // 🔧 Evitar errores 400 Listen en entornos estáticos
+        
         const db = initializeFirestore(app, {
           experimentalForceLongPolling: true,
           useFetchStreams: false
         });
 
         const auth = getAuth(app);
+        const functions = getFunctions(app);
         const googleProvider = new GoogleAuthProvider();
-
-        // Clave pública de MP
+        
         const publicKey = 'APP_USR-a633c3e4-ac28-4661-bba4-0a5dee41e9ed'; 
-        if (publicKey === 'APP_USR-a633c3e4-ac28-4661-bba4-0a5dee41e9ed') {
-            console.warn('ADVERTENCIA: Debes configurar tu Public Key de Producción de Mercado Pago.');
+        if (!publicKey || !publicKey.startsWith('APP_USR-')) {
+            console.error('ERROR: La Public Key de Mercado Pago no es válida o no está configurada.');
         }
         const mp = new MercadoPago(publicKey);
 
         document.addEventListener('DOMContentLoaded', () => {
             const params = new URLSearchParams(window.location.search);
             const plan = params.get('plan');
-
+            
             const planDetails = {
-                biblioteca: { id: 'plan-001', name: 'Suscripción Biblioteca Mágica', price: 8900, description: '...', image: '...', custom: false },
-                estandar: { id: 'plan-002', name: 'Cuento a Medida', price: 18900, description: '...', image: '...', custom: true },
-                premium: { id: 'plan-003', name: 'Cuento Premium', price: 40000, description: '...', image: '...', custom: true }
+                biblioteca: { id: 'plan-001', name: 'Suscripción Biblioteca Mágica', price: 8900, description: 'Acceso ilimitado a todos nuestros cuentos publicados.', image: 'https://bmeryu.github.io/muna-booki/biblioteca.png', custom: false },
+                estandar: { id: 'plan-002', name: 'Cuento a Medida', price: 18900, description: 'Un cuento personalizado basado en tus ideas.', image: 'https://bmeryu.github.io/muna-booki/crea.png', custom: true },
+                premium: { id: 'plan-003', name: 'Cuento Premium Ilustrado', price: 40000, description: 'Tu cuento personalizado con ilustraciones únicas.', image: 'https://bmeryu.github.io/muna-booki/premium.png', custom: true }
             };
 
             const selectedPlan = planDetails[plan];
-
-            // ⚠️ Manejar una sola vez el post-login
-            let handledUid = null;
-            onAuthStateChanged(auth, (user) => {
-              if (!user) return;
-              if (handledUid === user.uid) return;  // evita dobles disparos
-              handledUid = user.uid;
-              onLoginSuccess(user);
-            });
-
+            
+            if (selectedPlan) {
+                const summaryContainer = document.getElementById('order-summary');
+                summaryContainer.innerHTML = `
+                    <div class="flex items-center pb-6 border-b border-gray-200">
+                        <img src="${selectedPlan.image}" alt="Imagen del plan" class="w-20 h-20 rounded-lg object-cover mr-6">
+                        <div>
+                            <h3 class="text-xl font-bold section-title">${selectedPlan.name}</h3>
+                            <p class="text-gray-600">${selectedPlan.description}</p>
+                        </div>
+                        <p class="text-xl font-bold section-title ml-auto whitespace-nowrap">$${selectedPlan.price.toLocaleString('es-CL')}</p>
+                    </div>
+                    <div class="flex justify-between items-center pt-6">
+                        <span class="text-lg font-semibold text-gray-700">Total</span>
+                        <span class="text-2xl font-bold section-title">$${selectedPlan.price.toLocaleString('es-CL')}</span>
+                    </div>
+                `;
+            } else if (window.location.pathname.includes('checkout.html')) {
+                 window.location.href = 'index.html#planes';
+            }
+            
             async function onLoginSuccess(user) {
-                if (plan) {
-                    const userName = user.displayName || user.email.split('@')[0];
-                    document.getElementById('welcome-message').textContent = `¡Hola, ${userName}!`;
-                    document.getElementById('auth-section').classList.add('hidden');
-                    document.getElementById('payment-section').classList.remove('hidden');
+                const authError = document.getElementById('auth-error-message');
+                authError.textContent = 'Verificando acceso...';
+                
+                try {
+                    const allowlistRef = doc(db, 'allowlist', user.email);
+                    const allowlistSnap = await getDoc(allowlistRef);
 
-                    // 🚨 Revisar allowlist en Firestore
-                    const emailId = user.email;
-                    try {
-                        const ref = doc(db, 'allowlist', emailId);
-                        const snap = await getDoc(ref);
-
-                        if (snap.exists() && snap.data().active === true) {
-                            // Usuario en allowlist → acceso gratis
-                            document.getElementById('free-msg').classList.remove('hidden');
-                            document.getElementById('mercado-pago-button-container').innerHTML = '';
-                            return;
-                        }
-                    } catch (err) {
-                        console.error("Error revisando allowlist:", err);
-                    }
-
-                    // Flujo normal de pago
-                    if (selectedPlan?.custom) {
-                        document.getElementById('clauses-container').classList.remove('hidden');
-                        const terms = document.getElementById('terms-checkbox');
-
-                        // adjuntar UNA sola vez
-                        if (!terms.dataset.listenerAttached) {
-                          terms.addEventListener('change', (e) => {
-                              if (e.target.checked) createCheckoutButton(selectedPlan);
-                              else document.getElementById('mercado-pago-button-container').innerHTML = '';
-                          });
-                          terms.dataset.listenerAttached = 'true';
-                        }
-                    } else if (selectedPlan) {
-                        createCheckoutButton(selectedPlan);
+                    if (allowlistSnap.exists() && allowlistSnap.data().active === true) {
+                        authError.textContent = '';
+                        document.getElementById('auth-section').classList.add('hidden');
+                        document.getElementById('payment-section').classList.remove('hidden');
+                        document.getElementById('free-access-message').classList.remove('hidden');
+                        document.getElementById('clauses-container').classList.add('hidden');
+                        document.getElementById('mercado-pago-button-container').innerHTML = '';
                     } else {
-                        window.location.href = 'mi-cuenta.html';
+                        authError.textContent = '';
+                        if (plan) {
+                            const userName = user.displayName || user.email.split('@')[0];
+                            document.getElementById('welcome-message').textContent = `¡Hola, ${userName}!`;
+                            document.getElementById('auth-section').classList.add('hidden');
+                            document.getElementById('payment-section').classList.remove('hidden');
+
+                            if (selectedPlan.custom) {
+                                document.getElementById('clauses-container').classList.remove('hidden');
+                                const termsCheckbox = document.getElementById('terms-checkbox');
+                                termsCheckbox.checked = false; 
+                                termsCheckbox.addEventListener('change', (e) => {
+                                    if (e.target.checked) createCheckoutButton(selectedPlan);
+                                    else document.getElementById('mercado-pago-button-container').innerHTML = '';
+                                });
+                            } else {
+                                createCheckoutButton(selectedPlan);
+                            }
+                        } else {
+                            window.location.href = 'mi-cuenta.html';
+                        }
                     }
-                } else {
-                    window.location.href = 'mi-cuenta.html';
+                } catch (error) {
+                    console.error("Error al verificar la whitelist:", error);
+                    authError.textContent = 'Error al verificar permisos.';
+                    auth.signOut();
                 }
             }
 
             async function createCheckoutButton(planData) {
                 const buttonContainer = document.getElementById('mercado-pago-button-container');
-
-                // ✅ Evita crear el Wallet dos veces
-                if (window.__creatingWallet) return;
-                window.__creatingWallet = true;
-
-                // limpiar contenedor antes de montar
-                buttonContainer.innerHTML = '';
-
+                buttonContainer.innerHTML = '<p class="text-sm text-center text-gray-500">Generando link de pago seguro...</p>';
+                
                 try {
-                    const preferenceId = await createPreferenceOnBackend(planData);
-                    if (!preferenceId) throw new Error("No se pudo obtener el ID de preferencia desde el backend.");
+                    const createMercadoPagoPreference = httpsCallable(functions, 'createMercadoPagoPreference');
+                    const result = await createMercadoPagoPreference({
+                        title: planData.name,
+                        quantity: 1,
+                        unit_price: planData.price,
+                    });
+                    
+                    const preferenceId = result.data.preferenceId;
+                    if (!preferenceId) throw new Error("No se recibió ID de preferencia del backend.");
 
                     const bricksBuilder = mp.bricks();
-                    if (window.checkoutButton) {
-                      try { await window.checkoutButton.unmount(); } catch {}
-                    }
-
+                    if (window.checkoutButton) window.checkoutButton.unmount();
+                    
                     window.checkoutButton = await bricksBuilder.create('wallet', 'mercado-pago-button-container', {
-                        initialization: { preferenceId },
+                        initialization: { preferenceId: preferenceId },
                         customization: { texts: { valueProp: 'smart_option' } }
                     });
                 } catch (error) {
                     console.error("Error al crear el botón de pago:", error);
-                    buttonContainer.innerHTML = `<p class="text-red-500 text-sm text-center">Hubo un problema al cargar el botón de pago. Revisa la consola para más detalles.</p>`;
-                } finally {
-                    window.__creatingWallet = false;
+                    buttonContainer.innerHTML = `<p class="text-red-500 text-sm text-center">Hubo un problema al cargar el botón de pago.</p>`;
                 }
             }
+            
+            const loginTab = document.getElementById('login-tab-btn');
+            const registerTab = document.getElementById('register-tab-btn');
+            const loginForm = document.getElementById('login-form');
+            const registerForm = document.getElementById('register-form');
 
-            async function createPreferenceOnBackend(planData) {
-                const projectId = firebaseConfig.projectId;
-                const functionRegion = 'us-central1';
-                const functionName = 'createMercadoPagoPreference';
-                const functionUrl = `https://${functionRegion}-${projectId}.cloudfunctions.net/${functionName}`;
+            loginTab.addEventListener('click', () => {
+                loginTab.classList.add('text-teal-600', 'border-teal-600');
+                registerTab.classList.remove('text-teal-600', 'border-teal-600');
+                registerTab.classList.add('text-gray-500');
+                loginForm.classList.remove('hidden');
+                registerForm.classList.add('hidden');
+            });
 
+            registerTab.addEventListener('click', () => {
+                registerTab.classList.add('text-teal-600', 'border-teal-600');
+                loginTab.classList.remove('text-teal-600', 'border-teal-600');
+                loginTab.classList.add('text-gray-500');
+                registerForm.classList.remove('hidden');
+                loginForm.classList.add('hidden');
+            });
+            
+            const termsModal = document.getElementById('terms-modal');
+            document.getElementById('terms-trigger').addEventListener('click', (e) => {
+                e.preventDefault();
+                termsModal.classList.remove('hidden');
+            });
+            document.getElementById('close-terms-modal').addEventListener('click', () => {
+                termsModal.classList.add('hidden');
+            });
+
+            const authError = document.getElementById('auth-error-message');
+            
+            document.getElementById('google-signin-btn').addEventListener('click', () => {
                 try {
-                    const response = await fetch(functionUrl, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            title: planData.name,
-                            quantity: 1,
-                            unit_price: planData.price,
-                        })
-                    });
+                    signInWithPopup(auth, googleProvider).then(result => onLoginSuccess(result.user));
+                } catch(error) {
+                    authError.textContent = 'No se pudo iniciar sesión con Google.';
+                }
+            });
 
-                    if (!response.ok) throw new Error(`Estado: ${response.status}`);
-                    const data = await response.json();
-                    return data.preferenceId;
+            registerForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                authError.textContent = '';
+                try {
+                    createUserWithEmailAndPassword(auth, e.target.email.value, e.target.password.value)
+                        .then(userCredential => onLoginSuccess(userCredential.user))
+                        .catch(error => {
+                            if (error.code === 'auth/email-already-in-use') {
+                                authError.textContent = 'Este correo ya está registrado.';
+                            } else {
+                                authError.textContent = 'Error al crear la cuenta.';
+                            }
+                        });
                 } catch (error) {
-                    console.error("Error al llamar a la Cloud Function:", error);
-                    return null;
-                }
-            }
-
-            // ---- Event Listeners de Firebase Auth ----
-            document.getElementById('google-signin-btn').addEventListener('click', async () => {
-              try { await signInWithPopup(auth, googleProvider); } 
-              catch (e) { console.error(e); }
-            });
-
-            document.getElementById('register-form').addEventListener('submit', async (e) => {
-                e.preventDefault();
-                try { 
-                  await createUserWithEmailAndPassword(auth, e.target.email.value, e.target.password.value);
-                } catch (err) {
-                  console.error(err);
-                  document.getElementById('auth-error-message').textContent = 'No se pudo registrar. Revisa tus datos.';
+                    authError.textContent = 'Ocurrió un error inesperado.';
                 }
             });
 
-            document.getElementById('login-form').addEventListener('submit', async (e) => {
+            loginForm.addEventListener('submit', (e) => {
                 e.preventDefault();
-                try { 
-                  await signInWithEmailAndPassword(auth, e.target.email.value, e.target.password.value);
-                } catch (err) {
-                  console.error(err);
-                  document.getElementById('auth-error-message').textContent = 'Email o contraseña incorrectos.';
+                authError.textContent = '';
+                try {
+                    signInWithEmailAndPassword(auth, e.target.email.value, e.target.password.value)
+                        .then(userCredential => onLoginSuccess(userCredential.user))
+                        .catch(error => {
+                             if (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found') {
+                                authError.textContent = 'Correo o contraseña incorrectos.';
+                            } else {
+                                authError.textContent = 'Error al iniciar sesión.';
+                            }
+                        });
+                } catch (error) {
+                     authError.textContent = 'Ocurrió un error inesperado.';
+                }
+            });
+
+            onAuthStateChanged(auth, (user) => {
+                if (user) {
+                    // No hacer nada aquí para evitar la condición de carrera
+                } else {
+                    console.log("No hay usuario autenticado en la carga inicial.");
                 }
             });
         });
@@ -304,3 +360,4 @@
 
 </body>
 </html>
+
