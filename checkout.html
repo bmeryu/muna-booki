@@ -1,61 +1,28 @@
-# Objetivo
-
-Dejar **checkout.html** funcionando con:
-
-* Chequeo de **allowlist** primero (si está activo, redirige a `mi-cuenta.html` y NO monta Mercado Pago).
-* Soporte para **más de un producto** sin romper nada: si hay checkboxes en la página, suma los seleccionados; si no, sigue funcionando con `?plan=` (biblioteca/estandar/premium).
-* Mantener cambios al mínimo. No tocamos rules ni la Cloud Function salvo nota al final.
-
----
-
-## 1) Verificaciones rápidas (no cambies nada si ya está así)
-
-1. **firebaseConfig.projectId** = `"munabooki"` (sin guiones).
-2. **Firestore** creado en el proyecto *munabooki* en modo **Nativo**.
-3. **Rules** para `allowlist` (las mismas que ya tenías):
-
-```js
-rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-    match /allowlist/{email} {
-      allow get: if request.auth != null && request.auth.token.email == email;
-      allow list, create, update, delete: if false;
-    }
-  }
-}
-```
-
-> Si ves `permission-denied` en consola, es porque el usuario no está autenticado o el doc no existe. Si vieras `database (default) does not exist`, suele ser **proyecto equivocado** en `firebaseConfig` o caché; refresca/limpia caché y revisa el `projectId`.
-
----
-
-## 2) Reemplaza **checkout.html** COMPLETO por este (mínimos cambios)
-
-> Respeta todo el HTML; solo pegá esto completo.
-
-```html
 <!DOCTYPE html>
 <html lang="es" class="scroll-smooth">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Acceso - Muna Booki</title>
-  <!-- SDK de Mercado Pago -->
+  <title>Acceso / Checkout - Muna Booki</title>
+
+  <!-- Mercado Pago SDK -->
   <script src="https://sdk.mercadopago.com/js/v2"></script>
-  <!-- Tailwind (ok para pruebas; en prod conviene build local) -->
+  <!-- Tailwind (ok para pruebas; en producción compílalo con CLI/PostCSS) -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;900&family=Pacifico&display=swap" rel="stylesheet" />
+
+  <!-- Fuentes -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;900&family=Pacifico&display=swap" rel="stylesheet">
+
   <style>
-    :root { --color-dark-blue:#0A2F5B; --color-teal:#00B2A9; --color-gold:#FFC845; }
-    body { font-family:'Poppins', sans-serif; }
-    .font-cursive { font-family:'Pacifico', cursive; }
-    .section-title { color: var(--color-dark-blue); }
-    .btn-primary { background-color: var(--color-teal); color:white; }
-    .btn-primary:hover { background-color:#009a92; }
-    #debug-allowlist { display:none; font-size:12px; color:#64748b; }
+    :root{ --color-dark-blue:#0A2F5B; --color-teal:#00B2A9; --color-gold:#FFC845; }
+    body{ font-family:'Poppins',sans-serif; }
+    .font-cursive{ font-family:'Pacifico',cursive; }
+    .section-title{ color:var(--color-dark-blue); }
+    .btn-primary{ background-color:var(--color-teal); color:#fff; }
+    .btn-primary:hover{ background-color:#009a92; }
+    #debug-allowlist{ display:none; font-size:12px; color:#64748b; white-space:pre-wrap }
   </style>
 </head>
 <body class="bg-gray-50">
@@ -63,20 +30,20 @@ service cloud.firestore {
   <!-- Header -->
   <header class="bg-white shadow-sm">
     <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
-      <a href="index.html">
-        <img src="https://bmeryu.github.io/muna-booki/Logo_MunaBooki.png" alt="Logo de Muna Booki" class="h-16" />
+      <a href="index.html" class="flex items-center">
+        <img src="https://bmeryu.github.io/muna-booki/Logo_MunaBooki.png" alt="Logo Muna Booki" class="h-16" />
       </a>
       <a href="index.html" class="text-gray-600 hover:text-teal-500 font-semibold">Volver al inicio</a>
     </nav>
   </header>
 
   <main class="container mx-auto px-6 py-16">
-    <div class="max-w-4xl mx-auto grid md:grid-cols-2 gap-12">
-
-      <!-- Columna de Autenticación y Pago -->
+    <div class="max-w-5xl mx-auto grid md:grid-cols-2 gap-12">
+      <!-- Columna Auth + Pago -->
       <div id="auth-column" class="md:order-2 md:col-span-1">
+        <!-- Caja Auth -->
         <div id="auth-section" class="bg-white p-8 rounded-2xl shadow-lg">
-          <h2 id="auth-title" class="text-2xl font-bold text-center section-title mb-2">Casi listo para la magia...</h2>
+          <h2 id="auth-title" class="text-2xl font-bold text-center section-title mb-2">Casi listo para la magia…</h2>
           <p class="text-center text-gray-600 mb-6">Inicia sesión o crea tu cuenta para continuar.</p>
 
           <div class="flex border-b mb-6">
@@ -91,6 +58,7 @@ service cloud.firestore {
             <input name="password" type="password" placeholder="Contraseña" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500" />
             <button type="submit" class="w-full btn-primary font-bold py-3 rounded-lg">Ingresar</button>
           </form>
+
           <form id="register-form" class="space-y-4 hidden">
             <input name="email" type="email" placeholder="Correo electrónico" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500" />
             <input name="password" type="password" placeholder="Crear contraseña" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500" />
@@ -105,53 +73,70 @@ service cloud.firestore {
 
           <div class="space-y-3">
             <button id="google-signin-btn" class="w-full flex items-center justify-center bg-white border border-gray-300 text-gray-700 font-semibold py-3 px-4 rounded-lg hover:bg-gray-50 transition">
-              <svg class="w-6 h-6 mr-3" viewBox="0 0 48 48"><defs><path id="a" d="M44.5 20H24v8.5h11.8C34.7 33.9 30.1 37 24 37c-7.2 0-13-5.8-13-13s5.8-13 13-13c3.1 0 5.9 1.1 8.1 2.9l6.4-6.4C34.6 4.1 29.6 2 24 2 11.8 2 2 11.8 2 24s9.8 22 22 22c11 0 21-8 21-22 0-1.3-.2-2.7-.5-4z"/></defs><clipPath id="b"><use xlink:href="#a" overflow="visible"/></clipPath><path clip-path="url(#b)" fill="#FBBC05" d="M0 37V11l17 13z"/><path clip-path="url(#b)" fill="#EA4335" d="M0 11l17 13 7-6.1L48 14V0H0z"/><path clip-path="url(#b)" fill="#34A853" d="M0 37l30-23 7.9 1L48 0v48H0z"/><path clip-path="url(#b)" fill="#4285F4" d="M48 48L17 24l-4-3 35-10z"/></svg>
+              <svg class="w-6 h-6 mr-3" viewBox="0 0 48 48" aria-hidden="true">
+                <defs><path id="a" d="M44.5 20H24v8.5h11.8C34.7 33.9 30.1 37 24 37c-7.2 0-13-5.8-13-13s5.8-13 13-13c3.1 0 5.9 1.1 8.1 2.9l6.4-6.4C34.6 4.1 29.6 2 24 2 11.8 2 2 11.8 2 24s9.8 22 22 22c11 0 21-8 21-22 0-1.3-.2-2.7-.5-4z"/></defs>
+                <clipPath id="b"><use xlink:href="#a" overflow="visible"/></clipPath>
+                <path clip-path="url(#b)" fill="#FBBC05" d="M0 37V11l17 13z"/>
+                <path clip-path="url(#b)" fill="#EA4335" d="M0 11l17 13 7-6.1L48 14V0H0z"/>
+                <path clip-path="url(#b)" fill="#34A853" d="M0 37l30-23 7.9 1L48 0v48H0z"/>
+                <path clip-path="url(#b)" fill="#4285F4" d="M48 48L17 24l-4-3 35-10z"/>
+              </svg>
               Continuar con Google
             </button>
           </div>
         </div>
 
+        <!-- Caja Pago -->
         <div id="payment-section" class="bg-white p-8 rounded-2xl shadow-lg mt-8 hidden">
-          <h2 id="welcome-message" class="text-2xl font-bold text-center section-title mb-6">¡Hola, [Nombre Usuario]!</h2>
-          <p class="text-center text-gray-600 mb-6">Completa tu compra de forma segura.</p>
+          <h2 id="welcome-message" class="text-2xl font-bold text-center section-title mb-6">¡Hola!</h2>
 
-          <!-- Mensaje de acceso sin pago -->
-          <div id="free-msg" class="text-center text-green-600 font-bold mb-2 hidden">🎉 Estás en la lista. No necesitas pagar.</div>
+          <!-- Mensaje de acceso libre -->
+          <div id="free-msg" class="text-center text-green-600 font-bold mb-4 hidden">
+            🎉 Estás en la lista. No necesitas pagar.
+          </div>
           <div id="debug-allowlist" class="text-center mb-4"></div>
 
+          <!-- Cláusulas (sólo productos custom) -->
           <div id="clauses-container" class="mb-6 space-y-2 hidden">
             <div class="flex items-start bg-gray-100 p-4 rounded-lg">
-              <input id="terms-checkbox" type="checkbox" class="h-5 w-5 text-teal-600 border-gray-300 rounded focus:ring-teal-500 mt-1 cursor-pointer" />
+              <input id="terms-checkbox" type="checkbox" class="h-5 w-5 text-teal-600 border-gray-300 rounded focus:ring-teal-500 mt-1 cursor-pointer">
               <label for="terms-checkbox" class="ml-3 text-sm text-gray-800 cursor-pointer">
                 Entiendo y acepto las <a href="#" id="terms-trigger" class="font-semibold text-teal-600 hover:underline">Cláusulas de Creación</a>.
               </label>
             </div>
           </div>
 
-          <!-- Contenedor MP -->
+          <!-- Contenedor botón MP -->
           <div id="mercado-pago-button-container"></div>
         </div>
       </div>
 
+      <!-- Columna Resumen -->
       <div id="order-summary-column" class="md:order-1">
-        <h1 class="text-3xl font-bold section-title mb-6">Resumen de tu Compra</h1>
+        <h1 class="text-3xl font-bold section-title mb-6">Resumen de tu compra</h1>
         <div id="order-summary" class="bg-white p-8 rounded-2xl shadow-lg"></div>
         <div class="mt-8 text-gray-600 text-sm flex items-center">
-          <svg class="w-5 h-5 mr-2 text-teal-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 1a4.5 4.5 0 00-4.5 4.5V9H5a2 2 0 00-2 2v6a2 2 0 002 2h10a2 2 0 002-2v-6a2 2 0 00-2-2h-.5V5.5A4.5 4.5 0 0010 1zm3 8V5.5a3 3 0 10-6 0V9h6z" clip-rule="evenodd"></path></svg>
+          <svg class="w-5 h-5 mr-2 text-teal-500" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 1a4.5 4.5 0 00-4.5 4.5V9H5a2 2 0 00-2 2v6a2 2 0 002 2h10a2 2 0 002-2v-6a2 2 0 00-2-2h-.5V5.5A4.5 4.5 0 0010 1zm3 8V5.5a3 3 0 10-6 0V9h6z" clip-rule="evenodd"/></svg>
           <span>Transacción 100% segura y protegida.</span>
         </div>
       </div>
     </div>
   </main>
 
+  <!-- (Modal de Términos si lo necesitas) -->
   <div id="terms-modal" class="fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center p-4 hidden"></div>
 
   <script type="module">
+    // --- Firebase SDKs ---
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-    import { getAuth, signInWithPopup, GoogleAuthProvider, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-    // Usamos Firestore LITE (sin listeners de tiempo real)
+    import {
+      getAuth, signInWithPopup, GoogleAuthProvider,
+      createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    // Firestore LITE para lecturas simples (evita 'Listen')
     import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore-lite.js";
 
+    // --- Config Firebase (tu proyecto) ---
     const firebaseConfig = {
       apiKey: "AIzaSyBivlKO0Ijt1hvMNyH9aIGXf_7WZwE2tA4",
       authDomain: "munabooki.firebaseapp.com",
@@ -162,216 +147,204 @@ service cloud.firestore {
       measurementId: "G-HBM4Y2FKMF"
     };
 
+    // Inicializa
     const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app); // LITE
+    // 🔴 IMPORTANTE: usa la base con ID "munabooki" (no (default))
+    const db = getFirestore(app, 'munabooki');
     const auth = getAuth(app);
     const googleProvider = new GoogleAuthProvider();
 
-    // MP
+    // Mercado Pago (reemplaza por tu Public Key de producción)
     const publicKey = 'APP_USR-a633c3e4-ac28-4661-bba4-0a5dee41e9ed';
     const mp = new MercadoPago(publicKey);
 
+    // Helpers
     const qs = new URLSearchParams(location.search);
-    const DEBUG = qs.has('debug');
-
+    const DEBUG = qs.has('debug') || qs.get('debug') === '1';
     function showDebug(msg){
       if(!DEBUG) return;
       const el = document.getElementById('debug-allowlist');
       el.style.display = 'block';
-      el.textContent = msg;
+      el.textContent += (el.textContent ? '\n' : '') + String(msg);
       console.log('[ALLOWLIST]', msg);
     }
 
-    // Catálogo base por querystring (?plan=)
+    // Mapeo simple de planes (si navegas desde index con ?plan=...)
     const planDetails = {
-      biblioteca: { id:'plan-001', name:'Suscripción Biblioteca Mágica', price:8900, custom:false },
-      estandar:   { id:'plan-002', name:'Cuento a Medida',             price:18900, custom:true  },
-      premium:    { id:'plan-003', name:'Cuento Premium',              price:40000, custom:true  }
+      biblioteca: { id:'plan-001', name:'Suscripción Biblioteca Mágica', price:8900, description:'Acceso mensual a la biblioteca mágica.', custom:false },
+      estandar:   { id:'plan-002', name:'Cuento a Medida',              price:18900, description:'Un cuento personalizado estándar.',   custom:true  },
+      premium:    { id:'plan-003', name:'Cuento Premium',                price:40000, description:'Cuento premium hiper-personalizado.', custom:true  }
     };
 
-    document.addEventListener('DOMContentLoaded', () => {
-      const params = new URLSearchParams(window.location.search);
-      const plan = params.get('plan');
-      let handledUid = null;
+    // Render del resumen
+    function renderOrderSummary(planKey){
+      const box = document.getElementById('order-summary');
+      const p = planDetails[planKey];
+      if(!p){
+        box.innerHTML = `<p class="text-gray-600">No se encontró el plan seleccionado. Volviendo a tu cuenta…</p>`;
+        setTimeout(()=> location.href='mi-cuenta.html', 1200);
+        return;
+      }
+      box.innerHTML = `
+        <div class="flex items-start justify-between">
+          <div>
+            <h3 class="text-xl font-semibold text-gray-800">${p.name}</h3>
+            <p class="text-gray-500 mt-1">${p.description}</p>
+          </div>
+          <div class="text-right">
+            <div class="text-2xl font-bold text-gray-900">$${(p.price/100).toLocaleString('es-CL', {minimumFractionDigits:0})}</div>
+          </div>
+        </div>
+      `;
+    }
 
-      onAuthStateChanged(auth, (user) => {
-        if (!user) return;
-        if (handledUid === user.uid) return; // evitar dobles
-        handledUid = user.uid;
-        onLoginSuccess(user, plan);
-      });
+    // Tabs simples de login/registro
+    const loginTabBtn = document.getElementById('login-tab-btn');
+    const registerTabBtn = document.getElementById('register-tab-btn');
+    const loginForm = document.getElementById('login-form');
+    const registerForm = document.getElementById('register-form');
 
-      // Botones auth
-      document.getElementById('google-signin-btn').addEventListener('click', async () => {
-        try { await signInWithPopup(auth, googleProvider); } catch (e) { console.error(e); }
-      });
-      document.getElementById('register-form').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        try { await createUserWithEmailAndPassword(auth, e.target.email.value, e.target.password.value); }
-        catch (err) { console.error(err); document.getElementById('auth-error-message').textContent='No se pudo registrar. Revisa tus datos.'; }
-      });
-      document.getElementById('login-form').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        try { await signInWithEmailAndPassword(auth, e.target.email.value, e.target.password.value); }
-        catch (err) { console.error(err); document.getElementById('auth-error-message').textContent='Email o contraseña incorrectos.'; }
-      });
+    loginTabBtn.addEventListener('click', ()=>{
+      loginForm.classList.remove('hidden');
+      registerForm.classList.add('hidden');
+      loginTabBtn.classList.add('text-teal-600','border-b-2','border-teal-600');
+      registerTabBtn.classList.remove('text-teal-600','border-b-2','border-teal-600');
+    });
+    registerTabBtn.addEventListener('click', ()=>{
+      registerForm.classList.remove('hidden');
+      loginForm.classList.add('hidden');
+      registerTabBtn.classList.add('text-teal-600','border-b-2','border-teal-600');
+      loginTabBtn.classList.remove('text-teal-600','border-b-2','border-teal-600');
     });
 
-    async function onLoginSuccess(user, plan){
-      // UI básica
-      const userName = user.displayName || (user.email||'').split('@')[0];
+    // Auth listeners
+    document.getElementById('google-signin-btn').addEventListener('click', async()=>{
+      try{ await signInWithPopup(auth, googleProvider); }catch(e){ console.error(e); }
+    });
+    document.getElementById('register-form').addEventListener('submit', async (e)=>{
+      e.preventDefault();
+      const em = e.target.email.value; const pw = e.target.password.value;
+      try{ await createUserWithEmailAndPassword(auth, em, pw); }
+      catch(err){ console.error(err); document.getElementById('auth-error-message').textContent='No se pudo registrar. Revisa tus datos.'; }
+    });
+    document.getElementById('login-form').addEventListener('submit', async (e)=>{
+      e.preventDefault();
+      const em = e.target.email.value; const pw = e.target.password.value;
+      try{ await signInWithEmailAndPassword(auth, em, pw); }
+      catch(err){ console.error(err); document.getElementById('auth-error-message').textContent='Email o contraseña incorrectos.'; }
+    });
+
+    // Estado Auth -> flujo principal
+    const planKey = (new URLSearchParams(location.search)).get('plan');
+    renderOrderSummary(planKey);
+
+    let handledUid = null;
+    onAuthStateChanged(auth, (user)=>{
+      if(!user) return;
+      if(handledUid === user.uid) return; // evita dobles
+      handledUid = user.uid;
+      onLoginSuccess(user);
+    });
+
+    async function onLoginSuccess(user){
+      if(!planKey){ location.href = 'mi-cuenta.html'; return; }
+
+      const userName = user.displayName || (user.email||'').split('@')[0] || 'Explorador/a';
       document.getElementById('welcome-message').textContent = `¡Hola, ${userName}!`;
       document.getElementById('auth-section').classList.add('hidden');
       document.getElementById('payment-section').classList.remove('hidden');
 
-      // 1) Chequeo ALLOWLIST primero
+      // --- Allowlist ---
       const emailExact = (user.email||'');
       const emailLower = emailExact.toLowerCase();
       showDebug(`Email login: ${emailExact}`);
 
-      try {
+      try{
+        // Intenta primero con id en minúsculas
         let ref = doc(db, 'allowlist', emailLower);
         let snap = await getDoc(ref);
         let data = snap.exists() ? snap.data() : null;
 
-        if (!snap.exists()){
-          showDebug(`Doc no encontrado en lower (${emailLower}). Probando exacto...`);
+        // Si no existe, intenta con el email exacto
+        if(!snap.exists()){
+          showDebug(`No existe doc en lower (${emailLower}). Probando exacto…`);
           ref = doc(db, 'allowlist', emailExact);
           snap = await getDoc(ref);
           data = snap.exists() ? snap.data() : null;
         }
 
         const activeVal = data?.active;
-        const isActive = activeVal === true || activeVal === 'true' || activeVal === 1;
-        showDebug(`exists=${snap.exists()} | active=${JSON.stringify(activeVal)} | idUsado=${snap.exists()?ref.id:'ninguno'}`);
+        const isActive = (activeVal === true || activeVal === 'true' || activeVal === 1);
+        showDebug(`exists=${snap.exists()} | active=${JSON.stringify(activeVal)} | usingId=${snap.exists()? ref.id : 'ninguno'}`);
 
-        if (snap.exists() && isActive){
-          // Mensaje y redirección inmediata a mi-cuenta
-          const msg = document.getElementById('free-msg');
-          msg.classList.remove('hidden');
-          setTimeout(()=>{ location.replace('mi-cuenta.html?free=1'); }, 600);
-          return; // NO montar MP
+        if(snap.exists() && isActive){
+          // Muestra mensaje, NO renderiza MP y redirige a Mi Cuenta
+          const free = document.getElementById('free-msg');
+          free.classList.remove('hidden');
+          document.getElementById('mercado-pago-button-container').innerHTML='';
+          showDebug('Allowlist ACTIVO → redirigiendo a mi-cuenta.html');
+          setTimeout(()=>{ location.href = 'mi-cuenta.html'; }, 600);
+          return;
         }
-      } catch(err){
+      }catch(err){
+        // Si hay permission-denied para otros correos, seguimos con pago normal
         console.error('Error revisando allowlist:', err);
-        showDebug(`Error leyendo allowlist: ${err?.code||''} ${err?.message||err}`);
-        // Si hay error de permisos, de todas formas seguimos a pago
+        showDebug(`Error allowlist: ${err?.code||''} ${err?.message||err}`);
       }
 
-      // 2) Construcción de pedido
-      const items = collectItemsFromUIOrQuery(plan);
-      renderOrderSummary(items);
-
-      const requiereClausulas = items.some(i => i.custom === true);
-      if (requiereClausulas){
-        document.getElementById('clauses-container').classList.remove('hidden');
+      // --- Flujo normal de pago ---
+      const selectedPlan = planDetails[planKey];
+      if(selectedPlan?.custom){
+        const clauses = document.getElementById('clauses-container');
+        clauses.classList.remove('hidden');
         const terms = document.getElementById('terms-checkbox');
-        if (!terms.dataset.listenerAttached){
+        if(!terms.dataset.listenerAttached){
           terms.addEventListener('change', (e)=>{
-            if(e.target.checked) createCheckoutButton(items);
+            if(e.target.checked) createCheckoutButton(selectedPlan);
             else document.getElementById('mercado-pago-button-container').innerHTML='';
           });
           terms.dataset.listenerAttached = 'true';
         }
-      } else {
-        createCheckoutButton(items);
+      }else if(selectedPlan){
+        createCheckoutButton(selectedPlan);
+      }else{
+        location.href = 'mi-cuenta.html';
       }
     }
 
-    // Suma productos desde checkboxes si existen; si no, usa ?plan=
-    function collectItemsFromUIOrQuery(plan){
-      const checkboxes = Array.from(document.querySelectorAll('input[name="product"]:checked'));
-      if (checkboxes.length){
-        return checkboxes.map(cb=>({ id: cb.value, name: cb.dataset.name, price: Number(cb.dataset.price), qty: 1, custom: cb.dataset.custom === 'true' }));
-      }
-      const selected = planDetails[plan];
-      if (selected){
-        return [{ id:selected.id, name:selected.name, price:selected.price, qty:1, custom:selected.custom }];
-      }
-      // fallback vacío
-      return [];
-    }
-
-    function renderOrderSummary(items){
-      const el = document.getElementById('order-summary');
-      if (!items.length){ el.innerHTML = '<p class="text-gray-600">No hay productos seleccionados.</p>'; return; }
-      const total = items.reduce((acc,i)=> acc + i.price*(i.qty||1), 0);
-      const lines = items.map(i=>`<div class="flex justify-between py-2"><span>${i.name}</span><span>$${i.price.toLocaleString('es-CL')}</span></div>`).join('');
-      el.innerHTML = `
-        ${lines}
-        <div class="border-t mt-4 pt-4 flex justify-between font-bold">
-          <span>Total</span><span>$${total.toLocaleString('es-CL')}</span>
-        </div>`;
-    }
-
-    async function createCheckoutButton(items){
-      const container = document.getElementById('mercado-pago-button-container');
-      if (window.__creatingWallet) return; window.__creatingWallet = true; container.innerHTML = '';
-      try {
-        const prefId = await createPreferenceOnBackend(items);
-        if (!prefId) throw new Error('No se obtuvo preferenceId desde el backend');
-        const bricks = mp.bricks();
-        if (window.checkoutButton){ try { await window.checkoutButton.unmount(); } catch(_){} }
-        window.checkoutButton = await bricks.create('wallet', 'mercado-pago-button-container', {
-          initialization: { preferenceId: prefId },
+    async function createCheckoutButton(planData){
+      const buttonContainer = document.getElementById('mercado-pago-button-container');
+      if(window.__creatingWallet) return; window.__creatingWallet = true; buttonContainer.innerHTML = '';
+      try{
+        const preferenceId = await createPreferenceOnBackend(planData);
+        if(!preferenceId) throw new Error('No se obtuvo preferenceId desde el backend');
+        const bricksBuilder = mp.bricks();
+        if(window.checkoutButton){ try{ await window.checkoutButton.unmount(); }catch{} }
+        window.checkoutButton = await bricksBuilder.create('wallet', 'mercado-pago-button-container', {
+          initialization: { preferenceId },
           customization: { texts: { valueProp: 'smart_option' } }
         });
-      } catch(err){
-        console.error('Error al crear el botón de pago:', err);
-        container.innerHTML = '<p class="text-red-500 text-sm text-center">No se pudo cargar el botón de pago. Revisa consola.</p>';
-      } finally { window.__creatingWallet = false; }
+      }catch(error){
+        console.error('Error al crear el botón de pago:', error);
+        buttonContainer.innerHTML = `<p class="text-red-500 text-sm text-center">Hubo un problema al cargar el botón de pago. Revisa la consola.</p>`;
+      }finally{ window.__creatingWallet = false; }
     }
 
-    async function createPreferenceOnBackend(items){
+    async function createPreferenceOnBackend(planData){
       const projectId = firebaseConfig.projectId;
       const functionRegion = 'us-central1';
-      const url = `https://${functionRegion}-${projectId}.cloudfunctions.net/createMercadoPagoPreference`;
-
-      // Intento #1: enviar items (versión nueva de la función)
+      const functionName = 'createMercadoPagoPreference';
+      const functionUrl = `https://${functionRegion}-${projectId}.cloudfunctions.net/${functionName}`;
       try{
-        const r = await fetch(url, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ items: items.map(i=>({ title:i.name, unit_price:i.price, quantity:i.qty||1 })) }) });
-        if (!r.ok) throw new Error(`HTTP ${r.status}`);
-        const data = await r.json();
-        if (data?.preferenceId) return data.preferenceId;
-        throw new Error('Respuesta sin preferenceId');
-      } catch(e){
-        console.warn('Falla createPreference (items). Probando fallback single-item...', e);
-      }
-
-      // Intento #2 (fallback): título combinado y total (compatible con función antigua)
-      const total = items.reduce((acc,i)=> acc + i.price*(i.qty||1), 0);
-      const title = items.map(i=> i.name).join(' + ') || 'Muna Booki';
-      try{
-        const r = await fetch(url, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ title, unit_price: total, quantity: 1 }) });
-        if (!r.ok) throw new Error(`HTTP ${r.status}`);
-        const data = await r.json();
+        const resp = await fetch(functionUrl, {
+          method:'POST', headers:{ 'Content-Type':'application/json' },
+          body: JSON.stringify({ title: planData.name, quantity:1, unit_price: planData.price })
+        });
+        if(!resp.ok){ throw new Error(`Estado HTTP: ${resp.status}`); }
+        const data = await resp.json();
         return data.preferenceId;
-      } catch(e){
-        console.error('Error llamando Cloud Function:', e);
-        return null;
-      }
+      }catch(err){ console.error('Error llamando Cloud Function:', err); return null; }
     }
   </script>
 </body>
 </html>
-```
-
----
-
-## 3) Notas importantes
-
-* **Redirección allowlist:** ahora, si tu email está activo en `allowlist`, ves el mensaje y en ~0,6s se va solo a `mi-cuenta.html`.
-* **Multi‑producto:** si agregas checkboxes `<input name="product" ...>` con `data-name`, `data-price` y `data-custom`, el checkout sumará. Si no hay checkboxes, sigue funcionando con `?plan=`.
-* **HTTP 500 de la Function:** asegúrate de tener el token en variables de entorno (si no, el fallback igual intenta single‑item pero la función debe estar bien):
-
-  ```bash
-  firebase functions:config:set mercadopago.token="APP_USR-xxxxxxxx"
-  firebase deploy --only functions:createMercadoPagoPreference
-  ```
-* **Caché:** si cambiaste `firebaseConfig` o veías `database (default) does not exist`, prueba en ventana incógnita o vacía caché duro (Ctrl+Shift+R).
-
----
-
-## 4) ¿Quieres que te deje un ejemplo de checkboxes multi‑producto?
-
-Puedo agregarte un bloque listo para copiar al `order-summary` con tres productos y la suma automática. Pídemelo y te lo pego.
