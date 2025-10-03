@@ -19,33 +19,6 @@
     .btn-primary{ background-color:var(--color-teal); color:#fff; }
     .btn-primary:hover{ background-color:#009a92; }
     .disabled-plan { background-color: #f8f9fa; border-color: #e2e8f0; opacity: 0.7; cursor: not-allowed; }
-    
-    /* NUEVO: Estilos para la columna bloqueada */
-    .locked-column {
-        filter: grayscale(80%);
-        opacity: 0.6;
-        pointer-events: none;
-        transition: all 0.3s ease-in-out;
-    }
-    #products-column {
-        position: relative;
-        transition: all 0.3s ease-in-out;
-    }
-    #products-overlay {
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background-color: rgba(248, 249, 250, 0.5);
-        z-index: 10;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        text-align: center;
-        border-radius: 1rem;
-        backdrop-filter: blur(2px);
-    }
   </style>
 </head>
 <body class="bg-gray-50">
@@ -61,83 +34,77 @@
   </header>
 
   <main class="container mx-auto px-6 py-16">
-    <div class="max-w-6xl mx-auto grid lg:grid-cols-2 gap-12">
+    <div class="max-w-3xl mx-auto">
       
-      <!-- Columna Izquierda: Auth + Pago -->
-      <div id="auth-payment-column">
-        <!-- Caja Auth -->
-        <div id="auth-section" class="bg-white p-8 rounded-2xl shadow-lg">
-          <h2 id="auth-title" class="text-2xl font-bold text-center section-title mb-2">Paso 1: Accede a tu cuenta</h2>
-          <p class="text-center text-gray-600 mb-6">Inicia sesión o crea tu cuenta para continuar.</p>
-          <div class="flex border-b mb-6">
-            <button id="login-tab-btn" class="flex-1 py-2 font-semibold text-teal-600 border-b-2 border-teal-600">Iniciar Sesión</button>
-            <button id="register-tab-btn" class="flex-1 py-2 font-semibold text-gray-500">Registrarse</button>
-          </div>
-          <p id="auth-error-message" class="text-red-500 text-sm text-center mb-4 h-5"></p>
-          <form id="login-form" class="space-y-4">
-            <input name="email" type="email" placeholder="Correo electrónico" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500" />
-            <input name="password" type="password" placeholder="Contraseña" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500" />
-            <button type="submit" class="w-full btn-primary font-bold py-3 rounded-lg">Ingresar</button>
-          </form>
-          <form id="register-form" class="space-y-4 hidden">
-            <input name="email" type="email" placeholder="Correo electrónico" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500" />
-            <input name="password" type="password" placeholder="Crear contraseña" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500" />
-            <button type="submit" class="w-full btn-primary font-bold py-3 rounded-lg">Crear Cuenta</button>
-          </form>
-          <div class="my-6 flex items-center">
-            <div class="flex-grow border-t border-gray-300"></div><span class="mx-4 text-gray-500 text-sm">o</span><div class="flex-grow border-t border-gray-300"></div>
-          </div>
-          <button id="google-signin-btn" class="w-full flex items-center justify-center bg-white border border-gray-300 text-gray-700 font-semibold py-3 px-4 rounded-lg hover:bg-gray-50 transition">
-            <svg class="w-6 h-6 mr-3" viewBox="0 0 48 48" aria-hidden="true"><defs><path id="a" d="M44.5 20H24v8.5h11.8C34.7 33.9 30.1 37 24 37c-7.2 0-13-5.8-13-13s5.8-13 13-13c3.1 0 5.9 1.1 8.1 2.9l6.4-6.4C34.6 4.1 29.6 2 24 2 11.8 2 2 11.8 2 24s9.8 22 22 22c11 0 21-8 21-22 0-1.3-.2-2.7-.5-4z"/></defs><clipPath id="b"><use xlink:href="#a" overflow="visible"/></clipPath><path clip-path="url(#b)" fill="#FBBC05" d="M0 37V11l17 13z"/><path clip-path="url(#b)" fill="#EA4335" d="M0 11l17 13 7-6.1L48 14V0H0z"/><path clip-path="url(#b)" fill="#34A853" d="M0 37l30-23 7.9 1L48 0v48H0z"/><path clip-path="url(#b)" fill="#4285F4" d="M48 48L17 24l-4-3 35-10z"/></svg>
-            Continuar con Google
-          </button>
+      <!-- Paso 1: Auth -->
+      <div id="auth-section" class="bg-white p-8 rounded-2xl shadow-lg">
+        <h2 id="auth-title" class="text-2xl font-bold text-center section-title mb-2">Paso 1: Accede a tu cuenta</h2>
+        <p class="text-center text-gray-600 mb-6">Inicia sesión o crea una cuenta para continuar con tu compra.</p>
+        <div class="flex border-b mb-6">
+          <button id="login-tab-btn" class="flex-1 py-2 font-semibold text-teal-600 border-b-2 border-teal-600">Iniciar Sesión</button>
+          <button id="register-tab-btn" class="flex-1 py-2 font-semibold text-gray-500">Registrarse</button>
         </div>
-
-        <!-- Caja Pago -->
-        <div id="payment-section" class="bg-white p-8 rounded-2xl shadow-lg hidden">
-          <h2 id="welcome-message" class="text-2xl font-bold section-title mb-4">¡Hola! Finaliza tu compra</h2>
-          <p id="payment-instructions" class="text-gray-600 mb-6">Revisa tu selección y haz clic en el botón para pagar de forma segura con Mercado Pago.</p>
-          <div id="clauses-container" class="mb-6 space-y-2 hidden">
-            <div class="flex items-start bg-yellow-50 border border-yellow-200 p-4 rounded-lg">
-              <input id="terms-checkbox" type="checkbox" class="h-5 w-5 text-teal-600 border-gray-300 rounded focus:ring-teal-500 mt-1 cursor-pointer">
-              <label for="terms-checkbox" class="ml-3 text-sm text-gray-800 cursor-pointer">
-                Entiendo que para los cuentos personalizados, recibiré un formulario por correo después del pago para enviar los detalles de la historia.
-              </label>
-            </div>
-          </div>
-          <div id="mercado-pago-button-container"></div>
-           <p id="payment-error" class="text-red-500 text-sm mt-4 text-center"></p>
+        <p id="auth-error-message" class="text-red-500 text-sm text-center mb-4 h-5"></p>
+        <form id="login-form" class="space-y-4">
+          <input name="email" type="email" placeholder="Correo electrónico" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500" />
+          <input name="password" type="password" placeholder="Contraseña" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500" />
+          <button type="submit" class="w-full btn-primary font-bold py-3 rounded-lg">Ingresar</button>
+        </form>
+        <form id="register-form" class="space-y-4 hidden">
+          <input name="email" type="email" placeholder="Correo electrónico" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500" />
+          <input name="password" type="password" placeholder="Crear contraseña" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500" />
+          <button type="submit" class="w-full btn-primary font-bold py-3 rounded-lg">Crear Cuenta</button>
+        </form>
+        <div class="my-6 flex items-center">
+          <div class="flex-grow border-t border-gray-300"></div><span class="mx-4 text-gray-500 text-sm">o</span><div class="flex-grow border-t border-gray-300"></div>
         </div>
+        <button id="google-signin-btn" class="w-full flex items-center justify-center bg-white border border-gray-300 text-gray-700 font-semibold py-3 px-4 rounded-lg hover:bg-gray-50 transition">
+          <svg class="w-6 h-6 mr-3" viewBox="0 0 48 48" aria-hidden="true"><defs><path id="a" d="M44.5 20H24v8.5h11.8C34.7 33.9 30.1 37 24 37c-7.2 0-13-5.8-13-13s5.8-13 13-13c3.1 0 5.9 1.1 8.1 2.9l6.4-6.4C34.6 4.1 29.6 2 24 2 11.8 2 2 11.8 2 24s9.8 22 22 22c11 0 21-8 21-22 0-1.3-.2-2.7-.5-4z"/></defs><clipPath id="b"><use xlink:href="#a" overflow="visible"/></clipPath><path clip-path="url(#b)" fill="#FBBC05" d="M0 37V11l17 13z"/><path clip-path="url(#b)" fill="#EA4335" d="M0 11l17 13 7-6.1L48 14V0H0z"/><path clip-path="url(#b)" fill="#34A853" d="M0 37l30-23 7.9 1L48 0v48H0z"/><path clip-path="url(#b)" fill="#4285F4" d="M48 48L17 24l-4-3 35-10z"/></svg>
+          Continuar con Google
+        </button>
       </div>
 
-      <!-- Columna Derecha: Selección de Productos -->
-      <div id="products-column">
-        <!-- NUEVO: Overlay para indicar estado bloqueado -->
-        <div id="products-overlay">
-            <div class="p-4 bg-white/80 rounded-lg shadow">
-                 <h3 class="font-bold text-lg text-gray-700">Primero, inicia sesión</h3>
-                 <p class="text-sm text-gray-600">Completa el Paso 1 para elegir tus productos.</p>
-            </div>
-        </div>
-        <h1 class="text-3xl font-bold section-title mb-6">Paso 2: Elige tus productos y paga</h1>
-        <div id="plans-list" class="space-y-4">
-          <!-- Los planes se renderizarán aquí con JS -->
-        </div>
-
-        <!-- Add-on: Libro Impreso (condicional) -->
-        <div id="plan-004-wrapper" class="hidden mt-6 transition-all duration-300">
-            <div class="text-sm font-semibold text-gray-600 mb-2">✨ ¡Convierte tu cuento en un tesoro físico!</div>
-            <div id="plan-004-card">
-                <!-- El plan de libro impreso se renderizará aquí -->
-            </div>
-        </div>
+      <!-- Paso 2: Productos y Pago (Oculto por defecto) -->
+      <div id="purchase-section" class="hidden mt-12">
+          <div id="welcome-message" class="text-center mb-8">
+            <h2 class="text-2xl font-bold section-title">Paso 2: Elige tus productos y paga</h2>
+            <p class="text-gray-600 mt-1">¡Hola, <span id="user-name" class="font-semibold"></span>! Ya puedes completar tu compra.</p>
+          </div>
         
-        <!-- Total a Pagar -->
-        <div class="bg-white p-6 rounded-2xl shadow-lg mt-8">
-            <div class="flex items-center justify-between">
-                <span class="text-lg text-gray-800">Total a pagar</span>
-                <span id="total-amount" class="text-3xl font-extrabold text-gray-900">$0</span>
+          <div class="bg-white p-8 rounded-2xl shadow-lg">
+            <div id="plans-list" class="space-y-4">
+              <!-- Los planes se renderizarán aquí con JS -->
             </div>
+    
+            <!-- Add-on: Libro Impreso (condicional) -->
+            <div id="plan-004-wrapper" class="hidden mt-6 transition-all duration-300">
+                <div class="text-sm font-semibold text-gray-600 mb-2">✨ ¡Convierte tu cuento en un tesoro físico!</div>
+                <div id="plan-004-card">
+                    <!-- El plan de libro impreso se renderizará aquí -->
+                </div>
+            </div>
+            
+            <!-- Total a Pagar -->
+            <div class="border-t mt-8 pt-6">
+                <div class="flex items-center justify-between">
+                    <span class="text-lg text-gray-800">Total a pagar</span>
+                    <span id="total-amount" class="text-3xl font-extrabold text-gray-900">$0</span>
+                </div>
+            </div>
+
+            <!-- Cláusulas -->
+            <div id="clauses-container" class="mt-6 space-y-2 hidden">
+              <div class="flex items-start bg-yellow-50 border border-yellow-200 p-4 rounded-lg">
+                <input id="terms-checkbox" type="checkbox" class="h-5 w-5 text-teal-600 border-gray-300 rounded focus:ring-teal-500 mt-1 cursor-pointer flex-shrink-0">
+                <label for="terms-checkbox" class="ml-3 text-sm text-gray-800 cursor-pointer">
+                  Entiendo que para los cuentos personalizados, recibiré un formulario por correo después del pago para enviar los detalles de la historia.
+                </label>
+              </div>
+            </div>
+
+             <!-- Botón de Pago -->
+            <div id="mercado-pago-button-container" class="mt-6"></div>
+            <p id="payment-error" class="text-red-500 text-sm mt-4 text-center"></p>
         </div>
 
         <!-- A tener en cuenta -->
@@ -159,7 +126,6 @@
             </div>
         </div>
       </div>
-
     </div>
   </main>
 
@@ -276,20 +242,8 @@
         }
     }
 
-    function setProductsColumnLocked(isLocked) {
-        const productsColumn = $('#products-column');
-        const overlay = $('#products-overlay');
-        if (isLocked) {
-            productsColumn.classList.add('locked-column');
-            overlay.classList.remove('hidden');
-        } else {
-            productsColumn.classList.remove('locked-column');
-            overlay.classList.add('hidden');
-        }
-    }
-
     document.body.addEventListener('change', e => {
-        if (e.target.type === 'checkbox') {
+        if (e.target.type === 'checkbox' && e.target.dataset.id) {
             const id = e.target.dataset.id;
             const isOwned = owned.has(id);
             if(isOwned) {
@@ -314,10 +268,9 @@
     onAuthStateChanged(auth, async (user) => {
       currentUser = user;
       if (user) {
-        setProductsColumnLocked(false);
         $('#auth-section').classList.add('hidden');
-        $('#payment-section').classList.remove('hidden');
-        $('#welcome-message').textContent = `¡Hola, ${user.displayName || user.email.split('@')[0]}! Finaliza tu compra`;
+        $('#purchase-section').classList.remove('hidden');
+        $('#user-name').textContent = user.displayName || user.email.split('@')[0];
 
         try {
           const ref = doc(db, 'user_products', user.uid);
@@ -327,10 +280,9 @@
           renderPlans();
         } catch (e) { console.warn('No se pudo leer user_products:', e); renderPlans(); }
       } else {
-        setProductsColumnLocked(true);
-        owned.clear();
         $('#auth-section').classList.remove('hidden');
-        $('#payment-section').classList.add('hidden');
+        $('#purchase-section').classList.add('hidden');
+        owned.clear();
         renderPlans();
       }
     });
@@ -400,8 +352,6 @@
     const itemsFromUrl = urlParams.get('items')?.split(',').filter(Boolean) || [];
     itemsFromUrl.forEach(item => selected.add(item));
     
-    // Initial lock state
-    setProductsColumnLocked(true);
     renderPlans();
   </script>
 </body>
