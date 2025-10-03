@@ -3,21 +3,21 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Mi cuenta - Muna Booki</title>
+  <title>Mi Cuenta - Muna Booki</title>
+  <!-- Mercado Pago SDK -->
+  <script src="https://sdk.mercadopago.com/js/v2"></script>
+  <!-- Tailwind (ok para dev) -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;900&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;900&display=swap" rel="stylesheet" />
   <style>
-    :root{
-      --color-dark-blue:#0A2F5B; --color-teal:#00B2A9; --color-gold:#FFC845;
-    }
-    body{font-family:'Poppins',sans-serif}
-    .section-title{color:var(--color-dark-blue)}
-    .btn-primary{background:var(--color-teal);color:#fff}
-    .btn-primary:hover{background:#009a92}
-    .badge{background:var(--color-gold);color:#111;font-weight:700}
-    #debug-allowlist{display:none;font-size:12px;color:#64748b}
+    :root { --color-dark-blue:#0A2F5B; --color-teal:#00B2A9; --color-gold:#FFC845; }
+    body { font-family:'Poppins',sans-serif }
+    .section-title{ color:var(--color-dark-blue) }
+    .btn-primary{ background:var(--color-teal); color:#fff }
+    .btn-primary:hover{ background:#009a92 }
+    .tag{ font-size:12px; padding:2px 8px; border-radius:9999px }
   </style>
 </head>
 <body class="bg-gray-50">
@@ -25,58 +25,80 @@
   <header class="bg-white shadow-sm">
     <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
       <a href="index.html" class="flex items-center gap-3">
-        <img src="https://bmeryu.github.io/muna-booki/Logo_MunaBooki.png" alt="Muna Booki" class="h-14" />
-        <span class="sr-only">Inicio</span>
+        <img src="https://bmeryu.github.io/muna-booki/Logo_MunaBooki.png" alt="Muna Booki" class="h-12" />
+        <span class="font-bold text-lg text-slate-700">Mi Cuenta</span>
       </a>
-      <div class="flex items-center gap-3">
-        <button id="logout-btn" class="px-4 py-2 rounded-lg border text-gray-700 hover:bg-gray-50">Cerrar sesión</button>
-      </div>
+      <button id="logoutBtn" class="text-sm text-slate-600 hover:text-slate-900">Cerrar sesión</button>
     </nav>
   </header>
 
-  <!-- Main -->
-  <main class="container mx-auto px-6 py-10">
-    <h1 class="text-3xl font-bold section-title mb-2">Mi cuenta</h1>
-    <p class="text-gray-600 mb-6">Aquí verás tus accesos y compras.</p>
+  <main class="container mx-auto px-6 py-10 grid lg:grid-cols-3 gap-10">
+    <!-- Columna izquierda: Estado y productos -->
+    <section class="lg:col-span-2 space-y-6">
+      <div id="accountCard" class="bg-white p-6 rounded-2xl shadow">
+        <h1 class="text-2xl font-bold section-title mb-2">Hola <span id="userName">...</span></h1>
+        <p id="allowBanner" class="hidden mt-2 p-3 bg-green-50 text-green-700 rounded">✔ Tu email está en la <strong>lista de acceso</strong>. Tienes acceso sin pagar.</p>
+        <p id="noAllowBanner" class="hidden mt-2 p-3 bg-amber-50 text-amber-700 rounded">ℹ Aún no estás en la lista. Puedes comprar planes abajo.</p>
+        <p id="debugInfo" class="mt-2 text-xs text-slate-500 hidden"></p>
+      </div>
 
-    <!-- Perfil -->
-    <section class="bg-white rounded-2xl shadow p-6 mb-8">
-      <div class="flex flex-col md:flex-row md:items-center gap-4">
-        <div class="flex-1">
-          <h2 class="text-xl font-semibold" id="user-name">Cargando…</h2>
-          <p class="text-gray-500" id="user-email"></p>
-          <div id="allowlist-banner" class="hidden mt-3 p-3 rounded-lg bg-green-50 border border-green-200 text-green-700 font-semibold">
-            🎉 Acceso por lista blanca habilitado. <span class="font-normal">No necesitas pagar para acceder.</span>
-          </div>
-          <div id="debug-allowlist" class="mt-2"></div>
+      <div class="bg-white p-6 rounded-2xl shadow">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-xl font-semibold section-title">Mis productos</h2>
+          <span id="ownedCount" class="text-xs text-slate-500"></span>
         </div>
-        <a href="index.html" class="btn-primary px-4 py-2 rounded-lg inline-block">Explorar planes</a>
+        <div id="ownedList" class="grid sm:grid-cols-2 gap-4"></div>
+        <p id="ownedEmpty" class="text-slate-500 text-sm">No tienes productos aún.</p>
       </div>
     </section>
 
-    <!-- Mis productos -->
-    <section class="bg-white rounded-2xl shadow p-6">
-      <div class="flex items-center justify-between mb-4">
-        <h2 class="text-2xl font-semibold section-title">Mis productos</h2>
-        <button id="refresh-btn" class="px-3 py-2 rounded-lg border text-gray-700 hover:bg-gray-50">Refrescar</button>
+    <!-- Columna derecha: CTA -->
+    <aside class="space-y-6">
+      <div class="bg-white p-6 rounded-2xl shadow">
+        <h3 class="text-lg font-semibold section-title mb-2">Agregar productos</h3>
+        <p class="text-slate-600 text-sm mb-4">Elige uno o varios y paga en un solo paso.</p>
+        <button id="openModalBtn" class="w-full btn-primary py-3 rounded-lg font-semibold">Explorar planes</button>
       </div>
-      <div id="products-grid" class="grid md:grid-cols-3 gap-6"></div>
-      <div id="empty-state" class="hidden text-center text-gray-500 py-10">
-        <p class="mb-4">Aún no tienes productos.</p>
-        <a href="index.html" class="inline-block btn-primary px-4 py-2 rounded-lg">Ver planes</a>
+
+      <div class="bg-white p-6 rounded-2xl shadow text-sm text-slate-600">
+        <p>¿Dudas? Escríbenos y te ayudamos con la compra.</p>
       </div>
-    </section>
+    </aside>
   </main>
 
+  <!-- Modal Selección de productos -->
+  <div id="plansModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50 p-4">
+    <div class="bg-white w-full max-w-2xl rounded-2xl shadow-xl overflow-hidden">
+      <div class="p-6 border-b flex items-center justify-between">
+        <h4 class="text-lg font-semibold">Elige tus planes</h4>
+        <button id="closeModalBtn" class="text-slate-500 hover:text-slate-900">✕</button>
+      </div>
+
+      <div class="p-6 space-y-4">
+        <p id="allowModalMsg" class="hidden p-3 bg-green-50 text-green-700 rounded">Estás en allowlist: no necesitas pagar. Puedes disfrutar de todos los productos.</p>
+
+        <div id="plansList" class="space-y-3"></div>
+
+        <div class="flex items-center justify-between pt-4 border-t">
+          <div class="text-slate-600 text-sm">Total</div>
+          <div class="text-2xl font-bold" id="totalAmount">$0</div>
+        </div>
+
+        <div class="mt-4">
+          <button id="payBtn" class="w-full btn-primary py-3 rounded-lg font-semibold disabled:opacity-40 disabled:cursor-not-allowed">Pagar con Mercado Pago</button>
+          <div id="mp-button-container" class="mt-3"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script type="module">
+    // Firebase SDKs
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-    import { 
-      getAuth, onAuthStateChanged, signOut
-    } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-    // ⚡ Firestore LITE (sin listeners / sin canales)
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
     import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore-lite.js";
 
-    // --- Config Firebase (munabooki) ---
+    // Config Firebase (tu proyecto)
     const firebaseConfig = {
       apiKey: "AIzaSyBivlKO0Ijt1hvMNyH9aIGXf_7WZwE2tA4",
       authDomain: "munabooki.firebaseapp.com",
@@ -88,149 +110,214 @@
     };
 
     const app = initializeApp(firebaseConfig);
-    // 👇 Fuerza el databaseId = 'munabooki' para evitar (default)
-    const db = getFirestore(app, 'munabooki');
     const auth = getAuth(app);
+    const db = getFirestore(app); // Lite (sin listeners)
 
-    const qs = new URLSearchParams(location.search);
-    const DEBUG = qs.has('debug');
-    const debugBox = document.getElementById('debug-allowlist');
-    function showDebug(msg){
-      if(!DEBUG) return; 
-      debugBox.style.display='block';
-      debugBox.textContent = String(msg);
-      console.log('[MI-CUENTA DEBUG]', msg);
-    }
+    // Mercado Pago
+    const mpPublicKey = 'APP_USR-a633c3e4-ac28-4661-bba4-0a5dee41e9ed';
+    const mp = new MercadoPago(mpPublicKey);
 
-    const planDetails = {
-      biblioteca: {
-        id:'biblioteca', name:'Biblioteca Mágica',
-        description:'Acceso a la biblioteca completa de cuentos.',
-        actionLabel:'Entrar a la biblioteca',
-        href:'biblioteca.html',
-        img:'https://bmeryu.github.io/muna-booki/img/biblioteca.webp'
-      },
-      estandar: {
-        id:'estandar', name:'Cuento a Medida',
-        description:'Cuento personalizado con datos del niño/niña.',
-        actionLabel:'Crear mi cuento',
-        href:'creador.html?plan=estandar',
-        img:'https://bmeryu.github.io/muna-booki/img/estandar.webp'
-      },
-      premium: {
-        id:'premium', name:'Cuento Premium',
-        description:'Versión premium con extras ilustrados.',
-        actionLabel:'Crear mi cuento premium',
-        href:'creador.html?plan=premium',
-        img:'https://bmeryu.github.io/muna-booki/img/premium.webp'
-      }
+    // Catálogo (ids estables)
+    const CATALOG = {
+      'plan-001': { id:'plan-001', code:'biblioteca', name:'Suscripción Biblioteca Mágica', price: 8900 },
+      'plan-002': { id:'plan-002', code:'estandar',   name:'Cuento a Medida (Estándar)',  price: 18900 },
+      'plan-003': { id:'plan-003', code:'premium',    name:'Cuento Premium',               price: 40000 }
     };
 
-    const productsGrid = document.getElementById('products-grid');
-    const emptyState = document.getElementById('empty-state');
-    const banner = document.getElementById('allowlist-banner');
+    const $ = (sel)=>document.querySelector(sel);
+    const $$ = (sel)=>document.querySelectorAll(sel);
 
-    function productCard(p){
-      return `
-        <article class="rounded-xl border bg-white shadow-sm overflow-hidden">
-          <img src="${p.img}" alt="${p.name}" class="w-full h-40 object-cover">
-          <div class="p-4">
-            <h3 class="text-lg font-semibold">${p.name}</h3>
-            <p class="text-sm text-gray-600 mt-1">${p.description}</p>
-            <a href="${p.href}" class="mt-4 inline-block btn-primary px-4 py-2 rounded-lg">${p.actionLabel}</a>
-          </div>
-        </article>`;
-    }
+    // UI refs
+    const userNameEl = $('#userName');
+    const allowBanner = $('#allowBanner');
+    const noAllowBanner = $('#noAllowBanner');
+    const debugInfo = $('#debugInfo');
+    const ownedList = $('#ownedList');
+    const ownedEmpty = $('#ownedEmpty');
+    const ownedCount = $('#ownedCount');
 
-    function renderProducts(keys){
-      productsGrid.innerHTML = '';
-      if(!keys || !keys.length){
-        emptyState.classList.remove('hidden');
-        return;
-      }
-      emptyState.classList.add('hidden');
-      const cards = keys\
-        .map(k => planDetails[k])\
-        .filter(Boolean)\
-        .map(productCard)\
-        .join('');
-      productsGrid.innerHTML = cards || '<p class="text-gray-500">No hay productos para mostrar.</p>';
-    }
+    const openModalBtn = $('#openModalBtn');
+    const plansModal = $('#plansModal');
+    const closeModalBtn = $('#closeModalBtn');
+    const plansList = $('#plansList');
+    const totalAmount = $('#totalAmount');
+    const payBtn = $('#payBtn');
+    const mpBtnContainer = $('#mp-button-container');
+    const allowModalMsg = $('#allowModalMsg');
 
-    async function loadEntitlements(user){
-      const name = user.displayName || (user.email ? user.email.split('@')[0] : 'Usuario');
-      document.getElementById('user-name').textContent = `Hola, ${name}`;
-      document.getElementById('user-email').textContent = user.email || '';
+    let CURRENT_USER = null;
+    let IS_ALLOW = false;
+    let OWNED = new Set();
 
-      // 1) Compras reales almacenadas por uid
-      let purchased = [];
-      try{
-        const upRef = doc(db, 'user_products', user.uid);
-        const upSnap = await getDoc(upRef);
+    const fmt = (n)=> new Intl.NumberFormat('es-CL',{style:'currency',currency:'CLP',maximumFractionDigits:0}).format(n);
+
+    onAuthStateChanged(auth, async (user)=>{
+      if(!user){ window.location.href = 'index.html'; return; }
+      CURRENT_USER = user;
+      const name = user.displayName || user.email.split('@')[0];
+      userNameEl.textContent = name;
+
+      // 1) allowlist por email (lowercase)
+      try {
+        const emailLower = (user.email||'').toLowerCase();
+        const allowSnap = await getDoc(doc(db,'allowlist',emailLower));
+        const active = allowSnap.exists() && (allowSnap.data()?.active === true || allowSnap.data()?.active === 'true' || allowSnap.data()?.active === 1);
+        IS_ALLOW = !!active;
+      } catch(e){ IS_ALLOW = false; }
+
+      allowBanner.classList.toggle('hidden', !IS_ALLOW);
+      noAllowBanner.classList.toggle('hidden', IS_ALLOW);
+
+      // 2) productos comprados por uid
+      OWNED = new Set();
+      try {
+        const upSnap = await getDoc(doc(db,'user_products',user.uid));
         if(upSnap.exists()){
-          const data = upSnap.data();
-          if(Array.isArray(data.products)) purchased = data.products;
-          showDebug(`user_products: ${JSON.stringify(data)}`);
-        } else {
-          showDebug('user_products: (sin doc)');
+          const arr = Array.isArray(upSnap.data()?.products) ? upSnap.data().products : [];
+          arr.forEach(id=>OWNED.add(String(id)));
         }
-      }catch(err){
-        console.error('Error leyendo user_products:', err);
-        showDebug(`user_products error: ${err?.message||err}`);
-      }
+      } catch(e){ /* ignora */ }
 
-      // 2) Allowlist por email -> si está activo, otorgamos (por defecto) Biblioteca
-      let allowActive = false;
-      try{
-        const emailExact = (user.email||'');
-        const emailLower = emailExact.toLowerCase();
+      // Si está en allowlist, consideramos acceso total (no escribe en DB)
+      if(IS_ALLOW){ Object.keys(CATALOG).forEach(id=>OWNED.add(id)); }
 
-        let ref = doc(db, 'allowlist', emailLower);
-        let snap = await getDoc(ref);
-        let data = snap.exists()? snap.data(): null;
-        if(!snap.exists()){
-          // fallback exacto
-          ref = doc(db, 'allowlist', emailExact);
-          snap = await getDoc(ref);
-          data = snap.exists()? snap.data(): null;
-        }
-        const activeVal = data?.active;
-        allowActive = (activeVal===true || activeVal==='true' || activeVal===1);
-        showDebug(`allowlist.exists=${snap.exists()} active=${JSON.stringify(activeVal)} idUsado=${snap.exists()? ref.id : 'ninguno'}`);
-      }catch(err){
-        console.error('Error leyendo allowlist:', err);
-        showDebug(`allowlist error: ${err?.message||err}`);
-      }
+      renderOwned();
+    });
 
-      // 3) Resolver productos finales a mostrar
-      const finalSet = new Set(purchased);
-      if(allowActive){
-        banner.classList.remove('hidden');
-        // Decisión de negocio: con allowlist damos acceso a la Biblioteca.
-        // Si quieres que allowlist otorgue otros, agrega aquí:
-        finalSet.add('biblioteca');
-      }
-
-      renderProducts(Array.from(finalSet));
+    function renderOwned(){
+      ownedList.innerHTML = '';
+      const ids = Array.from(OWNED);
+      if(ids.length===0){ ownedEmpty.classList.remove('hidden'); ownedCount.textContent=''; return; }
+      ownedEmpty.classList.add('hidden');
+      ownedCount.textContent = `${ids.length} producto(s)`;
+      ids.forEach(id=>{
+        const p = CATALOG[id];
+        if(!p) return;
+        const card = document.createElement('div');
+        card.className = 'p-4 rounded-xl border flex items-center justify-between';
+        card.innerHTML = `
+          <div>
+            <div class="font-semibold">${p.name}</div>
+            <div class="text-xs text-slate-500">ID: ${p.code}</div>
+          </div>
+          <span class="tag bg-emerald-100 text-emerald-700">Activo</span>
+        `;
+        ownedList.appendChild(card);
+      });
     }
 
-    document.getElementById('logout-btn').addEventListener('click', async()=>{
-      try{ await signOut(auth); }catch(e){}
-      location.href = 'index.html';
+    // MODAL
+    $('#logoutBtn').addEventListener('click', ()=> signOut(auth));
+    openModalBtn.addEventListener('click', ()=>{
+      buildPlansList();
+      totalAmount.textContent = fmt(0);
+      payBtn.disabled = true;
+      mpBtnContainer.innerHTML = '';
+      allowModalMsg.classList.toggle('hidden', !IS_ALLOW);
+      plansModal.classList.remove('hidden');
+      plansModal.classList.add('flex');
     });
+    closeModalBtn.addEventListener('click', closeModal);
+    plansModal.addEventListener('click', (e)=>{ if(e.target===plansModal) closeModal(); });
+    function closeModal(){
+      plansModal.classList.add('hidden');
+      plansModal.classList.remove('flex');
+    }
 
-    document.getElementById('refresh-btn').addEventListener('click', ()=>{
-      const user = auth.currentUser; if(user) loadEntitlements(user);
-    });
+    function buildPlansList(){
+      plansList.innerHTML = '';
+      const available = Object.values(CATALOG).filter(p=>!OWNED.has(p.id));
 
-    onAuthStateChanged(auth, (user)=>{
-      if(!user){
-        // No autenticado -> a inicio/checkout
-        location.href = 'index.html';
+      if(IS_ALLOW){
+        // Si está en allowlist, mostramos lista pero deshabilitada
+        available.forEach(p=>{
+          const row = document.createElement('div');
+          row.className = 'p-3 rounded-lg border flex items-center justify-between opacity-60';
+          row.innerHTML = `
+            <div class="flex items-center gap-3">
+              <input type="checkbox" disabled class="h-5 w-5" />
+              <div>
+                <div class="font-medium">${p.name}</div>
+                <div class="text-xs text-slate-500">${fmt(p.price)}</div>
+              </div>
+            </div>
+            <span class="tag bg-green-100 text-green-700">Incluido por allowlist</span>
+          `;
+          plansList.appendChild(row);
+        });
+        payBtn.disabled = true;
         return;
       }
-      loadEntitlements(user);
+
+      available.forEach(p=>{
+        const id = `chk-${p.id}`;
+        const row = document.createElement('label');
+        row.htmlFor = id;
+        row.className = 'p-3 rounded-lg border flex items-center justify-between hover:bg-slate-50 cursor-pointer';
+        row.innerHTML = `
+          <div class="flex items-center gap-3">
+            <input id="${id}" data-id="${p.id}" type="checkbox" class="h-5 w-5" />
+            <div>
+              <div class="font-medium">${p.name}</div>
+              <div class="text-xs text-slate-500">${fmt(p.price)}</div>
+            </div>
+          </div>
+          <div class="text-sm text-slate-600">${fmt(p.price)}</div>
+        `;
+        plansList.appendChild(row);
+      });
+
+      plansList.addEventListener('change', recalcTotal, { once:false });
+    }
+
+    function recalcTotal(){
+      const checks = plansList.querySelectorAll('input[type="checkbox"]');
+      let sum = 0; let selected = [];
+      checks.forEach(chk=>{ if(chk.checked){ const p=CATALOG[chk.dataset.id]; sum += p.price; selected.push(p); } });
+      totalAmount.textContent = fmt(sum);
+      payBtn.disabled = (sum<=0);
+    }
+
+    payBtn.addEventListener('click', async ()=>{
+      const checks = plansList.querySelectorAll('input[type="checkbox"]');
+      const selected = [];
+      checks.forEach(chk=>{ if(chk.checked){ const p=CATALOG[chk.dataset.id]; selected.push({ id:p.id, title:p.name, unit_price:p.price, quantity:1 }); } });
+      if(selected.length===0) return;
+
+      try{
+        payBtn.disabled = true;
+        mpBtnContainer.innerHTML = '<div class="text-sm text-slate-600">Creando preferencia...</div>';
+        const prefId = await createPreferenceOnBackend(selected, CURRENT_USER.uid);
+        if(!prefId) throw new Error('Sin preferenceId');
+
+        // Renderiza botón Wallet de MP
+        mpBtnContainer.innerHTML = '';
+        const bricks = mp.bricks();
+        if(window.__mpWallet){ try{ await window.__mpWallet.unmount(); }catch{} }
+        window.__mpWallet = await bricks.create('wallet','mp-button-container',{
+          initialization:{ preferenceId: prefId },
+          customization:{ texts:{ valueProp:'smart_option' } }
+        });
+      }catch(err){
+        mpBtnContainer.innerHTML = '<div class="text-red-600 text-sm">No se pudo crear la preferencia. Revisa la consola.</div>';
+        console.error(err);
+      }finally{
+        payBtn.disabled = false;
+      }
     });
+
+    async function createPreferenceOnBackend(items, uid){
+      const functionUrl = `https://us-central1-${firebaseConfig.projectId}.cloudfunctions.net/createMercadoPagoPreference`;
+      const externalReference = `${uid}|${items.map(i=>i.id).join(',')}`;
+      const res = await fetch(functionUrl,{
+        method:'POST',
+        headers:{ 'Content-Type':'application/json' },
+        body: JSON.stringify({ items, externalReference })
+      });
+      if(!res.ok){ throw new Error('HTTP '+res.status); }
+      const data = await res.json();
+      return data.preferenceId;
+    }
   </script>
 </body>
 </html>
