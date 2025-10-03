@@ -4,14 +4,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Checkout - Muna Booki</title>
-
-  <!-- Mercado Pago SDK -->
   <script src="https://sdk.mercadopago.com/js/v2"></script>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;900&family=Pacifico&display=swap" rel="stylesheet">
-
   <style>
     :root{ --color-dark-blue:#0A2F5B; --color-teal:#00B2A9; --color-gold:#FFC845; }
     body{ font-family:'Poppins',sans-serif; }
@@ -19,113 +16,154 @@
     .btn-primary{ background-color:var(--color-teal); color:#fff; }
     .btn-primary:hover{ background-color:#009a92; }
     .disabled-plan { background-color: #f8f9fa; border-color: #e2e8f0; opacity: 0.7; cursor: not-allowed; }
+    .step-dot{ width:26px;height:26px }
+    .grayscale-locked{ filter: grayscale(1); opacity:.55; }
+    .no-pointer{ pointer-events:none; }
   </style>
 </head>
 <body class="bg-gray-50">
-
   <!-- Header -->
   <header class="bg-white shadow-sm">
     <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
-      <a href="index_mejorado.html" class="flex items-center">
-        <img src="https://bmeryu.github.io/muna-booki/Logo_MunaBooki.png" alt="Logo Muna Booki" class="h-16" />
+      <a href="index.html" class="flex items-center">
+        <img src="https://bmeryu.github.io/muna-booki/Logo_MunaBooki.png" alt="Logo Muna Booki" class="h-14" />
       </a>
-      <a href="index_mejorado.html" class="text-gray-600 hover:text-teal-500 font-semibold">Volver al inicio</a>
+      <a href="index.html" class="text-gray-600 hover:text-teal-500 font-semibold">Volver al inicio</a>
     </nav>
   </header>
 
-  <main class="container mx-auto px-6 py-16">
-    <div class="max-w-3xl mx-auto">
-      
-      <!-- Paso 1: Auth -->
-      <div id="auth-section" class="bg-white p-8 rounded-2xl shadow-lg">
-        <h2 id="auth-title" class="text-2xl font-bold text-center section-title mb-2">Paso 1: Accede a tu cuenta</h2>
-        <p class="text-center text-gray-600 mb-6">Inicia sesión o crea una cuenta para continuar con tu compra.</p>
-        <div class="flex border-b mb-6">
-          <button id="login-tab-btn" class="flex-1 py-2 font-semibold text-teal-600 border-b-2 border-teal-600">Iniciar Sesión</button>
-          <button id="register-tab-btn" class="flex-1 py-2 font-semibold text-gray-500">Registrarse</button>
+  <!-- Steps -->
+  <div class="container mx-auto px-6 pt-8">
+    <ol class="flex items-center gap-6 text-sm">
+      <li id="step1" class="flex items-center gap-2 font-semibold text-teal-700">
+        <span class="step-dot rounded-full bg-teal-600 text-white grid place-content-center">1</span>
+        Autentifícate
+      </li>
+      <li class="text-slate-400">⟶</li>
+      <li id="step2" class="flex items-center gap-2 text-slate-400">
+        <span class="step-dot rounded-full bg-slate-300 text-white grid place-content-center">2</span>
+        Elige tus productos
+      </li>
+      <li class="text-slate-400">⟶</li>
+      <li id="step3" class="flex items-center gap-2 text-slate-400">
+        <span class="step-dot rounded-full bg-slate-300 text-white grid place-content-center">3</span>
+        Paga
+      </li>
+    </ol>
+  </div>
+
+  <main class="container mx-auto px-6 py-8">
+    <div class="max-w-6xl mx-auto grid lg:grid-cols-2 gap-12">
+
+      <!-- Columna Izquierda: Auth + Pago -->
+      <div id="auth-payment-column">
+        <!-- Caja Auth -->
+        <div id="auth-section" class="bg-white p-8 rounded-2xl shadow-lg">
+          <h2 class="text-2xl font-bold text-center section-title mb-2">Paso 1: Accede a tu cuenta</h2>
+          <p class="text-center text-gray-600 mb-6">Inicia sesión o crea tu cuenta para continuar con la compra.</p>
+
+          <div class="flex border-b mb-6">
+            <button id="login-tab-btn" class="flex-1 py-2 font-semibold text-teal-600 border-b-2 border-teal-600">Iniciar Sesión</button>
+            <button id="register-tab-btn" class="flex-1 py-2 font-semibold text-gray-500">Registrarse</button>
+          </div>
+          <p id="auth-error-message" class="text-red-500 text-sm text-center mb-4 h-5"></p>
+
+          <form id="login-form" class="space-y-4">
+            <input name="email" type="email" placeholder="Correo electrónico" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500" />
+            <input name="password" type="password" placeholder="Contraseña" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500" />
+            <button type="submit" class="w-full btn-primary font-bold py-3 rounded-lg">Ingresar</button>
+          </form>
+
+          <form id="register-form" class="space-y-4 hidden">
+            <input name="email" type="email" placeholder="Correo electrónico" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500" />
+            <input name="password" type="password" placeholder="Crear contraseña" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500" />
+            <button type="submit" class="w-full btn-primary font-bold py-3 rounded-lg">Crear Cuenta</button>
+          </form>
+
+          <div class="my-6 flex items-center">
+            <div class="flex-grow border-t border-gray-300"></div>
+            <span class="mx-4 text-gray-500 text-sm">o</span>
+            <div class="flex-grow border-t border-gray-300"></div>
+          </div>
+
+          <button id="google-signin-btn" class="w-full flex items-center justify-center bg-white border border-gray-300 text-gray-700 font-semibold py-3 px-4 rounded-lg hover:bg-gray-50 transition">
+            <svg class="w-6 h-6 mr-3" viewBox="0 0 48 48" aria-hidden="true"><defs><path id="a" d="M44.5 20H24v8.5h11.8C34.7 33.9 30.1 37 24 37c-7.2 0-13-5.8-13-13s5.8-13 13-13c3.1 0 5.9 1.1 8.1 2.9l6.4-6.4C34.6 4.1 29.6 2 24 2 11.8 2 2 11.8 2 24s9.8 22 22 22c11 0 21-8 21-22 0-1.3-.2-2.7-.5-4z"/></defs><clipPath id="b"><use xlink:href="#a" overflow="visible"/></clipPath><path clip-path="url(#b)" fill="#FBBC05" d="M0 37V11l17 13z"/><path clip-path="url(#b)" fill="#EA4335" d="M0 11l17 13 7-6.1L48 14V0H0z"/><path clip-path="url(#b)" fill="#34A853" d="M0 37l30-23 7.9 1L48 0v48H0z"/><path clip-path="url(#b)" fill="#4285F4" d="M48 48L17 24l-4-3 35-10z"/></svg>
+            Continuar con Google
+          </button>
         </div>
-        <p id="auth-error-message" class="text-red-500 text-sm text-center mb-4 h-5"></p>
-        <form id="login-form" class="space-y-4">
-          <input name="email" type="email" placeholder="Correo electrónico" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500" />
-          <input name="password" type="password" placeholder="Contraseña" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500" />
-          <button type="submit" class="w-full btn-primary font-bold py-3 rounded-lg">Ingresar</button>
-        </form>
-        <form id="register-form" class="space-y-4 hidden">
-          <input name="email" type="email" placeholder="Correo electrónico" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500" />
-          <input name="password" type="password" placeholder="Crear contraseña" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500" />
-          <button type="submit" class="w-full btn-primary font-bold py-3 rounded-lg">Crear Cuenta</button>
-        </form>
-        <div class="my-6 flex items-center">
-          <div class="flex-grow border-t border-gray-300"></div><span class="mx-4 text-gray-500 text-sm">o</span><div class="flex-grow border-t border-gray-300"></div>
+
+        <!-- Caja Pago -->
+        <div id="payment-section" class="bg-white p-8 rounded-2xl shadow-lg hidden">
+          <h2 id="welcome-message" class="text-2xl font-bold section-title mb-4">Paso 3: Realiza el pago</h2>
+          <p id="payment-instructions" class="text-gray-600 mb-6">Revisa tu selección y paga de forma segura con Mercado Pago.</p>
+
+          <div id="clauses-container" class="mb-6 space-y-2 hidden">
+            <div class="flex items-start bg-yellow-50 border border-yellow-200 p-4 rounded-lg">
+              <input id="terms-checkbox" type="checkbox" class="h-5 w-5 text-teal-600 border-gray-300 rounded focus:ring-teal-500 mt-1 cursor-pointer">
+              <label for="terms-checkbox" class="ml-3 text-sm text-gray-800 cursor-pointer">
+                Entiendo que para los cuentos personalizados, recibiré un formulario por correo después del pago para enviar los detalles de la historia.
+              </label>
+            </div>
+          </div>
+
+          <div id="mercado-pago-button-container"></div>
+          <p id="payment-error" class="text-red-500 text-sm mt-4 text-center"></p>
         </div>
-        <button id="google-signin-btn" class="w-full flex items-center justify-center bg-white border border-gray-300 text-gray-700 font-semibold py-3 px-4 rounded-lg hover:bg-gray-50 transition">
-          <svg class="w-6 h-6 mr-3" viewBox="0 0 48 48" aria-hidden="true"><defs><path id="a" d="M44.5 20H24v8.5h11.8C34.7 33.9 30.1 37 24 37c-7.2 0-13-5.8-13-13s5.8-13 13-13c3.1 0 5.9 1.1 8.1 2.9l6.4-6.4C34.6 4.1 29.6 2 24 2 11.8 2 2 11.8 2 24s9.8 22 22 22c11 0 21-8 21-22 0-1.3-.2-2.7-.5-4z"/></defs><clipPath id="b"><use xlink:href="#a" overflow="visible"/></clipPath><path clip-path="url(#b)" fill="#FBBC05" d="M0 37V11l17 13z"/><path clip-path="url(#b)" fill="#EA4335" d="M0 11l17 13 7-6.1L48 14V0H0z"/><path clip-path="url(#b)" fill="#34A853" d="M0 37l30-23 7.9 1L48 0v48H0z"/><path clip-path="url(#b)" fill="#4285F4" d="M48 48L17 24l-4-3 35-10z"/></svg>
-          Continuar con Google
-        </button>
       </div>
 
-      <!-- Paso 2: Productos y Pago (Oculto por defecto) -->
-      <div id="purchase-section" class="hidden mt-12">
-          <div id="welcome-message" class="text-center mb-8">
-            <h2 class="text-2xl font-bold section-title">Paso 2: Elige tus productos y paga</h2>
-            <p class="text-gray-600 mt-1">¡Hola, <span id="user-name" class="font-semibold"></span>! Ya puedes completar tu compra.</p>
+      <!-- Columna Derecha: Selección de Productos -->
+      <div id="products-column">
+        <div class="flex items-center justify-between mb-6">
+          <h1 class="text-3xl font-bold section-title">Paso 2: Elige tus productos</h1>
+          <span id="lockBadge" class="text-xs px-3 py-1 rounded-full bg-slate-200 text-slate-700 hidden">Se habilita tras iniciar sesión</span>
+        </div>
+
+        <div id="plans-wrapper" class="relative">
+          <!-- Overlay de bloqueo (visible cuando no hay auth) -->
+          <div id="lockOverlay" class="absolute inset-0 bg-white/60 rounded-2xl border hidden grid place-content-center text-center">
+            <div class="px-6 py-4 rounded-xl border bg-white shadow">
+              <div class="font-semibold text-slate-700">Autentifícate para seleccionar tus productos</div>
+              <div class="text-xs text-slate-500 mt-1">Paso 1 a la izquierda</div>
+            </div>
           </div>
-        
-          <div class="bg-white p-8 rounded-2xl shadow-lg">
-            <div id="plans-list" class="space-y-4">
-              <!-- Los planes se renderizarán aquí con JS -->
-            </div>
-    
-            <!-- Add-on: Libro Impreso (condicional) -->
-            <div id="plan-004-wrapper" class="hidden mt-6 transition-all duration-300">
-                <div class="text-sm font-semibold text-gray-600 mb-2">✨ ¡Convierte tu cuento en un tesoro físico!</div>
-                <div id="plan-004-card">
-                    <!-- El plan de libro impreso se renderizará aquí -->
-                </div>
-            </div>
-            
-            <!-- Total a Pagar -->
-            <div class="border-t mt-8 pt-6">
-                <div class="flex items-center justify-between">
-                    <span class="text-lg text-gray-800">Total a pagar</span>
-                    <span id="total-amount" class="text-3xl font-extrabold text-gray-900">$0</span>
-                </div>
-            </div>
 
-            <!-- Cláusulas -->
-            <div id="clauses-container" class="mt-6 space-y-2 hidden">
-              <div class="flex items-start bg-yellow-50 border border-yellow-200 p-4 rounded-lg">
-                <input id="terms-checkbox" type="checkbox" class="h-5 w-5 text-teal-600 border-gray-300 rounded focus:ring-teal-500 mt-1 cursor-pointer flex-shrink-0">
-                <label for="terms-checkbox" class="ml-3 text-sm text-gray-800 cursor-pointer">
-                  Entiendo que para los cuentos personalizados, recibiré un formulario por correo después del pago para enviar los detalles de la historia.
-                </label>
-              </div>
-            </div>
+          <div id="plans-list" class="space-y-4 grayscale-locked no-pointer rounded-2xl"></div>
 
-             <!-- Botón de Pago -->
-            <div id="mercado-pago-button-container" class="mt-6"></div>
-            <p id="payment-error" class="text-red-500 text-sm mt-4 text-center"></p>
+          <!-- Add-on: Libro Impreso (solo cuando hay cuento custom seleccionado Y autenticado) -->
+          <div id="plan-004-wrapper" class="hidden mt-6 transition-all duration-300">
+            <div class="text-sm font-semibold text-gray-600 mb-2">✨ ¡Convierte tu cuento en un tesoro físico!</div>
+            <div id="plan-004-card"></div>
+          </div>
+        </div>
+
+        <!-- Total a Pagar -->
+        <div class="bg-white p-6 rounded-2xl shadow-lg mt-8">
+          <div class="flex items-center justify-between">
+            <span class="text-lg text-gray-800">Total a pagar</span>
+            <span id="total-amount" class="text-3xl font-extrabold text-gray-900">$0</span>
+          </div>
         </div>
 
         <!-- A tener en cuenta -->
         <div class="mt-8 bg-white p-6 rounded-2xl shadow-lg space-y-4">
-            <h3 class="font-bold text-lg section-title">A tener en cuenta</h3>
-            <div class="flex items-start gap-3">
-                <svg class="w-6 h-6 text-teal-500 mt-1 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                <div>
-                    <h4 class="font-semibold text-gray-800">Tiempos de entrega</h4>
-                    <p class="text-sm text-gray-600">Recibirás tu video-cuento personalizado en tu correo en **menos de 24 horas** tras completar el formulario que te enviaremos post-pago.</p>
-                </div>
+          <h3 class="font-bold text-lg section-title">A tener en cuenta</h3>
+          <div class="flex items-start gap-3">
+            <svg class="w-6 h-6 text-teal-500 mt-1 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            <div>
+              <h4 class="font-semibold text-gray-800">Tiempos de entrega</h4>
+              <p class="text-sm text-gray-600">Recibirás tu video‑cuento personalizado en **menos de 24 horas** tras completar el formulario post‑pago.</p>
             </div>
-            <div class="flex items-start gap-3">
-                 <svg class="w-6 h-6 text-teal-500 mt-1 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" /></svg>
-                <div>
-                    <h4 class="font-semibold text-gray-800">Política de Devolución</h4>
-                    <p class="text-sm text-gray-600">Debido a la naturaleza digital y personalizada de nuestros productos, no se realizan devoluciones una vez efectuada la compra.</p>
-                </div>
+          </div>
+          <div class="flex items-start gap-3">
+            <svg class="w-6 h-6 text-teal-500 mt-1 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" /></svg>
+            <div>
+              <h4 class="font-semibold text-gray-800">Política de Devolución</h4>
+              <p class="text-sm text-gray-600">Por la naturaleza digital y personalizada, no hay devoluciones una vez efectuada la compra.</p>
             </div>
+          </div>
         </div>
       </div>
+
     </div>
   </main>
 
@@ -151,9 +189,9 @@
 
     const PLANS = [
       { id: 'plan-001', name: 'Suscripción Biblioteca Mágica', price: 8900, custom: false, addon: false },
-      { id: 'plan-002', name: 'Cuento a Medida (Estándar)', price: 18900, custom: true, addon: false },
-      { id: 'plan-003', name: 'Cuento Premium', price: 40000, custom: true, addon: false },
-      { id: 'plan-004', name: 'Complemento: Libro Impreso', price: 50000, custom: false, addon: true, description: 'Tapa dura y calidad premium. Requiere un Cuento a Medida o Premium.' }
+      { id: 'plan-002', name: 'Cuento a Medida (Estándar)',   price: 18900, custom: true,  addon: false },
+      { id: 'plan-003', name: 'Cuento Premium',                price: 40000, custom: true,  addon: false },
+      { id: 'plan-004', name: 'Complemento: Libro Impreso',    price: 50000, custom: false, addon: true, description: 'Tapa dura premium. Requiere un Cuento a Medida o Premium.' }
     ];
 
     const $ = (sel) => document.querySelector(sel);
@@ -164,143 +202,150 @@
     let currentUser = null;
 
     function renderPlanCard(plan) {
-        const isOwned = owned.has(plan.id);
-        const isSelected = selected.has(plan.id);
-        
-        return `
-          <div class="flex items-start justify-between p-5 rounded-2xl border shadow-sm transition-colors ${isOwned ? 'disabled-plan' : 'bg-white'}">
-            <div class="flex items-start gap-4">
-              <input type="checkbox" data-id="${plan.id}" class="mt-1 h-5 w-5 rounded border-gray-300 text-teal-600 focus:ring-teal-500" ${isOwned ? 'disabled checked' : ''} ${isSelected ? 'checked' : ''}>
-              <div>
-                <div class="flex items-center gap-2">
-                  <span class="font-semibold text-gray-800">${plan.name}</span>
-                  ${isOwned ? '<span class="text-xs bg-gray-200 text-gray-700 px-2 py-0.5 rounded-full border">Ya lo tienes</span>' : ''}
-                </div>
-                <div class="text-sm text-gray-500">${plan.description || fmt(plan.price)}</div>
+      const isOwned = owned.has(plan.id);
+      const isSelected = selected.has(plan.id);
+      return `
+        <div class="flex items-start justify-between p-5 rounded-2xl border shadow-sm transition-colors ${isOwned ? 'disabled-plan' : 'bg-white'}">
+          <div class="flex items-start gap-4">
+            <input type="checkbox" data-id="${plan.id}" class="mt-1 h-5 w-5 rounded border-gray-300 text-teal-600 focus:ring-teal-500" ${isOwned ? 'disabled checked' : ''} ${isSelected ? 'checked' : ''}>
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="font-semibold text-gray-800">${plan.name}</span>
+                ${isOwned ? '<span class="text-xs bg-gray-200 text-gray-700 px-2 py-0.5 rounded-full border">Ya lo tienes</span>' : ''}
               </div>
+              <div class="text-sm text-gray-500">${plan.description || fmt(plan.price)}</div>
             </div>
-            <div class="text-gray-700 font-semibold text-lg">${fmt(plan.price)}</div>
           </div>
-        `;
+          <div class="text-gray-700 font-semibold text-lg">${fmt(plan.price)}</div>
+        </div>
+      `;
     }
 
-    function renderPlans() {
-      const mainPlansList = $('#plans-list');
-      const addonCardContainer = $('#plan-004-card');
-      
-      mainPlansList.innerHTML = '';
-      
+    function renderPlans(authenticated){
+      const list = $('#plans-list');
+      const addonBox = $('#plan-004-card');
+      list.innerHTML = '';
+      addonBox.innerHTML = '';
+
+      // Render principales SIEMPRE, pero si no hay auth quedan grises/bloqueados por CSS + overlay
       PLANS.forEach(plan => {
-          if (!plan.addon) {
-              mainPlansList.innerHTML += renderPlanCard(plan);
-          } else {
-              addonCardContainer.innerHTML = renderPlanCard(plan);
-          }
+        if (!plan.addon) list.innerHTML += renderPlanCard(plan);
       });
-      updateTotal();
+
+      // Addon impresos se carga pero se muestra SOLO si hay custom seleccionado y autenticado
+      addonBox.innerHTML = renderPlanCard(PLANS.find(p=>p.id==='plan-004'));
     }
 
-    function updateTotal() {
-        const hasCustomStorySelected = Array.from(selected).some(id => PLANS.find(p => p.id === id)?.custom);
-        const addonWrapper = $('#plan-004-wrapper');
-        const addonCheckbox = document.querySelector('input[data-id="plan-004"]');
+    function toggleSelectionLock(lock){
+      $('#plans-list').classList.toggle('grayscale-locked', lock);
+      $('#plans-list').classList.toggle('no-pointer', lock);
+      $('#lockOverlay').classList.toggle('hidden', !lock);
+      $('#lockBadge').classList.toggle('hidden', !lock);
 
-        addonWrapper.classList.toggle('hidden', !hasCustomStorySelected);
-
-        if (!hasCustomStorySelected && selected.has('plan-004')) {
-            selected.delete('plan-004');
-            if (addonCheckbox) addonCheckbox.checked = false;
-        }
-
-        let total = 0;
-        let hasCustom = false;
-        selected.forEach(id => {
-            const p = PLANS.find(x => x.id === id);
-            if (p) {
-                total += p.price;
-                if(p.custom) hasCustom = true;
-            }
-        });
-        $('#total-amount').textContent = fmt(total);
-
-        $('#clauses-container').classList.toggle('hidden', !hasCustom);
-
-        if (currentUser) {
-            updatePaymentButton();
-        }
-    }
-    
-    function updatePaymentButton() {
-        const total = Array.from(selected).reduce((acc, id) => acc + (PLANS.find(p => p.id === id)?.price || 0), 0);
-        const hasCustom = Array.from(selected).some(id => PLANS.find(p => p.id === id)?.custom);
-        const termsChecked = !hasCustom || $('#terms-checkbox').checked;
-
-        if (total > 0 && termsChecked) {
-            createCheckoutButton();
-        } else {
-            $('#mercado-pago-button-container').innerHTML = '';
-        }
-    }
-
-    document.body.addEventListener('change', e => {
-        if (e.target.type === 'checkbox' && e.target.dataset.id) {
-            const id = e.target.dataset.id;
-            const isOwned = owned.has(id);
-            if(isOwned) {
-                e.target.checked = true; // Prevent unchecking owned items
-                return;
-            }
-            if (e.target.checked) {
-                selected.add(id);
-            } else {
-                selected.delete(id);
-            }
-            updateTotal();
-        }
-    });
-    
-    $('#clauses-container').addEventListener('change', e => {
-        if (e.target.id === 'terms-checkbox') {
-            updatePaymentButton();
-        }
-    });
-
-    onAuthStateChanged(auth, async (user) => {
-      currentUser = user;
-      if (user) {
-        $('#auth-section').classList.add('hidden');
-        $('#purchase-section').classList.remove('hidden');
-        $('#user-name').textContent = user.displayName || user.email.split('@')[0];
-
-        try {
-          const ref = doc(db, 'user_products', user.uid);
-          const snap = await getDoc(ref);
-          owned = new Set((snap.exists() && Array.isArray(snap.data().items)) ? snap.data().items : []);
-          selected.forEach(item => { if(owned.has(item)) selected.delete(item) });
-          renderPlans();
-        } catch (e) { console.warn('No se pudo leer user_products:', e); renderPlans(); }
+      // Visual de pasos
+      if (lock){
+        // Paso 1 activo
+        $('#step1').className = 'flex items-center gap-2 font-semibold text-teal-700';
+        $('#step2').className = 'flex items-center gap-2 text-slate-400';
+        $('#step3').className = 'flex items-center gap-2 text-slate-400';
       } else {
-        $('#auth-section').classList.remove('hidden');
-        $('#purchase-section').classList.add('hidden');
-        owned.clear();
-        renderPlans();
+        // Paso 2 activo
+        $('#step1').className = 'flex items-center gap-2 text-slate-400';
+        $('#step2').className = 'flex items-center gap-2 font-semibold text-teal-700';
+        $('#step3').className = 'flex items-center gap-2 text-slate-400';
       }
+    }
+
+    function updateTotal(){
+      const hasCustom = Array.from(selected).some(id => PLANS.find(p => p.id === id)?.custom);
+      const addonWrapper = $('#plan-004-wrapper');
+      const addonCheckbox = document.querySelector('input[data-id="plan-004"]');
+
+      // Mostrar add-on SOLO si hay custom seleccionado Y autenticado
+      const showAddon = hasCustom && !!currentUser;
+      addonWrapper.classList.toggle('hidden', !showAddon);
+      if (!showAddon && selected.has('plan-004')){
+        selected.delete('plan-004');
+        if (addonCheckbox) addonCheckbox.checked = false;
+      }
+
+      let total = 0; let anyCustom = false;
+      selected.forEach(id => {
+        const p = PLANS.find(x => x.id === id);
+        if (p){ total += p.price; if (p.custom) anyCustom = true; }
+      });
+      $('#total-amount').textContent = fmt(total);
+      $('#clauses-container').classList.toggle('hidden', !anyCustom);
+      if (currentUser) updatePaymentButton();
+    }
+
+    function updatePaymentButton(){
+      const ids = Array.from(selected);
+      const total = ids.reduce((acc, id) => acc + (PLANS.find(p => p.id === id)?.price || 0), 0);
+      const needClauses = ids.some(id => PLANS.find(p => p.id === id)?.custom);
+      const termsChecked = !needClauses || $('#terms-checkbox').checked;
+      if (total > 0 && termsChecked){
+        createCheckoutButton(ids);
+      } else {
+        $('#mercado-pago-button-container').innerHTML = '';
+      }
+    }
+
+    // ===== Event delegation =====
+    document.body.addEventListener('change', e => {
+      if (e.target.matches('input[type="checkbox"][data-id]')){
+        const id = e.target.dataset.id;
+        if (owned.has(id)){ e.target.checked = true; return; }
+        if (e.target.checked) selected.add(id); else selected.delete(id);
+        updateTotal();
+      }
+      if (e.target.id === 'terms-checkbox') updatePaymentButton();
     });
-    
-    async function createCheckoutButton() {
+
+    // ===== Auth tabs & actions =====
+    const loginTabBtn = $('#login-tab-btn'), registerTabBtn = $('#register-tab-btn');
+    const loginForm = $('#login-form'), registerForm = $('#register-form');
+    loginTabBtn.addEventListener('click', () => {
+      loginForm.classList.remove('hidden');
+      registerForm.classList.add('hidden');
+      loginTabBtn.classList.add('text-teal-600','border-teal-600');
+      registerTabBtn.classList.remove('text-teal-600','border-teal-600');
+    });
+    registerTabBtn.addEventListener('click', () => {
+      registerForm.classList.remove('hidden');
+      loginForm.classList.add('hidden');
+      registerTabBtn.classList.add('text-teal-600','border-teal-600');
+      loginTabBtn.classList.remove('text-teal-600','border-teal-600');
+    });
+
+    $('#google-signin-btn').addEventListener('click', () => signInWithPopup(auth, googleProvider).catch(e => console.error(e)));
+
+    registerForm.addEventListener('submit', e => {
+      e.preventDefault();
+      createUserWithEmailAndPassword(auth, e.target.email.value, e.target.password.value)
+        .catch(err => $('#auth-error-message').textContent = 'Error al registrar. Verifica los datos.');
+    });
+
+    loginForm.addEventListener('submit', e => {
+      e.preventDefault();
+      signInWithEmailAndPassword(auth, e.target.email.value, e.target.password.value)
+        .catch(err => $('#auth-error-message').textContent = 'Email o contraseña incorrectos.');
+    });
+
+    // ===== Mercado Pago =====
+    async function createCheckoutButton(ids){
       const container = $('#mercado-pago-button-container');
       container.innerHTML = '<p class="text-center text-gray-500">Cargando botón de pago...</p>';
       $('#payment-error').textContent = '';
-      const itemsToBuy = Array.from(selected).map(id => PLANS.find(p => p.id === id)).filter(Boolean);
-      const total = itemsToBuy.reduce((sum, item) => sum + item.price, 0);
-      if (total <= 0) { container.innerHTML = ''; return; }
-      
+
+      const itemsToBuy = ids.map(id => PLANS.find(p => p.id === id)).filter(Boolean);
+      const bricksBuilder = mp.bricks();
+
       try {
         const preference = await createPreferenceOnBackend(itemsToBuy);
         if (!preference.id) throw new Error('No se obtuvo preferenceId');
         container.innerHTML = '';
         if(window.checkoutButton) await window.checkoutButton.unmount();
-        const bricksBuilder = mp.bricks();
         window.checkoutButton = await bricksBuilder.create('wallet', container.id, {
           initialization: { preferenceId: preference.id },
           customization: { texts: { valueProp: 'smart_option' } }
@@ -311,49 +356,52 @@
         $('#payment-error').textContent = 'Hubo un problema al generar el pago. Inténtalo de nuevo.';
       }
     }
-    
-    async function createPreferenceOnBackend(items) {
+
+    async function createPreferenceOnBackend(items){
       const functionUrl = `https://us-central1-munabooki.cloudfunctions.net/createMercadoPagoPreference`;
-      try{
-        const resp = await fetch(functionUrl, {
-          method:'POST', 
-          headers:{ 'Content-Type':'application/json' },
-          body: JSON.stringify({ items: items })
-        });
-        if(!resp.ok) throw new Error(`Error en la función: ${resp.statusText}`);
-        const data = await resp.json();
-        return { id: data.preferenceId };
-      } catch(err) { console.error('Error llamando a Cloud Function:', err); throw err; }
+      const resp = await fetch(functionUrl, {
+        method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify({ items })
+      });
+      if(!resp.ok) throw new Error(`Error en la función: ${resp.statusText}`);
+      const data = await resp.json();
+      return { id: data.preferenceId };
     }
-    
-    const loginTabBtn = $('#login-tab-btn'), registerTabBtn = $('#register-tab-btn');
-    const loginForm = $('#login-form'), registerForm = $('#register-form');
-    loginTabBtn.addEventListener('click', () => {
-        loginForm.classList.remove('hidden'); registerForm.classList.add('hidden');
-        loginTabBtn.classList.add('text-teal-600', 'border-teal-600'); registerTabBtn.classList.remove('text-teal-600', 'border-teal-600');
-    });
-    registerTabBtn.addEventListener('click', () => {
-        registerForm.classList.remove('hidden'); loginForm.classList.add('hidden');
-        registerTabBtn.classList.add('text-teal-600', 'border-teal-600'); loginTabBtn.classList.remove('text-teal-600', 'border-teal-600');
-    });
-    $('#google-signin-btn').addEventListener('click', () => signInWithPopup(auth, googleProvider).catch(e => console.error(e)));
-    registerForm.addEventListener('submit', e => {
-        e.preventDefault();
-        createUserWithEmailAndPassword(auth, e.target.email.value, e.target.password.value)
-            .catch(err => $('#auth-error-message').textContent = 'Error al registrar. Verifica los datos.');
-    });
-    loginForm.addEventListener('submit', e => {
-        e.preventDefault();
-        signInWithEmailAndPassword(auth, e.target.email.value, e.target.password.value)
-            .catch(err => $('#auth-error-message').textContent = 'Email o contraseña incorrectos.');
+
+    // ===== Estado =====
+    onAuthStateChanged(auth, async (user) => {
+      currentUser = user;
+      const locked = !user;
+      toggleSelectionLock(locked);
+
+      if (user) {
+        // Paso 3 sigue gris hasta que haya selección válida
+        $('#payment-section').classList.remove('hidden');
+        $('#welcome-message').textContent = `Paso 3: Realiza el pago, ${user.displayName || user.email.split('@')[0]}!`;
+        try {
+          const ref = doc(db, 'user_products', user.uid);
+          const snap = await getDoc(ref);
+          owned = new Set((snap.exists() && Array.isArray(snap.data().items)) ? snap.data().items : []);
+        } catch (e) { console.warn('No se pudo leer user_products:', e); }
+      } else {
+        $('#payment-section').classList.add('hidden');
+        owned.clear();
+        selected.clear();
+        $('#total-amount').textContent = fmt(0);
+        $('#mercado-pago-button-container').innerHTML = '';
+      }
+
+      renderPlans(!!user);
+      updateTotal();
     });
 
-    const urlParams = new URLSearchParams(window.location.search);
-    const itemsFromUrl = urlParams.get('items')?.split(',').filter(Boolean) || [];
+    // Preselección desde URL (si llega con items)
+    const sp = new URLSearchParams(window.location.search);
+    const itemsFromUrl = sp.get('items')?.split(',').filter(Boolean) || [];
     itemsFromUrl.forEach(item => selected.add(item));
-    
-    renderPlans();
+
+    // Render inicial
+    renderPlans(false);
+    updateTotal();
   </script>
 </body>
 </html>
-
