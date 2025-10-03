@@ -97,21 +97,12 @@
                 </div>
             </div>
 
-            <div id="clauses-container" class="mt-6 space-y-2 hidden">
-              <div class="flex items-start bg-yellow-50 border border-yellow-200 p-4 rounded-lg">
-                <input id="terms-checkbox" type="checkbox" class="h-5 w-5 text-teal-600 border-gray-300 rounded focus:ring-teal-500 mt-1 cursor-pointer flex-shrink-0">
-                <label for="terms-checkbox" class="ml-3 text-sm text-gray-800 cursor-pointer">
-                  Entiendo que para los cuentos personalizados, recibiré un formulario por correo después del pago para enviar los detalles de la historia.
-                </label>
-              </div>
-            </div>
-
             <div id="mercado-pago-button-container" class="mt-6"></div>
             <p id="payment-error" class="text-red-500 text-sm mt-4 text-center"></p>
           </div>
 
           <div class="mt-8 bg-white p-6 rounded-2xl shadow-lg space-y-4">
-            <h3 class="font-bold text-lg section-title">A tener en cuenta</h3>
+            <h3 class="font-bold text-lg section-title">Políticas y Condiciones de Compra</h3>
             <div class="flex items-start gap-3">
                 <svg class="w-6 h-6 text-teal-500 mt-1 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                 <div>
@@ -125,6 +116,15 @@
                     <h4 class="font-semibold text-gray-800">Política de Devolución</h4>
                     <p class="text-sm text-gray-600">Por la naturaleza digital y personalizada, no hay devoluciones una vez efectuada la compra.</p>
                 </div>
+            </div>
+            <!-- Contenedor de la cláusula, se muestra solo si hay cuentos custom -->
+             <div id="clauses-container" class="pt-4 mt-4 border-t border-gray-200 space-y-2 hidden">
+              <div class="flex items-start">
+                <input id="terms-checkbox" type="checkbox" checked class="h-5 w-5 text-teal-600 border-gray-300 rounded focus:ring-teal-500 mt-1 cursor-pointer flex-shrink-0">
+                <label for="terms-checkbox" class="ml-3 text-sm text-gray-800 cursor-pointer">
+                  Acepto las políticas y entiendo que para los cuentos personalizados, recibiré un formulario por correo después del pago para enviar los detalles.
+                </label>
+              </div>
             </div>
           </div>
       </div>
@@ -203,7 +203,8 @@
 
         if (step === 1) {
             step1Dot.classList.add('bg-teal-600', 'text-white');
-            step1Dot.classList.remove('bg-slate-300');
+            step1Dot.classList.remove('bg-slate-300', 'bg-green-500');
+            step1Dot.innerHTML = '1';
             step1Text.classList.add('font-semibold', 'text-teal-700');
             step1Text.classList.remove('text-slate-500');
 
