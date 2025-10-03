@@ -3,102 +3,26 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Mi Cuenta - Muna Booki</title>
-  <!-- Mercado Pago SDK -->
-  <script src="https://sdk.mercadopago.com/js/v2"></script>
-  <!-- Tailwind (ok para dev) -->
+  <title>Mi cuenta - Muna Booki</title>
+  <!-- Tailwind (para prototipado) -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;900&display=swap" rel="stylesheet" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;900&display=swap" rel="stylesheet">
   <style>
-    :root { --color-dark-blue:#0A2F5B; --color-teal:#00B2A9; --color-gold:#FFC845; }
-    body { font-family:'Poppins',sans-serif }
-    .section-title{ color:var(--color-dark-blue) }
-    .btn-primary{ background:var(--color-teal); color:#fff }
-    .btn-primary:hover{ background:#009a92 }
-    .tag{ font-size:12px; padding:2px 8px; border-radius:9999px }
+    body{font-family:'Poppins',sans-serif}
+    :root{--color-dark-blue:#0A2F5B;--color-teal:#00B2A9;--color-gold:#FFC845}
+    .section-title{color:var(--color-dark-blue)}
+    .btn-primary{background-color:var(--color-teal);color:#fff}
+    .btn-primary:hover{background-color:#009a92}
   </style>
-</head>
-<body class="bg-gray-50">
-  <!-- Header -->
-  <header class="bg-white shadow-sm">
-    <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
-      <a href="index.html" class="flex items-center gap-3">
-        <img src="https://bmeryu.github.io/muna-booki/Logo_MunaBooki.png" alt="Muna Booki" class="h-12" />
-        <span class="font-bold text-lg text-slate-700">Mi Cuenta</span>
-      </a>
-      <button id="logoutBtn" class="text-sm text-slate-600 hover:text-slate-900">Cerrar sesión</button>
-    </nav>
-  </header>
-
-  <main class="container mx-auto px-6 py-10 grid lg:grid-cols-3 gap-10">
-    <!-- Columna izquierda: Estado y productos -->
-    <section class="lg:col-span-2 space-y-6">
-      <div id="accountCard" class="bg-white p-6 rounded-2xl shadow">
-        <h1 class="text-2xl font-bold section-title mb-2">Hola <span id="userName">...</span></h1>
-        <p id="allowBanner" class="hidden mt-2 p-3 bg-green-50 text-green-700 rounded">✔ Tu email está en la <strong>lista de acceso</strong>. Tienes acceso sin pagar.</p>
-        <p id="noAllowBanner" class="hidden mt-2 p-3 bg-amber-50 text-amber-700 rounded">ℹ Aún no estás en la lista. Puedes comprar planes abajo.</p>
-        <p id="debugInfo" class="mt-2 text-xs text-slate-500 hidden"></p>
-      </div>
-
-      <div class="bg-white p-6 rounded-2xl shadow">
-        <div class="flex items-center justify-between mb-4">
-          <h2 class="text-xl font-semibold section-title">Mis productos</h2>
-          <span id="ownedCount" class="text-xs text-slate-500"></span>
-        </div>
-        <div id="ownedList" class="grid sm:grid-cols-2 gap-4"></div>
-        <p id="ownedEmpty" class="text-slate-500 text-sm">No tienes productos aún.</p>
-      </div>
-    </section>
-
-    <!-- Columna derecha: CTA -->
-    <aside class="space-y-6">
-      <div class="bg-white p-6 rounded-2xl shadow">
-        <h3 class="text-lg font-semibold section-title mb-2">Agregar productos</h3>
-        <p class="text-slate-600 text-sm mb-4">Elige uno o varios y paga en un solo paso.</p>
-        <button id="openModalBtn" class="w-full btn-primary py-3 rounded-lg font-semibold">Explorar planes</button>
-      </div>
-
-      <div class="bg-white p-6 rounded-2xl shadow text-sm text-slate-600">
-        <p>¿Dudas? Escríbenos y te ayudamos con la compra.</p>
-      </div>
-    </aside>
-  </main>
-
-  <!-- Modal Selección de productos -->
-  <div id="plansModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50 p-4">
-    <div class="bg-white w-full max-w-2xl rounded-2xl shadow-xl overflow-hidden">
-      <div class="p-6 border-b flex items-center justify-between">
-        <h4 class="text-lg font-semibold">Elige tus planes</h4>
-        <button id="closeModalBtn" class="text-slate-500 hover:text-slate-900">✕</button>
-      </div>
-
-      <div class="p-6 space-y-4">
-        <p id="allowModalMsg" class="hidden p-3 bg-green-50 text-green-700 rounded">Estás en allowlist: no necesitas pagar. Puedes disfrutar de todos los productos.</p>
-
-        <div id="plansList" class="space-y-3"></div>
-
-        <div class="flex items-center justify-between pt-4 border-t">
-          <div class="text-slate-600 text-sm">Total</div>
-          <div class="text-2xl font-bold" id="totalAmount">$0</div>
-        </div>
-
-        <div class="mt-4">
-          <button id="payBtn" class="w-full btn-primary py-3 rounded-lg font-semibold disabled:opacity-40 disabled:cursor-not-allowed">Pagar con Mercado Pago</button>
-          <div id="mp-button-container" class="mt-3"></div>
-        </div>
-      </div>
-    </div>
-  </div>
-
+  <!-- Firebase -->
   <script type="module">
-    // Firebase SDKs
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
     import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore-lite.js";
 
-    // Config Firebase (tu proyecto)
+    // 🔧 TU CONFIG
     const firebaseConfig = {
       apiKey: "AIzaSyBivlKO0Ijt1hvMNyH9aIGXf_7WZwE2tA4",
       authDomain: "munabooki.firebaseapp.com",
@@ -109,215 +33,178 @@
       measurementId: "G-HBM4Y2FKMF"
     };
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app); // Lite (sin listeners)
+    // 🧮 Planes disponibles (ids estables)
+    const PLANS = [
+      { id: 'plan-001', name: 'Suscripción Biblioteca Mágica', price: 8900 },
+      { id: 'plan-002', name: 'Cuento a Medida (Estándar)', price: 18900 },
+      { id: 'plan-003', name: 'Cuento Premium', price: 40000 }
+    ];
 
-    // Mercado Pago
-    const mpPublicKey = 'APP_USR-a633c3e4-ac28-4661-bba4-0a5dee41e9ed';
-    const mp = new MercadoPago(mpPublicKey);
-
-    // Catálogo (ids estables)
-    const CATALOG = {
-      'plan-001': { id:'plan-001', code:'biblioteca', name:'Suscripción Biblioteca Mágica', price: 8900 },
-      'plan-002': { id:'plan-002', code:'estandar',   name:'Cuento a Medida (Estándar)',  price: 18900 },
-      'plan-003': { id:'plan-003', code:'premium',    name:'Cuento Premium',               price: 40000 }
-    };
-
+    // Helpers UI
     const $ = (sel)=>document.querySelector(sel);
     const $$ = (sel)=>document.querySelectorAll(sel);
+    const fmt = (v)=> new Intl.NumberFormat('es-CL',{style:'currency',currency:'CLP',maximumFractionDigits:0}).format(v);
 
-    // UI refs
-    const userNameEl = $('#userName');
-    const allowBanner = $('#allowBanner');
-    const noAllowBanner = $('#noAllowBanner');
-    const debugInfo = $('#debugInfo');
-    const ownedList = $('#ownedList');
-    const ownedEmpty = $('#ownedEmpty');
-    const ownedCount = $('#ownedCount');
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app); // Lite, solo lecturas
 
-    const openModalBtn = $('#openModalBtn');
-    const plansModal = $('#plansModal');
-    const closeModalBtn = $('#closeModalBtn');
-    const plansList = $('#plansList');
-    const totalAmount = $('#totalAmount');
-    const payBtn = $('#payBtn');
-    const mpBtnContainer = $('#mp-button-container');
-    const allowModalMsg = $('#allowModalMsg');
+    let owned = new Set();
+    let selected = new Set();
 
-    let CURRENT_USER = null;
-    let IS_ALLOW = false;
-    let OWNED = new Set();
-
-    const fmt = (n)=> new Intl.NumberFormat('es-CL',{style:'currency',currency:'CLP',maximumFractionDigits:0}).format(n);
-
-    onAuthStateChanged(auth, async (user)=>{
-      if(!user){ window.location.href = 'index.html'; return; }
-      CURRENT_USER = user;
-      const name = user.displayName || user.email.split('@')[0];
-      userNameEl.textContent = name;
-
-      // 1) allowlist por email (lowercase)
-      try {
-        const emailLower = (user.email||'').toLowerCase();
-        const allowSnap = await getDoc(doc(db,'allowlist',emailLower));
-        const active = allowSnap.exists() && (allowSnap.data()?.active === true || allowSnap.data()?.active === 'true' || allowSnap.data()?.active === 1);
-        IS_ALLOW = !!active;
-      } catch(e){ IS_ALLOW = false; }
-
-      allowBanner.classList.toggle('hidden', !IS_ALLOW);
-      noAllowBanner.classList.toggle('hidden', IS_ALLOW);
-
-      // 2) productos comprados por uid
-      OWNED = new Set();
-      try {
-        const upSnap = await getDoc(doc(db,'user_products',user.uid));
-        if(upSnap.exists()){
-          const arr = Array.isArray(upSnap.data()?.products) ? upSnap.data().products : [];
-          arr.forEach(id=>OWNED.add(String(id)));
-        }
-      } catch(e){ /* ignora */ }
-
-      // Si está en allowlist, consideramos acceso total (no escribe en DB)
-      if(IS_ALLOW){ Object.keys(CATALOG).forEach(id=>OWNED.add(id)); }
-
-      renderOwned();
-    });
-
-    function renderOwned(){
-      ownedList.innerHTML = '';
-      const ids = Array.from(OWNED);
-      if(ids.length===0){ ownedEmpty.classList.remove('hidden'); ownedCount.textContent=''; return; }
-      ownedEmpty.classList.add('hidden');
-      ownedCount.textContent = `${ids.length} producto(s)`;
-      ids.forEach(id=>{
-        const p = CATALOG[id];
-        if(!p) return;
-        const card = document.createElement('div');
-        card.className = 'p-4 rounded-xl border flex items-center justify-between';
-        card.innerHTML = `
-          <div>
-            <div class="font-semibold">${p.name}</div>
-            <div class="text-xs text-slate-500">ID: ${p.code}</div>
-          </div>
-          <span class="tag bg-emerald-100 text-emerald-700">Activo</span>
-        `;
-        ownedList.appendChild(card);
-      });
-    }
-
-    // MODAL
-    $('#logoutBtn').addEventListener('click', ()=> signOut(auth));
-    openModalBtn.addEventListener('click', ()=>{
-      buildPlansList();
-      totalAmount.textContent = fmt(0);
-      payBtn.disabled = true;
-      mpBtnContainer.innerHTML = '';
-      allowModalMsg.classList.toggle('hidden', !IS_ALLOW);
-      plansModal.classList.remove('hidden');
-      plansModal.classList.add('flex');
-    });
-    closeModalBtn.addEventListener('click', closeModal);
-    plansModal.addEventListener('click', (e)=>{ if(e.target===plansModal) closeModal(); });
-    function closeModal(){
-      plansModal.classList.add('hidden');
-      plansModal.classList.remove('flex');
-    }
-
-    function buildPlansList(){
-      plansList.innerHTML = '';
-      const available = Object.values(CATALOG).filter(p=>!OWNED.has(p.id));
-
-      if(IS_ALLOW){
-        // Si está en allowlist, mostramos lista pero deshabilitada
-        available.forEach(p=>{
-          const row = document.createElement('div');
-          row.className = 'p-3 rounded-lg border flex items-center justify-between opacity-60';
-          row.innerHTML = `
-            <div class="flex items-center gap-3">
-              <input type="checkbox" disabled class="h-5 w-5" />
-              <div>
-                <div class="font-medium">${p.name}</div>
-                <div class="text-xs text-slate-500">${fmt(p.price)}</div>
-              </div>
-            </div>
-            <span class="tag bg-green-100 text-green-700">Incluido por allowlist</span>
-          `;
-          plansList.appendChild(row);
-        });
-        payBtn.disabled = true;
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        window.location.href = 'index.html';
         return;
       }
 
-      available.forEach(p=>{
-        const id = `chk-${p.id}`;
-        const row = document.createElement('label');
-        row.htmlFor = id;
-        row.className = 'p-3 rounded-lg border flex items-center justify-between hover:bg-slate-50 cursor-pointer';
-        row.innerHTML = `
-          <div class="flex items-center gap-3">
-            <input id="${id}" data-id="${p.id}" type="checkbox" class="h-5 w-5" />
-            <div>
-              <div class="font-medium">${p.name}</div>
-              <div class="text-xs text-slate-500">${fmt(p.price)}</div>
-            </div>
-          </div>
-          <div class="text-sm text-slate-600">${fmt(p.price)}</div>
-        `;
-        plansList.appendChild(row);
-      });
+      // Saludo
+      const userName = user.displayName || (user.email ? user.email.split('@')[0] : 'Explorador/a');
+      $('#hello').textContent = `¡Hola, ${userName}!`;
 
-      plansList.addEventListener('change', recalcTotal, { once:false });
-    }
-
-    function recalcTotal(){
-      const checks = plansList.querySelectorAll('input[type="checkbox"]');
-      let sum = 0; let selected = [];
-      checks.forEach(chk=>{ if(chk.checked){ const p=CATALOG[chk.dataset.id]; sum += p.price; selected.push(p); } });
-      totalAmount.textContent = fmt(sum);
-      payBtn.disabled = (sum<=0);
-    }
-
-    payBtn.addEventListener('click', async ()=>{
-      const checks = plansList.querySelectorAll('input[type="checkbox"]');
-      const selected = [];
-      checks.forEach(chk=>{ if(chk.checked){ const p=CATALOG[chk.dataset.id]; selected.push({ id:p.id, title:p.name, unit_price:p.price, quantity:1 }); } });
-      if(selected.length===0) return;
-
-      try{
-        payBtn.disabled = true;
-        mpBtnContainer.innerHTML = '<div class="text-sm text-slate-600">Creando preferencia...</div>';
-        const prefId = await createPreferenceOnBackend(selected, CURRENT_USER.uid);
-        if(!prefId) throw new Error('Sin preferenceId');
-
-        // Renderiza botón Wallet de MP
-        mpBtnContainer.innerHTML = '';
-        const bricks = mp.bricks();
-        if(window.__mpWallet){ try{ await window.__mpWallet.unmount(); }catch{} }
-        window.__mpWallet = await bricks.create('wallet','mp-button-container',{
-          initialization:{ preferenceId: prefId },
-          customization:{ texts:{ valueProp:'smart_option' } }
-        });
-      }catch(err){
-        mpBtnContainer.innerHTML = '<div class="text-red-600 text-sm">No se pudo crear la preferencia. Revisa la consola.</div>';
-        console.error(err);
-      }finally{
-        payBtn.disabled = false;
+      // Cargar productos del usuario (user_products/{uid})
+      try {
+        const ref = doc(db, 'user_products', user.uid);
+        const snap = await getDoc(ref);
+        const items = (snap.exists() && Array.isArray(snap.data().items)) ? snap.data().items : [];
+        owned = new Set(items);
+      } catch (e) {
+        console.warn('No se pudo leer user_products:', e);
       }
+
+      // Renderizar chips "Mis productos"
+      renderOwnedChips();
+      // Renderizar lista de planes seleccionables bajo "Mis productos"
+      renderPlanSelector();
+      // Calcular total inicial
+      updateTotal();
+
+      // Cerrar sesión
+      $('#logoutBtn').addEventListener('click', async ()=>{
+        try { await signOut(auth); } catch(_){}
+        window.location.href = 'index.html';
+      });
     });
 
-    async function createPreferenceOnBackend(items, uid){
-      const functionUrl = `https://us-central1-${firebaseConfig.projectId}.cloudfunctions.net/createMercadoPagoPreference`;
-      const externalReference = `${uid}|${items.map(i=>i.id).join(',')}`;
-      const res = await fetch(functionUrl,{
-        method:'POST',
-        headers:{ 'Content-Type':'application/json' },
-        body: JSON.stringify({ items, externalReference })
-      });
-      if(!res.ok){ throw new Error('HTTP '+res.status); }
-      const data = await res.json();
-      return data.preferenceId;
+    function renderOwnedChips(){
+      const cont = $('#owned-chips');
+      cont.innerHTML = '';
+      if (owned.size === 0) {
+        cont.innerHTML = '<p class="text-gray-500">Aún no tienes productos.</p>';
+        return;
+      }
+      for (const id of owned){
+        const plan = PLANS.find(p=>p.id===id);
+        if(!plan) continue;
+        const chip = document.createElement('span');
+        chip.className = 'inline-flex items-center gap-2 bg-teal-50 text-teal-700 px-3 py-1 rounded-full border border-teal-200 text-sm mr-2 mb-2';
+        chip.innerHTML = `<svg class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-7.25 7.25a1 1 0 01-1.414 0l-3-3a1 1 0 111.414-1.414l2.293 2.293 6.543-6.543a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>${plan.name}`;
+        cont.appendChild(chip);
+      }
+    }
+
+    function renderPlanSelector(){
+      const list = $('#plans-list');
+      list.innerHTML = '';
+      selected.clear();
+
+      for (const plan of PLANS){
+        const isOwned = owned.has(plan.id);
+        const li = document.createElement('div');
+        li.className = 'flex items-start justify-between p-5 rounded-2xl border mb-4 shadow-sm bg-white';
+
+        const left = document.createElement('div');
+        left.className = 'flex items-start gap-4';
+
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.className = 'mt-1 h-5 w-5 rounded border-gray-300 text-teal-600 focus:ring-teal-500';
+        checkbox.disabled = isOwned;
+        checkbox.checked = isOwned;
+        if (!isOwned) {
+          checkbox.addEventListener('change',()=>{
+            if (checkbox.checked) selected.add(plan.id); else selected.delete(plan.id);
+            updateTotal();
+          });
+        }
+
+        const titleWrap = document.createElement('div');
+        titleWrap.innerHTML = `
+          <div class="flex items-center gap-2">
+            <span class="font-semibold text-gray-800">${plan.name}</span>
+            ${isOwned ? '<span class="text-xs bg-gray-100 text-gray-700 px-2 py-0.5 rounded-full border">Ya lo tienes</span>' : ''}
+          </div>
+          <div class="text-sm text-gray-500">${fmt(plan.price)}</div>
+        `;
+
+        left.appendChild(checkbox);
+        left.appendChild(titleWrap);
+
+        const price = document.createElement('div');
+        price.className = 'text-gray-700 font-semibold';
+        price.textContent = fmt(plan.price);
+
+        li.appendChild(left);
+        li.appendChild(price);
+        list.appendChild(li);
+      }
+    }
+
+    function updateTotal(){
+      let total = 0;
+      for (const id of selected){
+        const p = PLANS.find(x=>x.id===id); if (p) total += p.price;
+      }
+      $('#total-amount').textContent = fmt(total);
+      const btn = $('#goCheckout');
+      btn.disabled = (total === 0);
+      btn.classList.toggle('opacity-60', total===0);
+    }
+
+    window._goToCheckout = function(){
+      const items = Array.from(selected);
+      if (items.length === 0) return;
+      const qs = encodeURIComponent(items.join(','));
+      window.location.href = `checkout.html?items=${qs}`;
     }
   </script>
+</head>
+<body class="bg-gray-50">
+  <!-- Header -->
+  <header class="bg-white shadow-sm">
+    <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+      <a href="index.html"><img src="https://bmeryu.github.io/muna-booki/Logo_MunaBooki.png" alt="Muna Booki" class="h-12"/></a>
+      <div class="flex items-center gap-4">
+        <button id="logoutBtn" class="text-gray-600 hover:text-teal-600 font-semibold">Cerrar sesión</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container mx-auto px-6 py-10 max-w-5xl">
+    <h1 id="hello" class="text-3xl font-bold section-title mb-2">Mi cuenta</h1>
+    <p class="text-gray-600 mb-8">Administra tus productos y contrata nuevos planes.</p>
+
+    <!-- Mis productos -->
+    <section class="mb-10">
+      <h2 class="text-xl font-semibold text-gray-800 mb-3">Mis productos</h2>
+      <div id="owned-chips" class="flex flex-wrap"></div>
+    </section>
+
+    <!-- Selector de planes, INCRUSTADO -->
+    <section class="bg-white rounded-2xl p-6 shadow-lg">
+      <h2 class="text-xl font-bold section-title mb-4">Elige tus planes</h2>
+      <div id="plans-list"></div>
+      <div class="mt-6 flex items-center justify-between border-t pt-4">
+        <span class="text-lg text-gray-800">Total</span>
+        <span id="total-amount" class="text-2xl font-extrabold text-gray-900">$0</span>
+      </div>
+      <div class="mt-4 text-right">
+        <button id="goCheckout" class="btn-primary px-5 py-3 rounded-xl font-semibold disabled:cursor-not-allowed" disabled onclick="_goToCheckout()">Continuar al pago</button>
+      </div>
+      <p class="text-xs text-gray-400 mt-3">Al continuar, te llevaremos al checkout para completar el pago con Mercado Pago.</p>
+    </section>
+  </main>
+
+  <footer class="py-10 text-center text-sm text-gray-400">© Muna Booki</footer>
 </body>
 </html>
