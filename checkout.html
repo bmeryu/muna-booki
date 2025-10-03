@@ -20,6 +20,9 @@
     .step-dot{ width:26px;height:26px }
     .grayscale-locked{ filter: grayscale(1); opacity:.55; }
     .no-pointer{ pointer-events:none; }
+    .step-inactive{ color:#94a3b8 }
+    .step-active{ color:#0ea5b7; font-weight:600 }
+    .step-done{ color:#16a34a; font-weight:600 }
   </style>
 </head>
 <body class="bg-gray-50">
@@ -36,18 +39,18 @@
   <!-- Steps -->
   <div class="container mx-auto px-6 pt-8">
     <ol class="flex items-center gap-6 text-sm">
-      <li id="step1" class="flex items-center gap-2 font-semibold text-teal-700">
-        <span class="step-dot rounded-full bg-teal-600 text-white grid place-content-center">1</span>
+      <li id="step1" class="flex items-center gap-2 step-active">
+        <span id="dot1" class="step-dot rounded-full bg-teal-600 text-white grid place-content-center">1</span>
         Autentifícate
       </li>
       <li class="text-slate-400">⟶</li>
-      <li id="step2" class="flex items-center gap-2 text-slate-400">
-        <span class="step-dot rounded-full bg-slate-300 text-white grid place-content-center">2</span>
+      <li id="step2" class="flex items-center gap-2 step-inactive">
+        <span id="dot2" class="step-dot rounded-full bg-slate-300 text-white grid place-content-center">2</span>
         Elige tus productos
       </li>
       <li class="text-slate-400">⟶</li>
-      <li id="step3" class="flex items-center gap-2 text-slate-400">
-        <span class="step-dot rounded-full bg-slate-300 text-white grid place-content-center">3</span>
+      <li id="step3" class="flex items-center gap-2 step-inactive">
+        <span id="dot3" class="step-dot rounded-full bg-slate-300 text-white grid place-content-center">3</span>
         Paga
       </li>
     </ol>
@@ -61,7 +64,7 @@
         <!-- Caja Auth -->
         <div id="auth-section" class="bg-white p-8 rounded-2xl shadow-lg">
           <h2 class="text-2xl font-bold text-center section-title mb-2">Paso 1: Accede a tu cuenta</h2>
-          <p class="text-center text-gray-600 mb-6">Inicia sesión o crea tu cuenta para continuar con la compra.</p>
+          <p class="text-center text-gray-600 mb-6">Inicia sesión o crea tu cuenta para continuar.</p>
 
           <div class="flex border-b mb-6">
             <button id="login-tab-btn" class="flex-1 py-2 font-semibold text-teal-600 border-b-2 border-teal-600">Iniciar Sesión</button>
@@ -93,7 +96,7 @@
           </button>
         </div>
 
-        <!-- Caja Pago -->
+        <!-- Caja Pago (aparece tras selección válida) -->
         <div id="payment-section" class="bg-white p-8 rounded-2xl shadow-lg hidden">
           <h2 id="welcome-message" class="text-2xl font-bold section-title mb-4">Paso 3: Realiza el pago</h2>
           <p id="payment-instructions" class="text-gray-600 mb-6">Revisa tu selección y paga de forma segura con Mercado Pago.</p>
@@ -102,11 +105,12 @@
             <div class="flex items-start bg-yellow-50 border border-yellow-200 p-4 rounded-lg">
               <input id="terms-checkbox" type="checkbox" class="h-5 w-5 text-teal-600 border-gray-300 rounded focus:ring-teal-500 mt-1 cursor-pointer">
               <label for="terms-checkbox" class="ml-3 text-sm text-gray-800 cursor-pointer">
-                Entiendo que para los cuentos personalizados, recibiré un formulario por correo después del pago para enviar los detalles de la historia.
+                Entiendo que para los cuentos personalizados, recibiré un formulario por correo después del pago.
               </label>
             </div>
           </div>
 
+          <!-- Aquí se monta el botón de pago de MP -->
           <div id="mercado-pago-button-container"></div>
           <p id="payment-error" class="text-red-500 text-sm mt-4 text-center"></p>
         </div>
@@ -116,12 +120,12 @@
       <div id="products-column">
         <div class="flex items-center justify-between mb-6">
           <h1 class="text-3xl font-bold section-title">Paso 2: Elige tus productos</h1>
-          <span id="lockBadge" class="text-xs px-3 py-1 rounded-full bg-slate-200 text-slate-700 hidden">Se habilita tras iniciar sesión</span>
+          <span id="lockBadge" class="text-xs px-3 py-1 rounded-full bg-slate-200 text-slate-700">Se habilita tras iniciar sesión</span>
         </div>
 
         <div id="plans-wrapper" class="relative">
           <!-- Overlay de bloqueo (visible cuando no hay auth) -->
-          <div id="lockOverlay" class="absolute inset-0 bg-white/60 rounded-2xl border hidden grid place-content-center text-center">
+          <div id="lockOverlay" class="absolute inset-0 bg-white/60 rounded-2xl border grid place-content-center text-center">
             <div class="px-6 py-4 rounded-xl border bg-white shadow">
               <div class="font-semibold text-slate-700">Autentifícate para seleccionar tus productos</div>
               <div class="text-xs text-slate-500 mt-1">Paso 1 a la izquierda</div>
@@ -152,7 +156,7 @@
             <svg class="w-6 h-6 text-teal-500 mt-1 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
             <div>
               <h4 class="font-semibold text-gray-800">Tiempos de entrega</h4>
-              <p class="text-sm text-gray-600">Recibirás tu video‑cuento personalizado en <strong>menos de 24 horas</strong> tras completar el formulario post‑pago.</p>
+              <p class="text-sm text-gray-600">Video‑cuento personalizado en <strong>menos de 24 horas</strong> tras completar el formulario.</p>
             </div>
           </div>
           <div class="flex items-start gap-3">
@@ -173,7 +177,7 @@
     import { getAuth, signInWithPopup, GoogleAuthProvider, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
     import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore-lite.js";
 
-    // 🔧 Reemplaza por tu config real
+    // Config Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyBivlKO0Ijt1hvMNyH9aIGXf_7WZwE2tA4",
       authDomain: "munabooki.firebaseapp.com",
@@ -184,12 +188,12 @@
     };
 
     const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+    // 🔑 Firestore NO por defecto; usar base de datos nombrada "munabooki"
+    const db = getFirestore(app, "munabooki");
     const auth = getAuth(app);
-    const googleProvider = new GoogleAuthProvider();
 
-    // ⚠️ Frontend debe usar **Public Key** (NO Access Token)
-    const mp = new MercadoPago('APP_USR-a633c3e4-ac28-4661-bba4-0a5dee41e9ed'); // <- Reemplaza aquí tu public key (TEST-*** o PUBLIC_KEY-***)
+    // Mercado Pago — usa tu Public Key
+    const mp = new MercadoPago('APP_USR-a633c3e4-ac28-4661-bba4-0a5dee41e9ed');
 
     // Catálogo
     const PLANS = [
@@ -205,6 +209,38 @@
     let selected = new Set();
     let owned = new Set();
     let currentUser = null;
+
+    // Render y estado de pasos
+    function setSteps({ authDone=false, selectionActive=false, payActive=false }){
+      const dot1 = $('#dot1'); const dot2 = $('#dot2'); const dot3 = $('#dot3');
+      const step1 = $('#step1'); const step2 = $('#step2'); const step3 = $('#step3');
+
+      if (authDone){
+        step1.className = 'flex items-center gap-2 step-done';
+        dot1.className = 'step-dot rounded-full bg-emerald-600 text-white grid place-content-center';
+        dot1.innerHTML = '✓';
+      } else {
+        step1.className = 'flex items-center gap-2 step-active';
+        dot1.className = 'step-dot rounded-full bg-teal-600 text-white grid place-content-center';
+        dot1.innerHTML = '1';
+      }
+
+      if (selectionActive){
+        step2.className = 'flex items-center gap-2 step-active';
+        dot2.className = 'step-dot rounded-full bg-teal-600 text-white grid place-content-center';
+      } else {
+        step2.className = 'flex items-center gap-2 step-inactive';
+        dot2.className = 'step-dot rounded-full bg-slate-300 text-white grid place-content-center';
+      }
+
+      if (payActive){
+        step3.className = 'flex items-center gap-2 step-active';
+        dot3.className = 'step-dot rounded-full bg-teal-600 text-white grid place-content-center';
+      } else {
+        step3.className = 'flex items-center gap-2 step-inactive';
+        dot3.className = 'step-dot rounded-full bg-slate-300 text-white grid place-content-center';
+      }
+    }
 
     function renderPlanCard(plan) {
       const isOwned = owned.has(plan.id);
@@ -241,16 +277,7 @@
       $('#plans-list').classList.toggle('no-pointer', lock);
       $('#lockOverlay').classList.toggle('hidden', !lock);
       $('#lockBadge').classList.toggle('hidden', !lock);
-
-      if (lock){
-        $('#step1').className = 'flex items-center gap-2 font-semibold text-teal-700';
-        $('#step2').className = 'flex items-center gap-2 text-slate-400';
-        $('#step3').className = 'flex items-center gap-2 text-slate-400';
-      } else {
-        $('#step1').className = 'flex items-center gap-2 text-slate-400';
-        $('#step2').className = 'flex items-center gap-2 font-semibold text-teal-700';
-        $('#step3').className = 'flex items-center gap-2 text-slate-400';
-      }
+      setSteps({ authDone: !lock, selectionActive: !lock, payActive: false });
     }
 
     function updateTotal(){
@@ -271,7 +298,18 @@
         if (p){ total += p.price; if (p.custom) anyCustom = true; }
       });
       $('#total-amount').textContent = fmt(total);
+
+      // Cláusulas sólo si hay custom
       $('#clauses-container').classList.toggle('hidden', !anyCustom);
+
+      // Mostrar caja de pago sólo cuando hay selección válida (y términos si aplica)
+      const needClauses = anyCustom;
+      const termsOK = !needClauses || $('#terms-checkbox').checked;
+      const showPayBox = currentUser && total > 0 && termsOK;
+      $('#payment-section').classList.toggle('hidden', !showPayBox);
+
+      setSteps({ authDone: !!currentUser, selectionActive: !!currentUser, payActive: showPayBox });
+
       if (currentUser) updatePaymentButton();
     }
 
@@ -314,25 +352,25 @@
       loginTabBtn.classList.remove('text-teal-600','border-teal-600');
     });
 
-    $('#google-signin-btn').addEventListener('click', () => signInWithPopup(auth, new GoogleAuthProvider()).catch(e => console.error(e)));
+    document.getElementById('google-signin-btn').addEventListener('click', () => signInWithPopup(auth, new GoogleAuthProvider()).catch(e => console.error(e)));
 
     registerForm.addEventListener('submit', e => {
       e.preventDefault();
       createUserWithEmailAndPassword(auth, e.target.email.value, e.target.password.value)
-        .catch(err => $('#auth-error-message').textContent = 'Error al registrar. Verifica los datos.');
+        .catch(err => document.getElementById('auth-error-message').textContent = 'Error al registrar. Verifica los datos.');
     });
 
     loginForm.addEventListener('submit', e => {
       e.preventDefault();
       signInWithEmailAndPassword(auth, e.target.email.value, e.target.password.value)
-        .catch(err => $('#auth-error-message').textContent = 'Email o contraseña incorrectos.');
+        .catch(err => document.getElementById('auth-error-message').textContent = 'Email o contraseña incorrectos.');
     });
 
     // MP — crear botón Wallet con preferenceId
     async function createCheckoutButton(ids){
-      const container = $('#mercado-pago-button-container');
+      const container = document.getElementById('mercado-pago-button-container');
       container.innerHTML = '<p class="text-center text-gray-500">Cargando botón de pago...</p>';
-      $('#payment-error').textContent = '';
+      document.getElementById('payment-error').textContent = '';
 
       const itemsToBuy = ids.map(id => PLANS.find(p => p.id === id)).filter(Boolean);
       const bricksBuilder = mp.bricks();
@@ -349,7 +387,7 @@
       } catch (error) {
         console.error('Error al crear el botón de pago:', error);
         container.innerHTML = '';
-        $('#payment-error').textContent = 'Hubo un problema al generar el pago. Inténtalo de nuevo.';
+        document.getElementById('payment-error').textContent = 'Hubo un problema al generar el pago. Inténtalo de nuevo.';
       }
     }
 
@@ -373,12 +411,12 @@
     // Estado auth + Firestore (no bloquear si FS no está)
     onAuthStateChanged(auth, async (user) => {
       currentUser = user;
-      const locked = !user;
-      toggleSelectionLock(locked);
+      // Step logic: 1 activo al inicio; al loguear → 1 done & 2 activo
+      toggleSelectionLock(!user);
 
       if (user) {
-        $('#payment-section').classList.remove('hidden');
-        $('#welcome-message').textContent = `Paso 3: Realiza el pago, ${user.displayName || user.email.split('@')[0]}!`;
+        document.getElementById('payment-section').classList.add('hidden'); // se muestra cuando haya selección válida
+        document.getElementById('welcome-message').textContent = `Paso 3: Realiza el pago, ${user.displayName || user.email.split('@')[0]}!`;
         try {
           const ref = doc(db, 'user_products', user.uid);
           const snap = await getDoc(ref);
@@ -388,13 +426,12 @@
           } else {
             owned = new Set();
           }
-        } catch (e) { console.warn('Firestore no disponible. Seguimos sin bloquear compra.'); }
+        } catch (e) { console.warn('Firestore no disponible o base distinta. Continuamos sin bloquear compra.'); }
       } else {
-        $('#payment-section').classList.add('hidden');
         owned.clear();
         selected.clear();
-        $('#total-amount').textContent = fmt(0);
-        $('#mercado-pago-button-container').innerHTML = '';
+        document.getElementById('total-amount').textContent = fmt(0);
+        document.getElementById('mercado-pago-button-container').innerHTML = '';
       }
 
       renderPlans();
