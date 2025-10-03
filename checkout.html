@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Checkout - Muna Booki</title>
+  <link rel="icon" href="https://bmeryu.github.io/muna-booki/favicon.ico" />
   <script src="https://sdk.mercadopago.com/js/v2"></script>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -129,7 +130,7 @@
 
           <div id="plans-list" class="space-y-4 grayscale-locked no-pointer rounded-2xl"></div>
 
-          <!-- Add-on: Libro Impreso (solo cuando hay cuento custom seleccionado Y autenticado) -->
+          <!-- Add-on: Libro Impreso (solo si hay cuento custom seleccionado Y autenticado) -->
           <div id="plan-004-wrapper" class="hidden mt-6 transition-all duration-300">
             <div class="text-sm font-semibold text-gray-600 mb-2">✨ ¡Convierte tu cuento en un tesoro físico!</div>
             <div id="plan-004-card"></div>
@@ -151,7 +152,7 @@
             <svg class="w-6 h-6 text-teal-500 mt-1 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
             <div>
               <h4 class="font-semibold text-gray-800">Tiempos de entrega</h4>
-              <p class="text-sm text-gray-600">Recibirás tu video‑cuento personalizado en **menos de 24 horas** tras completar el formulario post‑pago.</p>
+              <p class="text-sm text-gray-600">Recibirás tu video‑cuento personalizado en <strong>menos de 24 horas</strong> tras completar el formulario post‑pago.</p>
             </div>
           </div>
           <div class="flex items-start gap-3">
@@ -172,6 +173,7 @@
     import { getAuth, signInWithPopup, GoogleAuthProvider, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
     import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore-lite.js";
 
+    // 🔧 Reemplaza por tu config real
     const firebaseConfig = {
       apiKey: "AIzaSyBivlKO0Ijt1hvMNyH9aIGXf_7WZwE2tA4",
       authDomain: "munabooki.firebaseapp.com",
@@ -185,8 +187,11 @@
     const db = getFirestore(app);
     const auth = getAuth(app);
     const googleProvider = new GoogleAuthProvider();
-    const mp = new MercadoPago('APP_USR-a633c3e4-ac28-4661-bba4-0a5dee41e9ed');
 
+    // ⚠️ Frontend debe usar **Public Key** (NO Access Token)
+    const mp = new MercadoPago('PUBLIC_KEY_DE_TU_CUENTA'); // <- Reemplaza aquí tu public key (TEST-*** o PUBLIC_KEY-***)
+
+    // Catálogo
     const PLANS = [
       { id: 'plan-001', name: 'Suscripción Biblioteca Mágica', price: 8900, custom: false, addon: false },
       { id: 'plan-002', name: 'Cuento a Medida (Estándar)',   price: 18900, custom: true,  addon: false },
@@ -221,18 +226,13 @@
       `;
     }
 
-    function renderPlans(authenticated){
+    function renderPlans(){
       const list = $('#plans-list');
       const addonBox = $('#plan-004-card');
       list.innerHTML = '';
       addonBox.innerHTML = '';
 
-      // Render principales SIEMPRE, pero si no hay auth quedan grises/bloqueados por CSS + overlay
-      PLANS.forEach(plan => {
-        if (!plan.addon) list.innerHTML += renderPlanCard(plan);
-      });
-
-      // Addon impresos se carga pero se muestra SOLO si hay custom seleccionado y autenticado
+      PLANS.forEach(plan => { if (!plan.addon) list.innerHTML += renderPlanCard(plan); });
       addonBox.innerHTML = renderPlanCard(PLANS.find(p=>p.id==='plan-004'));
     }
 
@@ -242,14 +242,11 @@
       $('#lockOverlay').classList.toggle('hidden', !lock);
       $('#lockBadge').classList.toggle('hidden', !lock);
 
-      // Visual de pasos
       if (lock){
-        // Paso 1 activo
         $('#step1').className = 'flex items-center gap-2 font-semibold text-teal-700';
         $('#step2').className = 'flex items-center gap-2 text-slate-400';
         $('#step3').className = 'flex items-center gap-2 text-slate-400';
       } else {
-        // Paso 2 activo
         $('#step1').className = 'flex items-center gap-2 text-slate-400';
         $('#step2').className = 'flex items-center gap-2 font-semibold text-teal-700';
         $('#step3').className = 'flex items-center gap-2 text-slate-400';
@@ -261,7 +258,6 @@
       const addonWrapper = $('#plan-004-wrapper');
       const addonCheckbox = document.querySelector('input[data-id="plan-004"]');
 
-      // Mostrar add-on SOLO si hay custom seleccionado Y autenticado
       const showAddon = hasCustom && !!currentUser;
       addonWrapper.classList.toggle('hidden', !showAddon);
       if (!showAddon && selected.has('plan-004')){
@@ -291,7 +287,7 @@
       }
     }
 
-    // ===== Event delegation =====
+    // Delegación eventos
     document.body.addEventListener('change', e => {
       if (e.target.matches('input[type="checkbox"][data-id]')){
         const id = e.target.dataset.id;
@@ -302,7 +298,7 @@
       if (e.target.id === 'terms-checkbox') updatePaymentButton();
     });
 
-    // ===== Auth tabs & actions =====
+    // Tabs auth
     const loginTabBtn = $('#login-tab-btn'), registerTabBtn = $('#register-tab-btn');
     const loginForm = $('#login-form'), registerForm = $('#register-form');
     loginTabBtn.addEventListener('click', () => {
@@ -318,7 +314,7 @@
       loginTabBtn.classList.remove('text-teal-600','border-teal-600');
     });
 
-    $('#google-signin-btn').addEventListener('click', () => signInWithPopup(auth, googleProvider).catch(e => console.error(e)));
+    $('#google-signin-btn').addEventListener('click', () => signInWithPopup(auth, new GoogleAuthProvider()).catch(e => console.error(e)));
 
     registerForm.addEventListener('submit', e => {
       e.preventDefault();
@@ -332,7 +328,7 @@
         .catch(err => $('#auth-error-message').textContent = 'Email o contraseña incorrectos.');
     });
 
-    // ===== Mercado Pago =====
+    // MP — crear botón Wallet con preferenceId
     async function createCheckoutButton(ids){
       const container = $('#mercado-pago-button-container');
       container.innerHTML = '<p class="text-center text-gray-500">Cargando botón de pago...</p>';
@@ -343,11 +339,11 @@
 
       try {
         const preference = await createPreferenceOnBackend(itemsToBuy);
-        if (!preference.id) throw new Error('No se obtuvo preferenceId');
+        if (!preference.preferenceId) throw new Error('No se obtuvo preferenceId');
         container.innerHTML = '';
-        if(window.checkoutButton) await window.checkoutButton.unmount();
+        if(window.checkoutButton) { try { await window.checkoutButton.unmount(); } catch {} }
         window.checkoutButton = await bricksBuilder.create('wallet', container.id, {
-          initialization: { preferenceId: preference.id },
+          initialization: { preferenceId: preference.preferenceId },
           customization: { texts: { valueProp: 'smart_option' } }
         });
       } catch (error) {
@@ -357,31 +353,42 @@
       }
     }
 
+    // Llamada a tu Cloud Function — ENVÍA title/unit_price/quantity/currency_id
     async function createPreferenceOnBackend(items){
-      const functionUrl = `https://us-central1-munabooki.cloudfunctions.net/createMercadoPagoPreference`;
-      const resp = await fetch(functionUrl, {
-        method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify({ items })
-      });
-      if(!resp.ok) throw new Error(`Error en la función: ${resp.statusText}`);
-      const data = await resp.json();
-      return { id: data.preferenceId };
+      const functionUrl = 'https://us-central1-munabooki.cloudfunctions.net/createMercadoPagoPreference';
+      const payload = {
+        items: items.map(p => ({ title: p.name, unit_price: p.price, quantity: 1, currency_id: 'CLP' })),
+        metadata: { selectedPlanIds: items.map(p=>p.id) },
+        backUrls: {
+          success: 'https://bmeryu.github.io/muna-booki/mi-cuenta.html',
+          failure: 'https://bmeryu.github.io/muna-booki/checkout.html',
+          pending: 'https://bmeryu.github.io/muna-booki/checkout.html'
+        }
+      };
+      const resp = await fetch(functionUrl, { method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify(payload) });
+      if(!resp.ok) throw new Error(`Error en la función: ${resp.status}`);
+      return await resp.json(); // { preferenceId, init_point }
     }
 
-    // ===== Estado =====
+    // Estado auth + Firestore (no bloquear si FS no está)
     onAuthStateChanged(auth, async (user) => {
       currentUser = user;
       const locked = !user;
       toggleSelectionLock(locked);
 
       if (user) {
-        // Paso 3 sigue gris hasta que haya selección válida
         $('#payment-section').classList.remove('hidden');
         $('#welcome-message').textContent = `Paso 3: Realiza el pago, ${user.displayName || user.email.split('@')[0]}!`;
         try {
           const ref = doc(db, 'user_products', user.uid);
           const snap = await getDoc(ref);
-          owned = new Set((snap.exists() && Array.isArray(snap.data().items)) ? snap.data().items : []);
-        } catch (e) { console.warn('No se pudo leer user_products:', e); }
+          if (snap.exists()) {
+            const arr = Array.isArray(snap.data().items) ? snap.data().items : [];
+            owned = new Set(arr);
+          } else {
+            owned = new Set();
+          }
+        } catch (e) { console.warn('Firestore no disponible. Seguimos sin bloquear compra.'); }
       } else {
         $('#payment-section').classList.add('hidden');
         owned.clear();
@@ -390,17 +397,20 @@
         $('#mercado-pago-button-container').innerHTML = '';
       }
 
-      renderPlans(!!user);
+      renderPlans();
       updateTotal();
     });
 
-    // Preselección desde URL (si llega con items)
-    const sp = new URLSearchParams(window.location.search);
-    const itemsFromUrl = sp.get('items')?.split(',').filter(Boolean) || [];
-    itemsFromUrl.forEach(item => selected.add(item));
+    // Preselección desde URL (`?items=` o `?plan=`)
+    const aliasToId = { biblioteca: 'plan-001', estandar: 'plan-002', premium: 'plan-003' };
+    const sp = new URLSearchParams(location.search);
+    const fromItems = (sp.get('items')||'').split(',').filter(Boolean);
+    const fromPlan  = sp.get('plan') ? [ aliasToId[sp.get('plan')] ].filter(Boolean) : [];
+    const preselected = fromItems.length ? fromItems : fromPlan;
+    preselected.forEach(id => selected.add(id));
 
     // Render inicial
-    renderPlans(false);
+    renderPlans();
     updateTotal();
   </script>
 </body>
