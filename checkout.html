@@ -3,14 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Acceso / Checkout - Muna Booki</title>
+  <title>Checkout - Muna Booki</title>
 
   <!-- Mercado Pago SDK -->
   <script src="https://sdk.mercadopago.com/js/v2"></script>
-  <!-- Tailwind (ok para pruebas; en producción compílalo con CLI/PostCSS) -->
   <script src="https://cdn.tailwindcss.com"></script>
-
-  <!-- Fuentes -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;900&family=Pacifico&display=swap" rel="stylesheet">
@@ -18,11 +15,10 @@
   <style>
     :root{ --color-dark-blue:#0A2F5B; --color-teal:#00B2A9; --color-gold:#FFC845; }
     body{ font-family:'Poppins',sans-serif; }
-    .font-cursive{ font-family:'Pacifico',cursive; }
     .section-title{ color:var(--color-dark-blue); }
     .btn-primary{ background-color:var(--color-teal); color:#fff; }
     .btn-primary:hover{ background-color:#009a92; }
-    #debug-allowlist{ display:none; font-size:12px; color:#64748b; white-space:pre-wrap }
+    .disabled-plan { background-color: #f8f9fa; border-color: #e2e8f0; opacity: 0.7; cursor: not-allowed; }
   </style>
 </head>
 <body class="bg-gray-50">
@@ -30,113 +26,114 @@
   <!-- Header -->
   <header class="bg-white shadow-sm">
     <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
-      <a href="index.html" class="flex items-center">
+      <a href="index_mejorado.html" class="flex items-center">
         <img src="https://bmeryu.github.io/muna-booki/Logo_MunaBooki.png" alt="Logo Muna Booki" class="h-16" />
       </a>
-      <a href="index.html" class="text-gray-600 hover:text-teal-500 font-semibold">Volver al inicio</a>
+      <a href="index_mejorado.html" class="text-gray-600 hover:text-teal-500 font-semibold">Volver al inicio</a>
     </nav>
   </header>
 
   <main class="container mx-auto px-6 py-16">
-    <div class="max-w-5xl mx-auto grid md:grid-cols-2 gap-12">
-      <!-- Columna Auth + Pago -->
-      <div id="auth-column" class="md:order-2 md:col-span-1">
+    <div class="max-w-6xl mx-auto grid lg:grid-cols-2 gap-12">
+      
+      <!-- Columna Izquierda: Auth + Pago -->
+      <div id="auth-payment-column">
         <!-- Caja Auth -->
         <div id="auth-section" class="bg-white p-8 rounded-2xl shadow-lg">
-          <h2 id="auth-title" class="text-2xl font-bold text-center section-title mb-2">Casi listo para la magia…</h2>
+          <h2 id="auth-title" class="text-2xl font-bold text-center section-title mb-2">Paso 1: Accede a tu cuenta</h2>
           <p class="text-center text-gray-600 mb-6">Inicia sesión o crea tu cuenta para continuar.</p>
-
           <div class="flex border-b mb-6">
             <button id="login-tab-btn" class="flex-1 py-2 font-semibold text-teal-600 border-b-2 border-teal-600">Iniciar Sesión</button>
             <button id="register-tab-btn" class="flex-1 py-2 font-semibold text-gray-500">Registrarse</button>
           </div>
-
           <p id="auth-error-message" class="text-red-500 text-sm text-center mb-4 h-5"></p>
-
           <form id="login-form" class="space-y-4">
             <input name="email" type="email" placeholder="Correo electrónico" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500" />
             <input name="password" type="password" placeholder="Contraseña" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500" />
             <button type="submit" class="w-full btn-primary font-bold py-3 rounded-lg">Ingresar</button>
           </form>
-
           <form id="register-form" class="space-y-4 hidden">
             <input name="email" type="email" placeholder="Correo electrónico" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500" />
             <input name="password" type="password" placeholder="Crear contraseña" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500" />
             <button type="submit" class="w-full btn-primary font-bold py-3 rounded-lg">Crear Cuenta</button>
           </form>
-
           <div class="my-6 flex items-center">
-            <div class="flex-grow border-t border-gray-300"></div>
-            <span class="mx-4 text-gray-500 text-sm">o</span>
-            <div class="flex-grow border-t border-gray-300"></div>
+            <div class="flex-grow border-t border-gray-300"></div><span class="mx-4 text-gray-500 text-sm">o</span><div class="flex-grow border-t border-gray-300"></div>
           </div>
-
-          <div class="space-y-3">
-            <button id="google-signin-btn" class="w-full flex items-center justify-center bg-white border border-gray-300 text-gray-700 font-semibold py-3 px-4 rounded-lg hover:bg-gray-50 transition">
-              <svg class="w-6 h-6 mr-3" viewBox="0 0 48 48" aria-hidden="true">
-                <defs><path id="a" d="M44.5 20H24v8.5h11.8C34.7 33.9 30.1 37 24 37c-7.2 0-13-5.8-13-13s5.8-13 13-13c3.1 0 5.9 1.1 8.1 2.9l6.4-6.4C34.6 4.1 29.6 2 24 2 11.8 2 2 11.8 2 24s9.8 22 22 22c11 0 21-8 21-22 0-1.3-.2-2.7-.5-4z"/></defs>
-                <clipPath id="b"><use xlink:href="#a" overflow="visible"/></clipPath>
-                <path clip-path="url(#b)" fill="#FBBC05" d="M0 37V11l17 13z"/>
-                <path clip-path="url(#b)" fill="#EA4335" d="M0 11l17 13 7-6.1L48 14V0H0z"/>
-                <path clip-path="url(#b)" fill="#34A853" d="M0 37l30-23 7.9 1L48 0v48H0z"/>
-                <path clip-path="url(#b)" fill="#4285F4" d="M48 48L17 24l-4-3 35-10z"/>
-              </svg>
-              Continuar con Google
-            </button>
-          </div>
+          <button id="google-signin-btn" class="w-full flex items-center justify-center bg-white border border-gray-300 text-gray-700 font-semibold py-3 px-4 rounded-lg hover:bg-gray-50 transition">
+            <svg class="w-6 h-6 mr-3" viewBox="0 0 48 48" aria-hidden="true"><defs><path id="a" d="M44.5 20H24v8.5h11.8C34.7 33.9 30.1 37 24 37c-7.2 0-13-5.8-13-13s5.8-13 13-13c3.1 0 5.9 1.1 8.1 2.9l6.4-6.4C34.6 4.1 29.6 2 24 2 11.8 2 2 11.8 2 24s9.8 22 22 22c11 0 21-8 21-22 0-1.3-.2-2.7-.5-4z"/></defs><clipPath id="b"><use xlink:href="#a" overflow="visible"/></clipPath><path clip-path="url(#b)" fill="#FBBC05" d="M0 37V11l17 13z"/><path clip-path="url(#b)" fill="#EA4335" d="M0 11l17 13 7-6.1L48 14V0H0z"/><path clip-path="url(#b)" fill="#34A853" d="M0 37l30-23 7.9 1L48 0v48H0z"/><path clip-path="url(#b)" fill="#4285F4" d="M48 48L17 24l-4-3 35-10z"/></svg>
+            Continuar con Google
+          </button>
         </div>
 
         <!-- Caja Pago -->
-        <div id="payment-section" class="bg-white p-8 rounded-2xl shadow-lg mt-8 hidden">
-          <h2 id="welcome-message" class="text-2xl font-bold text-center section-title mb-6">¡Hola!</h2>
-
-          <!-- Mensaje de acceso libre -->
-          <div id="free-msg" class="text-center text-green-600 font-bold mb-4 hidden">
-            🎉 Estás en la lista. No necesitas pagar.
-          </div>
-          <div id="debug-allowlist" class="text-center mb-4"></div>
-
-          <!-- Cláusulas (sólo productos custom) -->
+        <div id="payment-section" class="bg-white p-8 rounded-2xl shadow-lg hidden">
+          <h2 id="welcome-message" class="text-2xl font-bold section-title mb-4">Paso 3: Realiza el pago</h2>
+          <p id="payment-instructions" class="text-gray-600 mb-6">Revisa tu selección y haz clic en el botón para pagar de forma segura con Mercado Pago.</p>
           <div id="clauses-container" class="mb-6 space-y-2 hidden">
-            <div class="flex items-start bg-gray-100 p-4 rounded-lg">
+            <div class="flex items-start bg-yellow-50 border border-yellow-200 p-4 rounded-lg">
               <input id="terms-checkbox" type="checkbox" class="h-5 w-5 text-teal-600 border-gray-300 rounded focus:ring-teal-500 mt-1 cursor-pointer">
               <label for="terms-checkbox" class="ml-3 text-sm text-gray-800 cursor-pointer">
-                Entiendo y acepto las <a href="#" id="terms-trigger" class="font-semibold text-teal-600 hover:underline">Cláusulas de Creación</a>.
+                Entiendo que para los cuentos personalizados, recibiré un formulario por correo después del pago para enviar los detalles de la historia.
               </label>
             </div>
           </div>
-
-          <!-- Contenedor botón MP -->
           <div id="mercado-pago-button-container"></div>
+           <p id="payment-error" class="text-red-500 text-sm mt-4 text-center"></p>
         </div>
       </div>
 
-      <!-- Columna Resumen -->
-      <div id="order-summary-column" class="md:order-1">
-        <h1 class="text-3xl font-bold section-title mb-6">Resumen de tu compra</h1>
-        <div id="order-summary" class="bg-white p-8 rounded-2xl shadow-lg"></div>
-        <div class="mt-8 text-gray-600 text-sm flex items-center">
-          <svg class="w-5 h-5 mr-2 text-teal-500" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 1a4.5 4.5 0 00-4.5 4.5V9H5a2 2 0 00-2 2v6a2 2 0 002 2h10a2 2 0 002-2v-6a2 2 0 00-2-2h-.5V5.5A4.5 4.5 0 0010 1zm3 8V5.5a3 3 0 10-6 0V9h6z" clip-rule="evenodd"/></svg>
-          <span>Transacción 100% segura y protegida.</span>
+      <!-- Columna Derecha: Selección de Productos -->
+      <div id="products-column">
+        <h1 class="text-3xl font-bold section-title mb-6">Paso 2: Elige tus productos</h1>
+        <div id="plans-list" class="space-y-4">
+          <!-- Los planes se renderizarán aquí con JS -->
+        </div>
+
+        <!-- Add-on: Libro Impreso (condicional) -->
+        <div id="plan-004-wrapper" class="hidden mt-6 transition-all duration-300">
+            <div class="text-sm font-semibold text-gray-600 mb-2">✨ ¡Convierte tu cuento en un tesoro físico!</div>
+            <div id="plan-004-card">
+                <!-- El plan de libro impreso se renderizará aquí -->
+            </div>
+        </div>
+        
+        <!-- Total a Pagar -->
+        <div class="bg-white p-6 rounded-2xl shadow-lg mt-8">
+            <div class="flex items-center justify-between">
+                <span class="text-lg text-gray-800">Total a pagar</span>
+                <span id="total-amount" class="text-3xl font-extrabold text-gray-900">$0</span>
+            </div>
+        </div>
+
+        <!-- A tener en cuenta -->
+        <div class="mt-8 bg-white p-6 rounded-2xl shadow-lg space-y-4">
+            <h3 class="font-bold text-lg section-title">A tener en cuenta</h3>
+            <div class="flex items-start gap-3">
+                <svg class="w-6 h-6 text-teal-500 mt-1 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <div>
+                    <h4 class="font-semibold text-gray-800">Tiempos de entrega</h4>
+                    <p class="text-sm text-gray-600">Recibirás tu video-cuento personalizado en tu correo en **menos de 24 horas** tras completar el formulario que te enviaremos post-pago.</p>
+                </div>
+            </div>
+            <div class="flex items-start gap-3">
+                 <svg class="w-6 h-6 text-teal-500 mt-1 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" /></svg>
+                <div>
+                    <h4 class="font-semibold text-gray-800">Política de Devolución</h4>
+                    <p class="text-sm text-gray-600">Debido a la naturaleza digital y personalizada de nuestros productos, no se realizan devoluciones una vez efectuada la compra.</p>
+                </div>
+            </div>
         </div>
       </div>
+
     </div>
   </main>
 
-  <!-- (Modal de Términos si lo necesitas) -->
-  <div id="terms-modal" class="fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center p-4 hidden"></div>
-
   <script type="module">
-    // --- Firebase SDKs ---
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-    import {
-      getAuth, signInWithPopup, GoogleAuthProvider,
-      createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged
-    } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-    // Firestore LITE para lecturas simples (evita 'Listen')
+    import { getAuth, signInWithPopup, GoogleAuthProvider, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
     import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore-lite.js";
 
-    // --- Config Firebase (tu proyecto) ---
     const firebaseConfig = {
       apiKey: "AIzaSyBivlKO0Ijt1hvMNyH9aIGXf_7WZwE2tA4",
       authDomain: "munabooki.firebaseapp.com",
@@ -144,207 +141,218 @@
       storageBucket: "munabooki.firebasestorage.app",
       messagingSenderId: "585414544600",
       appId: "1:585414544600:web:77026db4856b0111249bad",
-      measurementId: "G-HBM4Y2FKMF"
     };
 
-    // Inicializa
     const app = initializeApp(firebaseConfig);
-    // 🔴 IMPORTANTE: usa la base con ID "munabooki" (no (default))
-    const db = getFirestore(app, 'munabooki');
+    const db = getFirestore(app);
     const auth = getAuth(app);
     const googleProvider = new GoogleAuthProvider();
+    const mp = new MercadoPago('APP_USR-a633c3e4-ac28-4661-bba4-0a5dee41e9ed');
 
-    // Mercado Pago (reemplaza por tu Public Key de producción)
-    const publicKey = 'APP_USR-a633c3e4-ac28-4661-bba4-0a5dee41e9ed';
-    const mp = new MercadoPago(publicKey);
+    const PLANS = [
+      { id: 'plan-001', name: 'Suscripción Biblioteca Mágica', price: 8900, custom: false, addon: false },
+      { id: 'plan-002', name: 'Cuento a Medida (Estándar)', price: 18900, custom: true, addon: false },
+      { id: 'plan-003', name: 'Cuento Premium', price: 40000, custom: true, addon: false },
+      { id: 'plan-004', name: 'Complemento: Libro Impreso', price: 50000, custom: false, addon: true, description: 'Tapa dura y calidad premium. Requiere un Cuento a Medida o Premium.' }
+    ];
 
-    // Helpers
-    const qs = new URLSearchParams(location.search);
-    const DEBUG = qs.has('debug') || qs.get('debug') === '1';
-    function showDebug(msg){
-      if(!DEBUG) return;
-      const el = document.getElementById('debug-allowlist');
-      el.style.display = 'block';
-      el.textContent += (el.textContent ? '\n' : '') + String(msg);
-      console.log('[ALLOWLIST]', msg);
-    }
+    const $ = (sel) => document.querySelector(sel);
+    const fmt = (v) => new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', maximumFractionDigits: 0 }).format(v);
 
-    // Mapeo simple de planes (si navegas desde index con ?plan=...)
-    const planDetails = {
-      biblioteca: { id:'plan-001', name:'Suscripción Biblioteca Mágica', price:8900, description:'Acceso mensual a la biblioteca mágica.', custom:false },
-      estandar:   { id:'plan-002', name:'Cuento a Medida',              price:18900, description:'Un cuento personalizado estándar.',   custom:true  },
-      premium:    { id:'plan-003', name:'Cuento Premium',                price:40000, description:'Cuento premium hiper-personalizado.', custom:true  }
-    };
+    let selected = new Set();
+    let owned = new Set();
+    let currentUser = null;
 
-    // Render del resumen
-    function renderOrderSummary(planKey){
-      const box = document.getElementById('order-summary');
-      const p = planDetails[planKey];
-      if(!p){
-        box.innerHTML = `<p class="text-gray-600">No se encontró el plan seleccionado. Volviendo a tu cuenta…</p>`;
-        setTimeout(()=> location.href='mi-cuenta.html', 1200);
-        return;
-      }
-      box.innerHTML = `
-        <div class="flex items-start justify-between">
-          <div>
-            <h3 class="text-xl font-semibold text-gray-800">${p.name}</h3>
-            <p class="text-gray-500 mt-1">${p.description}</p>
+    function renderPlanCard(plan) {
+        const isOwned = owned.has(plan.id);
+        const isSelected = selected.has(plan.id);
+        
+        return `
+          <div class="flex items-start justify-between p-5 rounded-2xl border shadow-sm transition-colors ${isOwned ? 'disabled-plan' : 'bg-white'}">
+            <div class="flex items-start gap-4">
+              <input type="checkbox" data-id="${plan.id}" class="mt-1 h-5 w-5 rounded border-gray-300 text-teal-600 focus:ring-teal-500" ${isOwned ? 'disabled checked' : ''} ${isSelected ? 'checked' : ''}>
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="font-semibold text-gray-800">${plan.name}</span>
+                  ${isOwned ? '<span class="text-xs bg-gray-200 text-gray-700 px-2 py-0.5 rounded-full border">Ya lo tienes</span>' : ''}
+                </div>
+                <div class="text-sm text-gray-500">${plan.description || fmt(plan.price)}</div>
+              </div>
+            </div>
+            <div class="text-gray-700 font-semibold text-lg">${fmt(plan.price)}</div>
           </div>
-          <div class="text-right">
-            <div class="text-2xl font-bold text-gray-900">$${(p.price/100).toLocaleString('es-CL', {minimumFractionDigits:0})}</div>
-          </div>
-        </div>
-      `;
+        `;
     }
 
-    // Tabs simples de login/registro
-    const loginTabBtn = document.getElementById('login-tab-btn');
-    const registerTabBtn = document.getElementById('register-tab-btn');
-    const loginForm = document.getElementById('login-form');
-    const registerForm = document.getElementById('register-form');
-
-    loginTabBtn.addEventListener('click', ()=>{
-      loginForm.classList.remove('hidden');
-      registerForm.classList.add('hidden');
-      loginTabBtn.classList.add('text-teal-600','border-b-2','border-teal-600');
-      registerTabBtn.classList.remove('text-teal-600','border-b-2','border-teal-600');
-    });
-    registerTabBtn.addEventListener('click', ()=>{
-      registerForm.classList.remove('hidden');
-      loginForm.classList.add('hidden');
-      registerTabBtn.classList.add('text-teal-600','border-b-2','border-teal-600');
-      loginTabBtn.classList.remove('text-teal-600','border-b-2','border-teal-600');
-    });
-
-    // Auth listeners
-    document.getElementById('google-signin-btn').addEventListener('click', async()=>{
-      try{ await signInWithPopup(auth, googleProvider); }catch(e){ console.error(e); }
-    });
-    document.getElementById('register-form').addEventListener('submit', async (e)=>{
-      e.preventDefault();
-      const em = e.target.email.value; const pw = e.target.password.value;
-      try{ await createUserWithEmailAndPassword(auth, em, pw); }
-      catch(err){ console.error(err); document.getElementById('auth-error-message').textContent='No se pudo registrar. Revisa tus datos.'; }
-    });
-    document.getElementById('login-form').addEventListener('submit', async (e)=>{
-      e.preventDefault();
-      const em = e.target.email.value; const pw = e.target.password.value;
-      try{ await signInWithEmailAndPassword(auth, em, pw); }
-      catch(err){ console.error(err); document.getElementById('auth-error-message').textContent='Email o contraseña incorrectos.'; }
-    });
-
-    // Estado Auth -> flujo principal
-    const planKey = (new URLSearchParams(location.search)).get('plan');
-    renderOrderSummary(planKey);
-
-    let handledUid = null;
-    onAuthStateChanged(auth, (user)=>{
-      if(!user) return;
-      if(handledUid === user.uid) return; // evita dobles
-      handledUid = user.uid;
-      onLoginSuccess(user);
-    });
-
-    async function onLoginSuccess(user){
-      if(!planKey){ location.href = 'mi-cuenta.html'; return; }
-
-      const userName = user.displayName || (user.email||'').split('@')[0] || 'Explorador/a';
-      document.getElementById('welcome-message').textContent = `¡Hola, ${userName}!`;
-      document.getElementById('auth-section').classList.add('hidden');
-      document.getElementById('payment-section').classList.remove('hidden');
-
-      // --- Allowlist ---
-      const emailExact = (user.email||'');
-      const emailLower = emailExact.toLowerCase();
-      showDebug(`Email login: ${emailExact}`);
-
-      try{
-        // Intenta primero con id en minúsculas
-        let ref = doc(db, 'allowlist', emailLower);
-        let snap = await getDoc(ref);
-        let data = snap.exists() ? snap.data() : null;
-
-        // Si no existe, intenta con el email exacto
-        if(!snap.exists()){
-          showDebug(`No existe doc en lower (${emailLower}). Probando exacto…`);
-          ref = doc(db, 'allowlist', emailExact);
-          snap = await getDoc(ref);
-          data = snap.exists() ? snap.data() : null;
-        }
-
-        const activeVal = data?.active;
-        const isActive = (activeVal === true || activeVal === 'true' || activeVal === 1);
-        showDebug(`exists=${snap.exists()} | active=${JSON.stringify(activeVal)} | usingId=${snap.exists()? ref.id : 'ninguno'}`);
-
-        if(snap.exists() && isActive){
-          // Muestra mensaje, NO renderiza MP y redirige a Mi Cuenta
-          const free = document.getElementById('free-msg');
-          free.classList.remove('hidden');
-          document.getElementById('mercado-pago-button-container').innerHTML='';
-          showDebug('Allowlist ACTIVO → redirigiendo a mi-cuenta.html');
-          setTimeout(()=>{ location.href = 'mi-cuenta.html'; }, 600);
-          return;
-        }
-      }catch(err){
-        // Si hay permission-denied para otros correos, seguimos con pago normal
-        console.error('Error revisando allowlist:', err);
-        showDebug(`Error allowlist: ${err?.code||''} ${err?.message||err}`);
-      }
-
-      // --- Flujo normal de pago ---
-      const selectedPlan = planDetails[planKey];
-      if(selectedPlan?.custom){
-        const clauses = document.getElementById('clauses-container');
-        clauses.classList.remove('hidden');
-        const terms = document.getElementById('terms-checkbox');
-        if(!terms.dataset.listenerAttached){
-          terms.addEventListener('change', (e)=>{
-            if(e.target.checked) createCheckoutButton(selectedPlan);
-            else document.getElementById('mercado-pago-button-container').innerHTML='';
-          });
-          terms.dataset.listenerAttached = 'true';
-        }
-      }else if(selectedPlan){
-        createCheckoutButton(selectedPlan);
-      }else{
-        location.href = 'mi-cuenta.html';
-      }
+    function renderPlans() {
+      const mainPlansList = $('#plans-list');
+      const addonCardContainer = $('#plan-004-card');
+      
+      mainPlansList.innerHTML = '';
+      
+      PLANS.forEach(plan => {
+          if (!plan.addon) {
+              mainPlansList.innerHTML += renderPlanCard(plan);
+          } else {
+              addonCardContainer.innerHTML = renderPlanCard(plan);
+          }
+      });
+      updateTotal();
     }
 
-    async function createCheckoutButton(planData){
-      const buttonContainer = document.getElementById('mercado-pago-button-container');
-      if(window.__creatingWallet) return; window.__creatingWallet = true; buttonContainer.innerHTML = '';
-      try{
-        const preferenceId = await createPreferenceOnBackend(planData);
-        if(!preferenceId) throw new Error('No se obtuvo preferenceId desde el backend');
+    function updateTotal() {
+        const hasCustomStorySelected = Array.from(selected).some(id => PLANS.find(p => p.id === id)?.custom);
+        const addonWrapper = $('#plan-004-wrapper');
+        const addonCheckbox = document.querySelector('input[data-id="plan-004"]');
+
+        addonWrapper.classList.toggle('hidden', !hasCustomStorySelected);
+
+        if (!hasCustomStorySelected && selected.has('plan-004')) {
+            selected.delete('plan-004');
+            if (addonCheckbox) addonCheckbox.checked = false;
+        }
+
+        let total = 0;
+        let hasCustom = false;
+        selected.forEach(id => {
+            const p = PLANS.find(x => x.id === id);
+            if (p) {
+                total += p.price;
+                if(p.custom) hasCustom = true;
+            }
+        });
+        $('#total-amount').textContent = fmt(total);
+
+        $('#clauses-container').classList.toggle('hidden', !hasCustom);
+
+        if (currentUser) {
+            updatePaymentButton();
+        }
+    }
+    
+    function updatePaymentButton() {
+        const total = Array.from(selected).reduce((acc, id) => acc + (PLANS.find(p => p.id === id)?.price || 0), 0);
+        const hasCustom = Array.from(selected).some(id => PLANS.find(p => p.id === id)?.custom);
+        const termsChecked = !hasCustom || $('#terms-checkbox').checked;
+
+        if (total > 0 && termsChecked) {
+            createCheckoutButton();
+        } else {
+            $('#mercado-pago-button-container').innerHTML = '';
+        }
+    }
+
+    document.body.addEventListener('change', e => {
+        if (e.target.type === 'checkbox') {
+            const id = e.target.dataset.id;
+            const isOwned = owned.has(id);
+            if(isOwned) {
+                e.target.checked = true; // Prevent unchecking owned items
+                return;
+            }
+            if (e.target.checked) {
+                selected.add(id);
+            } else {
+                selected.delete(id);
+            }
+            updateTotal();
+        }
+    });
+    
+    $('#clauses-container').addEventListener('change', e => {
+        if (e.target.id === 'terms-checkbox') {
+            updatePaymentButton();
+        }
+    });
+
+    onAuthStateChanged(auth, async (user) => {
+      currentUser = user;
+      if (user) {
+        $('#auth-section').classList.add('hidden');
+        $('#payment-section').classList.remove('hidden');
+        $('#welcome-message').textContent = `Paso 3: Realiza el pago, ${user.displayName || user.email.split('@')[0]}!`;
+
+        try {
+          const ref = doc(db, 'user_products', user.uid);
+          const snap = await getDoc(ref);
+          owned = new Set((snap.exists() && Array.isArray(snap.data().items)) ? snap.data().items : []);
+          selected.forEach(item => { if(owned.has(item)) selected.delete(item) });
+          renderPlans();
+        } catch (e) { console.warn('No se pudo leer user_products:', e); renderPlans(); }
+      } else {
+        owned.clear();
+        $('#auth-section').classList.remove('hidden');
+        $('#payment-section').classList.add('hidden');
+        renderPlans();
+      }
+    });
+    
+    async function createCheckoutButton() {
+      const container = $('#mercado-pago-button-container');
+      container.innerHTML = '<p class="text-center text-gray-500">Cargando botón de pago...</p>';
+      $('#payment-error').textContent = '';
+      const itemsToBuy = Array.from(selected).map(id => PLANS.find(p => p.id === id)).filter(Boolean);
+      const total = itemsToBuy.reduce((sum, item) => sum + item.price, 0);
+      if (total <= 0) { container.innerHTML = ''; return; }
+      
+      try {
+        const preference = await createPreferenceOnBackend(itemsToBuy);
+        if (!preference.id) throw new Error('No se obtuvo preferenceId');
+        container.innerHTML = '';
+        if(window.checkoutButton) await window.checkoutButton.unmount();
         const bricksBuilder = mp.bricks();
-        if(window.checkoutButton){ try{ await window.checkoutButton.unmount(); }catch{} }
-        window.checkoutButton = await bricksBuilder.create('wallet', 'mercado-pago-button-container', {
-          initialization: { preferenceId },
+        window.checkoutButton = await bricksBuilder.create('wallet', container.id, {
+          initialization: { preferenceId: preference.id },
           customization: { texts: { valueProp: 'smart_option' } }
         });
-      }catch(error){
+      } catch (error) {
         console.error('Error al crear el botón de pago:', error);
-        buttonContainer.innerHTML = `<p class="text-red-500 text-sm text-center">Hubo un problema al cargar el botón de pago. Revisa la consola.</p>`;
-      }finally{ window.__creatingWallet = false; }
+        container.innerHTML = '';
+        $('#payment-error').textContent = 'Hubo un problema al generar el pago. Inténtalo de nuevo.';
+      }
     }
-
-    async function createPreferenceOnBackend(planData){
-      const projectId = firebaseConfig.projectId;
-      const functionRegion = 'us-central1';
-      const functionName = 'createMercadoPagoPreference';
-      const functionUrl = `https://${functionRegion}-${projectId}.cloudfunctions.net/${functionName}`;
+    
+    async function createPreferenceOnBackend(items) {
+      const functionUrl = `https://us-central1-munabooki.cloudfunctions.net/createMercadoPagoPreference`;
       try{
         const resp = await fetch(functionUrl, {
-          method:'POST', headers:{ 'Content-Type':'application/json' },
-          body: JSON.stringify({ title: planData.name, quantity:1, unit_price: planData.price })
+          method:'POST', 
+          headers:{ 'Content-Type':'application/json' },
+          body: JSON.stringify({ items: items })
         });
-        if(!resp.ok){ throw new Error(`Estado HTTP: ${resp.status}`); }
+        if(!resp.ok) throw new Error(`Error en la función: ${resp.statusText}`);
         const data = await resp.json();
-        return data.preferenceId;
-      }catch(err){ console.error('Error llamando Cloud Function:', err); return null; }
+        return { id: data.preferenceId };
+      } catch(err) { console.error('Error llamando a Cloud Function:', err); throw err; }
     }
+    
+    const loginTabBtn = $('#login-tab-btn'), registerTabBtn = $('#register-tab-btn');
+    const loginForm = $('#login-form'), registerForm = $('#register-form');
+    loginTabBtn.addEventListener('click', () => {
+        loginForm.classList.remove('hidden'); registerForm.classList.add('hidden');
+        loginTabBtn.classList.add('text-teal-600', 'border-teal-600'); registerTabBtn.classList.remove('text-teal-600', 'border-teal-600');
+    });
+    registerTabBtn.addEventListener('click', () => {
+        registerForm.classList.remove('hidden'); loginForm.classList.add('hidden');
+        registerTabBtn.classList.add('text-teal-600', 'border-teal-600'); loginTabBtn.classList.remove('text-teal-600', 'border-teal-600');
+    });
+    $('#google-signin-btn').addEventListener('click', () => signInWithPopup(auth, googleProvider).catch(e => console.error(e)));
+    registerForm.addEventListener('submit', e => {
+        e.preventDefault();
+        createUserWithEmailAndPassword(auth, e.target.email.value, e.target.password.value)
+            .catch(err => $('#auth-error-message').textContent = 'Error al registrar. Verifica los datos.');
+    });
+    loginForm.addEventListener('submit', e => {
+        e.preventDefault();
+        signInWithEmailAndPassword(auth, e.target.email.value, e.target.password.value)
+            .catch(err => $('#auth-error-message').textContent = 'Email o contraseña incorrectos.');
+    });
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const itemsFromUrl = urlParams.get('items')?.split(',').filter(Boolean) || [];
+    itemsFromUrl.forEach(item => selected.add(item));
+    renderPlans();
   </script>
 </body>
 </html>
+
