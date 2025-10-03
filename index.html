@@ -71,6 +71,97 @@
             border: 2px solid var(--color-teal);
             transform: scale(1.05);
         }
+        .star-gold {
+            color: var(--color-gold);
+        }
+        .whatsapp-float {
+            position: fixed;
+            width: 60px;
+            height: 60px;
+            bottom: 40px;
+            right: 40px;
+            background-color: #25d366;
+            color: #FFF;
+            border-radius: 50px;
+            text-align: center;
+            font-size: 30px;
+            box-shadow: 2px 2px 6px rgba(0,0,0,0.25);
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.3s ease;
+        }
+        .whatsapp-float:hover {
+            transform: scale(1.1);
+        }
+        .video-thumbnail {
+            position: relative;
+            cursor: pointer;
+            overflow: hidden;
+            border-radius: 1rem;
+        }
+        .video-thumbnail::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.3);
+            transition: background 0.3s ease;
+        }
+        .video-thumbnail:hover::before {
+            background: rgba(0,0,0,0.1);
+        }
+        .play-icon {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(1);
+            transition: transform 0.3s ease;
+            width: 80px;
+            height: 80px;
+            background: rgba(255,255,255,0.8);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .video-thumbnail:hover .play-icon {
+            transform: translate(-50%, -50%) scale(1.1);
+        }
+        /* Auth & Legal Modal Styles */
+        .modal-backdrop {
+            transition: opacity 0.3s ease;
+        }
+        .modal-content {
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+        .prose h2 { color: var(--color-dark-blue); font-weight: 700; margin-top: 2em; margin-bottom: 1em; }
+        .prose p { margin-bottom: 1em; line-height: 1.75; }
+        .prose ul { list-style-position: inside; margin-left: 1.5em; }
+        .prose li { margin-bottom: 0.5em; }
+        .faq-question { cursor: pointer; }
+        .faq-answer { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-in-out; }
+
+        /* NUEVO: Estilos para el tooltip de libro impreso */
+        .tooltip-trigger {
+            position: relative;
+            cursor: pointer;
+            border-bottom: 1px dotted var(--color-teal);
+        }
+        .tooltip-content {
+            visibility: hidden;
+            opacity: 0;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            transform: translateY(10px);
+        }
+        .tooltip-trigger:hover .tooltip-content {
+            visibility: visible;
+            opacity: 1;
+            transform: translateY(0);
+        }
     </style>
 </head>
 <body class="bg-white">
@@ -87,11 +178,12 @@
                 <a href="#library" class="text-gray-600 hover:text-teal-500 font-semibold focus-ring rounded">Biblioteca</a>
                 <a href="#personalized" class="text-gray-600 hover:text-teal-500 font-semibold focus-ring rounded">Cuentos Personalizados</a>
                 <a href="#plans" class="text-gray-600 hover:text-teal-500 font-semibold focus-ring rounded">Planes</a>
+                <a href="#" id="header-faq-trigger" class="text-gray-600 hover:text-teal-500 font-semibold focus-ring rounded">FAQ</a>
             </div>
             
+            <!-- Auth Buttons Area -->
             <div id="auth-container" class="flex items-center space-x-4">
-                <a href="checkout.html" class="text-gray-600 hover:text-gray-900 font-semibold focus-ring rounded">Iniciar Sesión</a>
-                <a href="checkout.html" class="btn btn-primary px-5 py-2 rounded-full focus-ring">Registrarse</a>
+                <!-- This will be populated by JavaScript -->
             </div>
         </nav>
     </header>
@@ -114,10 +206,123 @@
             </div>
         </section>
 
-        <!-- Sections: Ally, Library, Personalized, etc. -->
-        <!-- ... (resto del contenido del index) ... -->
+        <!-- Parenting Ally Section (Adjusted) -->
+        <section id="ally" class="py-20 md:py-24 bg-gray-50">
+            <div class="container mx-auto px-6 text-center">
+                <h2 class="text-4xl md:text-5xl font-bold section-title mb-6 leading-tight">Tu aliado para una crianza <br> más consciente y divertida</h2>
+                <p class="text-lg md:text-xl text-gray-700 max-w-3xl mx-auto mb-10">Sabemos que criar es un reto maravilloso. Por eso, creamos herramientas que te ayudan a conectar con tus hijos y a sembrar valores a través del poder de las historias. Descubre nuestras dos soluciones mágicas.</p>
+                <div class="flex justify-center gap-4 flex-wrap">
+                    <a href="#library" class="btn btn-secondary text-lg font-bold py-3 px-8 rounded-full focus-ring">Conoce la Biblioteca</a>
+                    <a href="#personalized" class="btn btn-primary text-lg font-bold py-3 px-8 rounded-full focus-ring">Crea un Cuento Personalizado</a>
+                </div>
+            </div>
+        </section>
 
-        <!-- Pricing Plans Section (Updated Links) -->
+        <!-- Library Section -->
+        <section id="library" class="py-20">
+            <div class="container mx-auto px-6">
+                <div class="grid md:grid-cols-2 gap-12 items-center">
+                    <div>
+                        <span class="font-bold text-teal-500 uppercase">BIBLIOTECA MÁGICA</span>
+                        <h2 class="text-3xl md:text-4xl font-bold section-title my-4">Contenido seguro y enriquecedor, siempre a tu alcance.</h2>
+                        <p class="text-lg text-gray-600 mb-6">Nuestra biblioteca es un refugio de historias cuidadosamente seleccionadas por pedagogos. Ofrece a tus hijos una alternativa positiva al contenido masivo, con cuentos que entretienen, educan en valores y desarrollan la inteligencia emocional.</p>
+                        <ul class="space-y-4">
+                            <li class="flex items-start"><span class="text-teal-500 font-bold mr-3 mt-1">✓</span><div><strong class="text-gray-800">Acceso Ilimitado:</strong> Disfruta de todos nuestros video-cuentos sin restricciones.</div></li>
+                            <li class="flex items-start"><span class="text-teal-500 font-bold mr-3 mt-1">✓</span><div><strong class="text-gray-800">Nuevas Historias Cada Mes:</strong> Contenido fresco para mantener viva la curiosidad.</div></li>
+                            <li class="flex items-start"><span class="text-teal-500 font-bold mr-3 mt-1">✓</span><div><strong class="text-gray-800">100% Libre de Anuncios:</strong> Un entorno seguro para que tus hijos exploren sin interrupciones.</div></li>
+                        </ul>
+                        <a href="#plans" class="mt-8 inline-block btn btn-primary font-bold py-3 px-8 rounded-full focus-ring">Ver Plan Biblioteca</a>
+                    </div>
+                    <div>
+                        <img src="https://placehold.co/600x450/E0F2F1/0A2F5B?text=Biblioteca+Muna+Booki" alt="Niños viendo cuentos en una tablet" class="rounded-2xl shadow-xl w-full">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Personalized Stories Section -->
+        <section id="personalized" class="py-20 bg-gray-50">
+            <div class="container mx-auto px-6">
+                 <div class="grid md:grid-cols-2 gap-12 items-center">
+                    <div class="md:order-2">
+                        <span class="font-bold text-gold-500 uppercase" style="color:var(--color-gold);">CUENTOS PERSONALIZADOS</span>
+                        <h2 class="text-3xl md:text-4xl font-bold section-title my-4">Co-crea una historia única para un desafío específico.</h2>
+                        <p class="text-lg text-gray-600 mb-6">Transforma retos como el miedo a la oscuridad, los celos por un hermanito o la gestión de la frustración en una herramienta pedagógica poderosa. Al ver la historia desde fuera, con ellos mismos como héroes, los niños procesan sus emociones y adquieren herramientas para la vida.</p>
+                         <div class="space-y-6">
+                            <div class="flex flex-col items-center text-center md:flex-row md:text-left">
+                                <div class="bg-teal-100 rounded-full w-16 h-16 flex items-center justify-center mb-4 md:mb-0 md:mr-6 flex-shrink-0"><span class="text-teal-600 text-3xl font-bold">1</span></div>
+                                <div>
+                                    <h3 class="text-xl font-bold">Nos cuentas el reto</h3>
+                                    <p class="text-gray-600">A través de un simple formulario, nos explicas el desafío o el valor que quieres reforzar y nos das los detalles clave.</p>
+                                </div>
+                            </div>
+                            <div class="flex flex-col items-center text-center md:flex-row md:text-left">
+                               <div class="bg-teal-100 rounded-full w-16 h-16 flex items-center justify-center mb-4 md:mb-0 md:mr-6 flex-shrink-0"><span class="text-teal-600 text-3xl font-bold">2</span></div>
+                                <div>
+                                    <h3 class="text-xl font-bold">Creamos la magia</h3>
+                                    <p class="text-gray-600">Nuestro equipo de expertos da vida a una historia y guion únicos para tu hijo.</p>
+                                </div>
+                            </div>
+                            <div class="flex flex-col items-center text-center md:flex-row md:text-left">
+                                <div class="bg-teal-100 rounded-full w-16 h-16 flex items-center justify-center mb-4 md:mb-0 md:mr-6 flex-shrink-0"><span class="text-teal-600 text-3xl font-bold">3</span></div>
+                                <div>
+                                    <h3 class="text-xl font-bold">Recibes tu video</h3>
+                                    <p class="text-gray-600">En menos de 24 horas, tienes un video-cuento de alta calidad listo para ver en familia.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <a href="#plans" class="mt-8 inline-block btn btn-secondary font-bold py-3 px-8 rounded-full focus-ring">Ver Planes Personalizados</a>
+                    </div>
+                    <div class="md:order-1">
+                        <img src="https://placehold.co/600x450/FFF9C4/0A2F5B?text=Cuento+Personalizado" alt="Un padre y su hijo creando un cuento juntos" class="rounded-2xl shadow-xl w-full">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- Sample Stories Section -->
+        <section id="samples" class="py-20">
+            <div class="container mx-auto px-6 text-center">
+                <h2 class="text-3xl md:text-4xl font-bold section-title mb-4">Nuestros Cuentos en Acción</h2>
+                <p class="text-lg text-gray-600 max-w-2xl mx-auto mb-12">Así se ve y se siente la magia de un cuento Muna Booki.</p>
+                <div class="grid md:grid-cols-3 gap-8">
+                    <!-- Sample 1 -->
+                    <div class="flex flex-col">
+                        <div class="video-thumbnail bg-teal-200 aspect-video flex items-center justify-center">
+                             <div class="play-icon">
+                                <svg class="w-10 h-10 text-teal-700" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"></path></svg>
+                            </div>
+                        </div>
+                        <h3 class="text-xl font-bold mt-4 mb-2 text-gray-800">El Miedo a la Oscuridad de Leo</h3>
+                        <p class="text-gray-600">Un cuento para transformar sombras en amigos y la noche en una aventura.</p>
+                    </div>
+                    <!-- Sample 2 -->
+                    <div class="flex flex-col">
+                         <div class="video-thumbnail bg-yellow-200 aspect-video flex items-center justify-center">
+                            <div class="play-icon">
+                               <svg class="w-10 h-10 text-yellow-700" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"></path></svg>
+                            </div>
+                        </div>
+                        <h3 class="text-xl font-bold mt-4 mb-2 text-gray-800">La Aventura de Compartir de Sofía</h3>
+                        <p class="text-gray-600">Una historia que enseña que la alegría se multiplica cuando se comparte.</p>
+                    </div>
+                    <!-- Sample 3 -->
+                    <div class="flex flex-col">
+                        <div class="video-thumbnail bg-blue-200 aspect-video flex items-center justify-center">
+                           <div class="play-icon">
+                                <svg class="w-10 h-10 text-blue-700" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"></path></svg>
+                            </div>
+                        </div>
+                        <h3 class="text-xl font-bold mt-4 mb-2 text-gray-800">El Nuevo Hermanito de Mía</h3>
+                        <p class="text-gray-600">Un relato para recibir al nuevo miembro de la familia con amor y sin celos.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- Pricing Plans Section (Updated) -->
         <section id="plans" class="py-20 bg-gray-50">
             <div class="container mx-auto px-6">
                 <div class="text-center mb-16">
@@ -130,6 +335,7 @@
                 </div>
 
                 <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8 items-stretch max-w-6xl mx-auto">
+
                     <!-- Plan 1: Acceso Biblioteca -->
                     <div class="plan-card bg-white rounded-2xl shadow-lg p-8 flex flex-col text-center">
                         <h3 class="text-2xl font-bold text-gray-800">Biblioteca Mágica</h3>
@@ -138,22 +344,32 @@
                             <span class="text-5xl font-extrabold" style="color: var(--color-dark-blue);">$8.900</span>
                             <span class="text-gray-500 font-medium">/ Mes</span>
                         </div>
-                        <a href="checkout.html?plan=biblioteca" class="w-full bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-3 px-6 rounded-lg transition-colors duration-300 mt-auto">
+                        <button data-plan="biblioteca" class="w-full bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-3 px-6 rounded-lg transition-colors duration-300 mt-auto">
                             Suscribirme
-                        </a>
+                        </button>
                     </div>
 
                     <!-- Plan 2: Libro Estándar a Solicitud -->
                     <div class="plan-card bg-white rounded-2xl shadow-lg p-8 flex flex-col text-center">
                         <h3 class="text-2xl font-bold text-gray-800">Tu Cuento a Medida</h3>
                         <p class="text-gray-500 mt-2 flex-grow">Un video-cuento único para un desafío o valor específico.</p>
+                        <!-- Tooltip Trigger -->
+                        <div class="relative mt-4">
+                            <span class="tooltip-trigger text-sm text-teal-600 font-semibold">
+                                + Opción de libro impreso
+                                <div class="tooltip-content absolute bottom-full mb-2 w-64 bg-gray-800 text-white text-xs rounded-lg p-3 shadow-lg z-10 left-1/2 -translate-x-1/2">
+                                    <strong class="font-bold block">¡Conviértelo en un tesoro!</strong>
+                                    Añade la versión impresa de tu cuento por $50.000. Tapa dura y calidad premium.
+                                </div>
+                            </span>
+                        </div>
                         <div class="my-6">
                             <span class="text-5xl font-extrabold" style="color: var(--color-dark-blue);">$18.900</span>
                             <span class="text-gray-500 font-medium">/ único</span>
                         </div>
-                        <a href="checkout.html?plan=estandar" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition-colors duration-300 mt-auto">
+                        <button data-plan="estandar" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition-colors duration-300 mt-auto">
                             Crear mi Cuento
-                        </a>
+                        </button>
                     </div>
 
                     <!-- Plan 3: Libro Personalizado (DESTACADO) -->
@@ -161,25 +377,292 @@
                          <span class="absolute top-0 -translate-y-1/2 bg-teal-500 text-white text-xs font-bold px-4 py-1 rounded-full uppercase tracking-wider">Más Popular</span>
                         <h3 class="text-2xl font-bold text-gray-800">Cuento Premium</h3>
                         <p class="text-gray-500 mt-2 flex-grow">Co-crea un video-cuento premium con tus fotos, audios y detalles únicos.</p>
+                        <!-- Tooltip Trigger -->
+                        <div class="relative mt-4">
+                            <span class="tooltip-trigger text-sm text-teal-600 font-semibold">
+                                + Opción de libro impreso
+                                <div class="tooltip-content absolute bottom-full mb-2 w-64 bg-gray-800 text-white text-xs rounded-lg p-3 shadow-lg z-10 left-1/2 -translate-x-1/2">
+                                    <strong class="font-bold block">¡Conviértelo en un tesoro!</strong>
+                                    Añade la versión impresa de tu cuento por $50.000. Tapa dura y calidad premium.
+                                </div>
+                            </span>
+                        </div>
                         <div class="my-6">
                             <span class="text-5xl font-extrabold" style="color: var(--color-teal);">$40.000</span>
                              <span class="text-gray-500 font-medium">/ único</span>
                         </div>
-                        <a href="checkout.html?plan=premium" class="w-full font-bold py-3 px-6 rounded-lg transition-colors duration-300 mt-auto" style="background-color: var(--color-teal); color: white;">
+                        <button data-plan="personalizado" class="w-full font-bold py-3 px-6 rounded-lg transition-colors duration-300 mt-auto" style="background-color: var(--color-teal); color: white;">
                             Diseñar Cuento Premium
-                        </a>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Plan Empresas -->
+                <div class="mt-16 bg-white rounded-2xl shadow-lg p-8 text-center border-2 border-dashed max-w-6xl mx-auto">
+                    <h3 class="text-2xl font-bold" style="color: var(--color-dark-blue);">¿Eres una Empresa o Colegio?</h3>
+                    <p class="text-gray-600 mt-2 max-w-xl mx-auto">Tenemos planes especiales para licencias por volumen y proyectos educativos. ¡Conversemos!</p>
+                    <a href="https://wa.me/56998956864?text=Hola!%20Vengo%20desde%20la%20p%C3%A1gina%20web%20y%20me%20gustar%C3%ADa%20cotizar%20un%20plan%20para%20mi%20empresa%2Fcolegio." target="_blank" rel="noopener noreferrer" class="inline-block mt-6 bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold py-3 px-8 rounded-lg transition-colors duration-300">
+                        Cotizar ahora
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- NEW: Printed Book Section -->
+        <section id="printed-book" class="py-20">
+            <div class="container mx-auto px-6">
+                <div class="grid md:grid-cols-2 gap-12 items-center bg-white p-12 rounded-2xl shadow-xl">
+                    <div class="md:order-2">
+                        <span class="font-bold uppercase" style="color: var(--color-dark-blue);">EL COMPLEMENTO PERFECTO</span>
+                        <h2 class="text-3xl md:text-4xl font-bold section-title my-4">Convierte su Cuento en un Tesoro Impreso</h2>
+                        <p class="text-lg text-gray-600 mb-6">La magia del video, ahora en sus manos. Transforma cualquier cuento personalizado ("A Medida" o "Premium") en un libro físico de alta calidad, con tapa dura y colores vibrantes. Un recuerdo tangible para atesorar en la biblioteca familiar.</p>
+                        <ul class="space-y-4">
+                            <li class="flex items-start"><span class="text-gold-500 font-bold mr-3 mt-1" style="color: var(--color-gold);">✓</span><div><strong class="text-gray-800">Calidad Premium:</strong> Tapa dura y papel de alto gramaje para máxima durabilidad.</div></li>
+                            <li class="flex items-start"><span class="text-gold-500 font-bold mr-3 mt-1" style="color: var(--color-gold);">✓</span><div><strong class="text-gray-800">Recuerdo para Siempre:</strong> Un objeto físico que podrán leer una y otra vez.</div></li>
+                            <li class="flex items-start"><span class="text-gold-500 font-bold mr-3 mt-1" style="color: var(--color-gold);">✓</span><div><strong class="text-gray-800">Regalo Inolvidable:</strong> El complemento ideal para un regalo de cumpleaños o una ocasión especial.</div></li>
+                        </ul>
+                        <a href="#faq-modal" id="more-info-printed" class="mt-8 inline-block btn btn-secondary font-bold py-3 px-8 rounded-full focus-ring">Saber más sobre la impresión</a>
+                    </div>
+                    <div class="md:order-1">
+                        <img src="https://placehold.co/600x450/FFECB3/0A2F5B?text=Libro+Impreso" alt="Un libro físico de Muna Booki abierto en una mesa" class="rounded-2xl shadow-xl w-full">
                     </div>
                 </div>
             </div>
         </section>
-        <!-- ... (Rest of the index.html content) ... -->
+
+
+        <!-- Testimonials -->
+        <section id="testimonials" class="py-20 bg-gray-50">
+            <div class="container mx-auto px-6">
+                <h2 class="text-3xl md:text-4xl font-bold section-title mb-12 text-center">Familias que encontraron a su aliado en Muna Booki</h2>
+                <div class="grid md:grid-cols-3 gap-8 text-left">
+                    <div class="bg-white p-8 rounded-2xl shadow-lg flex flex-col">
+                        <div class="flex items-center mb-4">
+                            <div class="w-12 h-12 rounded-full bg-teal-500 flex items-center justify-center text-white font-bold text-xl mr-4 flex-shrink-0">LG</div>
+                            <div>
+                                <div class="font-bold text-gray-800">Laura G.</div>
+                                <div class="flex mt-1"><span class="star-gold text-xl">★</span><span class="star-gold text-xl">★</span><span class="star-gold text-xl">★</span><span class="star-gold text-xl">★</span><span class="star-gold text-xl">★</span></div>
+                            </div>
+                        </div>
+                        <p class="text-gray-600 italic">"El cuento sobre compartir funcionó de maravilla. Mi hija ahora entiende mucho mejor el concepto. ¡Es una herramienta increíble!"</p>
+                    </div>
+                    <div class="bg-white p-8 rounded-2xl shadow-lg flex flex-col">
+                        <div class="flex items-center mb-4">
+                            <div class="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-xl mr-4 flex-shrink-0" style="background-color: var(--color-dark-blue);">MR</div>
+                            <div>
+                                <div class="font-bold text-gray-800">Marcos R.</div>
+                                <div class="flex mt-1"><span class="star-gold text-xl">★</span><span class="star-gold text-xl">★</span><span class="star-gold text-xl">★</span><span class="star-gold text-xl">★</span><span class="star-gold text-xl">★</span></div>
+                            </div>
+                        </div>
+                        <p class="text-gray-600 italic">"Usamos un cuento para prepararnos para la llegada de su hermanita y redujo muchísimo su ansiedad. Súper recomendado."</p>
+                    </div>
+                    <div class="bg-white p-8 rounded-2xl shadow-lg flex flex-col">
+                        <div class="flex items-center mb-4">
+                            <div class="w-12 h-12 rounded-full bg-yellow-500 flex items-center justify-center text-white font-bold text-xl mr-4 flex-shrink-0">SC</div>
+                            <div>
+                                <div class="font-bold text-gray-800">Sofía y Carlos</div>
+                                <div class="flex mt-1"><span class="star-gold text-xl">★</span><span class="star-gold text-xl">★</span><span class="star-gold text-xl">★</span><span class="star-gold text-xl">★</span><span class="star-gold text-xl">★</span></div>
+                            </div>
+                        </div>
+                        <p class="text-gray-600 italic">"¡Ver la carita de nuestro hijo al entender por qué no debía tener miedo a la oscuridad no tiene precio! Un servicio de 10."</p>
+                    </div>
+                </div>
+            </div>
+        </section>
     </main>
     
+    <!-- Auth Modal -->
+    <div id="auth-modal-backdrop" class="fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center p-4 hidden modal-backdrop">
+        <div id="auth-modal-content" class="bg-white rounded-2xl w-full max-w-md mx-auto transform scale-95 opacity-0 modal-content">
+            <div class="p-8">
+                <div class="flex justify-end">
+                    <button id="close-auth-modal-btn" class="text-gray-400 hover:text-gray-700">&times;</button>
+                </div>
+                <h2 id="auth-modal-title" class="text-2xl font-bold text-center section-title mb-6">Bienvenido a Muna Booki</h2>
+                <div class="flex border-b mb-6">
+                    <button id="login-tab-btn" class="flex-1 py-2 font-semibold text-teal-600 border-b-2 border-teal-600">Iniciar Sesión</button>
+                    <button id="register-tab-btn" class="flex-1 py-2 font-semibold text-gray-500">Registrarse</button>
+                </div>
+                <p id="auth-error-message" class="text-red-500 text-sm text-center mb-4 h-5"></p>
+                <form id="login-form" class="space-y-4">
+                    <input type="email" id="login-email" placeholder="Correo electrónico" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500">
+                    <input type="password" id="login-password" placeholder="Contraseña" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500">
+                    <button type="submit" class="w-full btn btn-primary font-bold py-3 rounded-lg">Ingresar</button>
+                </form>
+                <form id="register-form" class="space-y-4 hidden">
+                    <input type="email" id="register-email" placeholder="Correo electrónico" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500">
+                    <input type="password" id="register-password" placeholder="Crear contraseña (mín. 6 caracteres)" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500">
+                    <button type="submit" class="w-full btn btn-primary font-bold py-3 rounded-lg">Crear Cuenta</button>
+                </form>
+                <div class="my-6 flex items-center">
+                    <div class="flex-grow border-t border-gray-300"></div>
+                    <span class="mx-4 text-gray-500 text-sm">o</span>
+                    <div class="flex-grow border-t border-gray-300"></div>
+                </div>
+                <button id="google-signin-btn" class="w-full flex items-center justify-center bg-white border border-gray-300 text-gray-700 font-semibold py-3 px-4 rounded-lg hover:bg-gray-50 transition">
+                    <svg class="w-6 h-6 mr-3" viewBox="0 0 48 48"><defs><path id="a" d="M44.5 20H24v8.5h11.8C34.7 33.9 30.1 37 24 37c-7.2 0-13-5.8-13-13s5.8-13 13-13c3.1 0 5.9 1.1 8.1 2.9l6.4-6.4C34.6 4.1 29.6 2 24 2 11.8 2 2 11.8 2 24s9.8 22 22 22c11 0 21-8 21-22 0-1.3-.2-2.7-.5-4z"/></defs><clipPath id="b"><use xlink:href="#a" overflow="visible"/></clipPath><path clip-path="url(#b)" fill="#FBBC05" d="M0 37V11l17 13z"/><path clip-path="url(#b)" fill="#EA4335" d="M0 11l17 13 7-6.1L48 14V0H0z"/><path clip-path="url(#b)" fill="#34A853" d="M0 37l30-23 7.9 1L48 0v48H0z"/><path clip-path="url(#b)" fill="#4285F4" d="M48 48L17 24l-4-3 35-10z"/></svg>
+                    Continuar con Google
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Legal Modals -->
+    <!-- FAQ Modal -->
+    <div id="faq-modal" class="fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center p-4 hidden modal-backdrop">
+        <div class="bg-white rounded-2xl w-full max-w-3xl transform scale-95 opacity-0 modal-content max-h-[90vh] flex flex-col">
+            <div class="flex justify-between items-center p-6 border-b sticky top-0 bg-white rounded-t-2xl">
+                <h2 class="text-2xl font-bold section-title">Preguntas Frecuentes</h2>
+                <button class="text-gray-400 hover:text-gray-700 text-3xl close-modal-btn">&times;</button>
+            </div>
+            <div class="p-8 overflow-y-auto">
+                <div class="space-y-6">
+                    <div class="faq-item border-b pb-4">
+                        <div class="faq-question flex justify-between items-center py-2">
+                            <h3 class="text-lg font-semibold text-gray-800">¿Cuál es la diferencia entre "Cuento a Medida" y "Cuento Premium"?</h3>
+                            <span class="transform transition-transform duration-300 text-teal-500 font-bold text-2xl">+</span>
+                        </div>
+                        <div class="faq-answer text-gray-600 pt-2 pr-8">
+                            <p>El "Cuento a Medida" es ideal para abordar un desafío o valor específico de forma rápida. Nos das el tema y nosotros creamos la historia. El "Cuento Premium" es una experiencia de co-creación: puedes incluir detalles específicos, nombres de familiares, anécdotas, fotos e incluso la voz de tu hijo/a para un resultado final mucho más personal y emotivo.</p>
+                        </div>
+                    </div>
+                    <div class="faq-item border-b pb-4">
+                        <div class="faq-question flex justify-between items-center py-2">
+                            <h3 class="text-lg font-semibold text-gray-800">¿Cómo funciona la opción de libro impreso?</h3>
+                             <span class="transform transition-transform duration-300 text-teal-500 font-bold text-2xl">+</span>
+                        </div>
+                        <div class="faq-answer text-gray-600 pt-2 pr-8">
+                            <p>La impresión es un complemento que puedes añadir a tu "Cuento a Medida" o "Cuento Premium". Una vez que apruebes el video-cuento final, te daremos la opción de adquirir una versión física, impresa en alta calidad y tapa dura, para que se convierta en un tesoro familiar. El costo es de $50.000 CLP adicionales y el envío se calcula aparte.</p>
+                        </div>
+                    </div>
+                     <div class="faq-item border-b pb-4">
+                        <div class="faq-question flex justify-between items-center py-2">
+                            <h3 class="text-lg font-semibold text-gray-800">¿En cuánto tiempo recibo mi video-cuento?</h3>
+                             <span class="transform transition-transform duration-300 text-teal-500 font-bold text-2xl">+</span>
+                        </div>
+                        <div class="faq-answer text-gray-600 pt-2 pr-8">
+                            <p>¡Muy rápido! Recibirás tu video-cuento personalizado en tu correo electrónico en menos de 24 horas después de haber completado el formulario de personalización.</p>
+                        </div>
+                    </div>
+                    <div class="faq-item border-b pb-4">
+                        <div class="faq-question flex justify-between items-center py-2">
+                            <h3 class="text-lg font-semibold text-gray-800">¿Puedo cancelar mi suscripción a la Biblioteca Mágica?</h3>
+                             <span class="transform transition-transform duration-300 text-teal-500 font-bold text-2xl">+</span>
+                        </div>
+                        <div class="faq-answer text-gray-600 pt-2 pr-8">
+                            <p>¡Por supuesto! Puedes cancelar tu suscripción mensual en cualquier momento desde tu panel de usuario, sin preguntas ni penalizaciones. Seguirás teniendo acceso hasta el final de tu ciclo de facturación.</p>
+                        </div>
+                    </div>
+                </div>
+                <p class="mt-12 text-center text-sm text-gray-600 italic">
+                    Esta información tiene un carácter meramente informativo. Para obtener asesoramiento o diagnóstico médicos, consulta a un profesional.
+                </p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Privacy Modal -->
+    <div id="privacy-modal" class="fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center p-4 hidden modal-backdrop">
+        <div class="bg-white rounded-2xl w-full max-w-3xl transform scale-95 opacity-0 modal-content max-h-[90vh] flex flex-col">
+             <div class="flex justify-between items-center p-6 border-b sticky top-0 bg-white rounded-t-2xl">
+                <h2 class="text-2xl font-bold section-title">Políticas de Privacidad</h2>
+                <button class="text-gray-400 hover:text-gray-700 text-3xl close-modal-btn">&times;</button>
+            </div>
+            <div class="p-8 overflow-y-auto prose">
+                <p class="text-sm text-gray-500">Última actualización: 30 de Septiembre de 2025</p>
+                <p>En Muna Booki, tu privacidad y la seguridad de tus datos son fundamentales. Esta Política de Privacidad describe cómo recopilamos, usamos y protegemos tu información.</p>
+                <h2>1. Información que Recopilamos</h2>
+                <ul>
+                    <li><strong>Información de la cuenta:</strong> Nombre, dirección de correo electrónico y contraseña.</li>
+                    <li><strong>Información de personalización:</strong> Datos del niño y detalles de la situación a tratar.</li>
+                    <li><strong>Información de pago:</strong> Procesada por terceros; no almacenamos datos de tarjetas.</li>
+                    <li><strong>Información de uso:</strong> Datos anónimos sobre interacciones con nuestro sitio.</li>
+                </ul>
+                <h2>2. Cómo Usamos tu Información</h2>
+                <p>Utilizamos la información para crear y entregar tu cuento, administrar tu cuenta, comunicarnos contigo y mejorar nuestro servicio. La información sensible de personalización se trata con máxima confidencialidad.</p>
+                <h2>3. Seguridad y Tus Derechos</h2>
+                <p>Implementamos medidas de seguridad para proteger tus datos. Tienes derecho a acceder, corregir o eliminar tu información personal contactándonos.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Terms Modal -->
+    <div id="terms-modal" class="fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center p-4 hidden modal-backdrop">
+        <div class="bg-white rounded-2xl w-full max-w-3xl transform scale-95 opacity-0 modal-content max-h-[90vh] flex flex-col">
+             <div class="flex justify-between items-center p-6 border-b sticky top-0 bg-white rounded-t-2xl">
+                <h2 class="text-2xl font-bold section-title">Términos y Condiciones</h2>
+                <button class="text-gray-400 hover:text-gray-700 text-3xl close-modal-btn">&times;</button>
+            </div>
+            <div class="p-8 overflow-y-auto prose">
+                <p class="text-sm text-gray-500">Última actualización: 30 de Septiembre de 2025</p>
+                <p>Al acceder y utilizar nuestro sitio web, aceptas cumplir con los siguientes términos.</p>
+                <h2>1. Cuentas de Usuario</h2>
+                <p>Eres responsable de mantener la confidencialidad de tu contraseña. Debes ser mayor de 18 años para crear una cuenta y realizar compras.</p>
+                <h2>2. Pagos y Suscripciones</h2>
+                <ul>
+                    <li><strong>Suscripciones:</strong> Se renuevan automáticamente. Puedes cancelar en cualquier momento para evitar cargos futuros.</li>
+                    <li><strong>Pagos Únicos:</strong> Se cobran al momento de realizar el pedido.</li>
+                </ul>
+                <h2>3. Propiedad Intelectual</h2>
+                <p>Todo el contenido es propiedad exclusiva de Muna Booki. Los cuentos son para uso personal y familiar y no pueden ser revendidos.</p>
+                <h2>4. Limitación de Responsabilidad</h2>
+                <p>Nuestros cuentos son herramientas de apoyo y no sustituyen el consejo profesional, médico o psicológico. El resultado o impacto en cada niño puede variar.</p>
+            </div>
+        </div>
+    </div>
+
     <!-- Footer -->
     <footer style="background-color: var(--color-dark-blue);" class="text-white">
-        <!-- ... (Footer content) ... -->
+        <div class="container mx-auto px-6 pt-16 pb-8">
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-10">
+                <!-- Columna Logo y Descripción -->
+                <div class="lg:col-span-1">
+                    <div class="bg-white rounded-lg p-2 inline-block mb-4">
+                        <img src="https://bmeryu.github.io/muna-booki/Logo_MunaBooki.png" alt="Logo de Muna Booki" class="h-16">
+                    </div>
+                    <p class="text-gray-300 text-sm">Tu aliado en la crianza, transformando desafíos en historias mágicas.</p>
+                    <div class="flex space-x-4 mt-6">
+                        <a href="#" class="text-gray-300 hover:text-white" aria-label="Instagram"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.85s-.011 3.584-.069 4.85c-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07s-3.584-.012-4.85-.07c-3.252-.148-4.771-1.691-4.919-4.919-.058-1.265-.069-1.645-.069-4.85s.011-3.584.069-4.85c.149-3.225 1.664 4.771 4.919-4.919 1.266-.057 1.644-.07 4.85-.07zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948s.014 3.667.072 4.947c.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072s3.667-.014 4.947-.072c4.358-.2 6.78-2.618 6.98-6.98.059-1.281.073-1.689.073-4.948s-.014-3.667-.072-4.947c-.2-4.358-2.618-6.78-6.98-6.98-1.281-.058-1.689-.072-4.948-.072zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.162 6.162 6.162 6.162-2.759 6.162-6.162-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4s1.791-4 4-4 4 1.79 4 4-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44 1.441-.645 1.441-1.44-.645-1.44-1.441-1.44z"/></svg></a>
+                        <a href="#" class="text-gray-300 hover:text-white" aria-label="Facebook"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M9 8h-3v4h3v12h5v-12h3.642l.358-4h-4v-1.667c0-.955.192-1.333 1.115-1.333h2.885v-5h-3.808c-3.596 0-5.192 1.583-5.192 4.615v3.385z"/></svg></a>
+                        <a href="#" class="text-gray-300 hover:text-white" aria-label="YouTube"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg></a>
+                    </div>
+                </div>
+                <div class="lg:col-span-1">
+                    <h4 class="font-bold text-lg mb-4 text-white uppercase tracking-wider">Muna Booki</h4>
+                    <ul class="space-y-3">
+                        <li><a href="#library" class="text-gray-300 hover:text-white transition-colors duration-300">Biblioteca Mágica</a></li>
+                        <li><a href="#personalized" class="text-gray-300 hover:text-white transition-colors duration-300">Cuentos Personalizados</a></li>
+                        <li><a href="#plans" class="text-gray-300 hover:text-white transition-colors duration-300">Nuestros Planes</a></li>
+                    </ul>
+                </div>
+                <div class="lg:col-span-1">
+                    <h4 class="font-bold text-lg mb-4 text-white uppercase tracking-wider">Soporte y Legal</h4>
+                    <ul class="space-y-3">
+                        <li><a href="#" id="faq-modal-trigger" class="text-gray-300 hover:text-white transition-colors duration-300">Preguntas Frecuentes</a></li>
+                        <li><a href="#" id="privacy-modal-trigger" class="text-gray-300 hover:text-white transition-colors duration-300">Políticas de Privacidad</a></li>
+                        <li><a href="#" id="terms-modal-trigger" class="text-gray-300 hover:text-white transition-colors duration-300">Términos y Condiciones</a></li>
+                    </ul>
+                </div>
+                <div class="lg:col-span-1">
+                    <h4 class="font-bold text-lg mb-4 text-white uppercase tracking-wider">Únete a la Magia</h4>
+                    <p class="text-gray-300 mb-4 text-sm">Recibe consejos de crianza y novedades directo en tu correo.</p>
+                    <form action="#" method="POST">
+                        <div class="flex">
+                            <input type="email" placeholder="tu@email.com" class="w-full bg-gray-700 text-white px-4 py-2 rounded-l-md focus:outline-none focus:ring-2 focus:ring-teal-500">
+                            <button type="submit" class="bg-teal-500 hover:bg-teal-600 text-white font-bold px-4 py-2 rounded-r-md transition-colors duration-300">Enviar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="text-center text-gray-400 mt-12 border-t border-gray-700 pt-8 text-sm">
+                © 2025 Muna Booki - Todos los derechos reservados.
+            </div>
+        </div>
     </footer>
 
-</body>
-</html>
+    <!-- Botón Flotante de WhatsApp -->
+    <a href="https://wa.me/56998956864?text=Hola!%20Me%20gustar%C3%ADa%20saber%20m%C3%A1s%20sobre%20Muna%20Booki." 
+       target="_blank" rel="noopener noreferrer" class="whatsapp-float" aria-label="Contactar por WhatsApp">
+        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" viewBox="0 0 16 16">
+            <path d="M13.601 2.326A7.854 7.854 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.933 7.933 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.898 7.898 0 0 0 13.6 2.326zM7.994 14.521a6.573 6.573 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.557 6.557 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592zm3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.068-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.59-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.729.729 0 0 0-.529.247c-.182.198-.691.677-.691 1.654 0 .977.71 1.916.81 2.049.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.I1... (9236 more characters)
 
