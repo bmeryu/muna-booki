@@ -292,8 +292,8 @@
           failure: 'https://bmeryu.github.io/muna-booki/checkout.html',
           pending: 'https://bmeryu.github.io/muna-booki/checkout.html'
         },
-        // --> LÍNEA AÑADIDA <--
-        payer_email: currentUser ? currentUser.email : null
+        payer_email: currentUser ? currentUser.email : null,
+        user_id: currentUser ? currentUser.uid : null
       };
       console.log('POST → Function payload:', payload);
       const resp = await fetch(functionUrl, { method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify(payload) });
@@ -437,3 +437,4 @@
   </script>
 </body>
 </html>
+
