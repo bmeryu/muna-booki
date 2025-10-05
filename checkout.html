@@ -1,4 +1,4 @@
-##1##
+##2##
 <!DOCTYPE html>
 <html lang="es" class="scroll-smooth">
 <head>
@@ -75,13 +75,12 @@
         </button>
       </div>
       
-      <!-- Paso 2: Productos y Pago (Oculto por defecto) -->
+      <!-- Paso 2: Productos y Pago -->
       <div id="purchase-section" class="hidden">
         <div id="welcome-message" class="text-center mb-8 mt-12">
           <h2 class="text-2xl font-bold section-title">Paso 2: Elige tus productos y paga</h2>
           <p class="text-gray-600 mt-1">¡Hola, <span id="user-name" class="font-semibold"></span>! Ya puedes completar tu compra.</p>
         </div>
-      
         <div class="bg-white p-8 rounded-2xl shadow-lg">
           <div id="plans-list" class="space-y-4"></div>
 
@@ -149,18 +148,24 @@
       messagingSenderId: "585414544600",
       appId: "1:585414544600:web:77026db4856b0111249bad",
     };
-
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app, 'munabooki');
     const auth = getAuth(app);
+    const googleProvider = new GoogleAuthProvider();
 
     // Mercado Pago (PK sandbox)
     const MP_PUBLIC_KEY = 'APP_USR-3ac9fc9a-2795-4219-b5c3-6e51e968d6c0';
     const mp = new MercadoPago(MP_PUBLIC_KEY, { locale: 'es-CL' });
-    // 👇 LOG 1: confirma la PK que usa el front
     console.log('MP PK (front)=', MP_PUBLIC_KEY.slice(0, 16));
 
-    const googleProvider = new GoogleAuthProvider();
+    // Helpers UI
+    const $ = (sel) => document.querySelector(sel);
+    const fmt = (v) => new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', maximumFractionDigits: 0 }).format(v);
+
+    // Estado
+    let selected = new Set();
+    let owned = new Set();
+    let currentUser = null;
 
     // Catálogo
     const PLANS = [
@@ -170,13 +175,7 @@
       { id: 'plan-004', name: 'Complemento: Libro Impreso', price: 50000, custom: false, addon: true, description: 'Tapa dura premium. Requiere un Cuento a Medida o Premium.' }
     ];
 
-    const $ = (sel) => document.querySelector(sel);
-    const fmt = (v) => new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', maximumFractionDigits: 0 }).format(v);
-
-    let selected = new Set();
-    let owned = new Set();
-    let currentUser = null;
-
+    // ---- UI builders ----
     function renderPlanCard(plan) {
       const isOwned = owned.has(plan.id);
       const isSelected = selected.has(plan.id);
@@ -206,7 +205,7 @@
       addonBox.innerHTML = renderPlanCard(PLANS.find(p=>p.id==='plan-004'));
       updateTotal();
     }
-    
+
     function updateStepIndicator(step) {
       const step1Dot = $('#step1-indicator .step-dot');
       const step1Text = $('#step1-indicator .step-text');
@@ -238,6 +237,7 @@
       }
     }
 
+    // Totales y botón
     function updateTotal(){
       const hasCustom = Array.from(selected).some(id => PLANS.find(p => p.id === id)?.custom);
       const addonWrapper = $('#plan-004-wrapper');
@@ -280,30 +280,6 @@
       if (e.target.id === 'terms-checkbox') updatePaymentButton();
     });
 
-    const loginTabBtn = $('#login-tab-btn'), registerTabBtn = $('#register-tab-btn');
-    const loginForm = $('#login-form'), registerForm = $('#register-form');
-    loginTabBtn.addEventListener('click', () => {
-      loginForm.classList.remove('hidden'); registerForm.classList.add('hidden');
-      loginTabBtn.classList.add('text-teal-600','border-teal-600');
-      registerTabBtn.classList.remove('text-teal-600','border-teal-600');
-    });
-    registerTabBtn.addEventListener('click', () => {
-      registerForm.classList.remove('hidden'); loginForm.classList.add('hidden');
-      registerTabBtn.classList.add('text-teal-600','border-teal-600');
-      loginTabBtn.classList.remove('text-teal-600','border-teal-600');
-    });
-    $('#google-signin-btn').addEventListener('click', () => signInWithPopup(auth, new GoogleAuthProvider()).catch(e => console.error(e)));
-    registerForm.addEventListener('submit', e => {
-      e.preventDefault();
-      createUserWithEmailAndPassword(auth, e.target.email.value, e.target.password.value)
-        .catch(err => $('#auth-error-message').textContent = 'Error al registrar. Verifica los datos.');
-    });
-    loginForm.addEventListener('submit', e => {
-      e.preventDefault();
-      signInWithEmailAndPassword(auth, e.target.email.value, e.target.password.value)
-        .catch(err => $('#auth-error-message').textContent = 'Email o contraseña incorrectos.');
-    });
-
     // ====== MP: crear preferencia en backend ======
     async function createPreferenceOnBackend(items){
       const functionUrl = 'https://us-central1-munabooki.cloudfunctions.net/createMercadoPagoPreference';
@@ -316,7 +292,6 @@
           pending: 'https://bmeryu.github.io/muna-booki/checkout.html'
         }
       };
-      // 👇 LOG 2: qué envío y qué me responde el backend
       console.log('POST → Function payload:', payload);
       const resp = await fetch(functionUrl, { method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify(payload) });
       console.log('Function status:', resp.status);
@@ -340,7 +315,6 @@
       try {
         const preference = await createPreferenceOnBackend(itemsToBuy);
         const preferenceId = preference?.preferenceId;
-        // 👇 LOG 3: preferenceId antes de montar Wallet
         console.log('preferenceId (front)=', preferenceId);
         if (!preferenceId) throw new Error('No se obtuvo preferenceId');
 
@@ -394,11 +368,10 @@
       return false;
     }
 
-    // ====== Auth flow ======
-    function updateStepIndicator(step) { /* (ya definido arriba) */ }
-    $('#google-signin-btn').addEventListener('click', () => signInWithPopup(auth, new GoogleAuthProvider()).catch(e => console.error(e)));
+    // ====== Auth & app flow (una sola vez) ======
     const loginTabBtn = $('#login-tab-btn'), registerTabBtn = $('#register-tab-btn');
     const loginForm = $('#login-form'), registerForm = $('#register-form');
+
     loginTabBtn.addEventListener('click', () => {
       loginForm.classList.remove('hidden'); registerForm.classList.add('hidden');
       loginTabBtn.classList.add('text-teal-600','border-teal-600');
@@ -409,6 +382,8 @@
       registerTabBtn.classList.add('text-teal-600','border-teal-600');
       loginTabBtn.classList.remove('text-teal-600','border-teal-600');
     });
+
+    $('#google-signin-btn').addEventListener('click', () => signInWithPopup(auth, new GoogleAuthProvider()).catch(e => console.error(e)));
     registerForm.addEventListener('submit', e => {
       e.preventDefault();
       createUserWithEmailAndPassword(auth, e.target.email.value, e.target.password.value)
@@ -427,6 +402,7 @@
         $('#auth-section').classList.add('hidden');
         $('#purchase-section').classList.remove('hidden');
         $('#user-name').textContent = user.displayName || user.email.split('@')[0];
+
         try {
           const ref = doc(db, 'user_products', user.uid);
           const snap = await getDoc(ref);
