@@ -1,4 +1,9 @@
-
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Checkout - Muna Booki</title>
   <link rel="icon" href="https://bmeryu.github.io/muna-booki/favicon.ico" />
   <script src="https://sdk.mercadopago.com/js/v2"></script>
   <script src="https://cdn.tailwindcss.com"></script>
@@ -133,6 +138,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
     import { getAuth, signInWithPopup, GoogleAuthProvider, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    // Volvemos a la versión LITE como pediste
     import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore-lite.js";
 
     // Firebase
@@ -151,7 +157,7 @@
     const auth = getAuth(app);
     const googleProvider = new GoogleAuthProvider();
 
-    // Mercado Pago - ¡CLAVE ACTUALIZADA AQUÍ!
+    // Mercado Pago
     const mp = new MercadoPago('APP_USR-3ac9fc9a-2795-4219-b5c3-6e51e968d6c0');
 
     // Catálogo
@@ -411,3 +417,4 @@
   </script>
 </body>
 </html>
+```
