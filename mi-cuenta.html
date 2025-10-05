@@ -1,382 +1,167 @@
-<!doctype html>
-<html lang="es">
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Mi cuenta — Muna Booki (unificado)</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mi Cuenta - Muna Booki</title>
+  <link rel="icon" href="https://bmeryu.github.io/muna-booki/favicon.ico" />
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-  <style>body{font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial}</style>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;900&family=Pacifico&display=swap" rel="stylesheet">
+  <style>
+    :root{ --color-dark-blue:#0A2F5B; --color-teal:#00B2A9; --color-gold:#FFC845; }
+    body{ font-family:'Poppins',sans-serif; }
+    .section-title{ color:var(--color-dark-blue); }
+    .btn-primary{ background-color:var(--color-teal); color:#fff; }
+    .btn-primary:hover{ background-color:#009a92; }
+  </style>
 </head>
-<body class="bg-slate-50">
-  <header class="bg-white border-b sticky top-0 z-50">
-    <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
-      <a href="index.html" class="font-bold">Muna Booki</a>
-      <nav class="flex items-center gap-3">
-        <a href="biblioteca.html" class="text-slate-600 hover:text-slate-900">Biblioteca</a>
-        <button id="btnLogout" class="text-sm text-slate-600 hover:text-slate-900 hidden">Salir</button>
-      </nav>
-    </div>
+<body class="bg-gray-50">
+  <header class="bg-white shadow-sm">
+    <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+      <a href="index.html" class="flex items-center">
+        <img src="https://bmeryu.github.io/muna-booki/Logo_MunaBooki.png" alt="Logo Muna Booki" class="h-14" />
+      </a>
+      <div>
+        <span id="user-email-display" class="text-gray-600 mr-4"></span>
+        <button id="logout-btn" class="text-gray-600 hover:text-teal-500 font-semibold">Cerrar Sesión</button>
+      </div>
+    </nav>
   </header>
 
-  <main class="max-w-5xl mx-auto px-4 py-8">
-    <!-- Saludo + chips de productos -->
-    <section class="mb-8">
-      <h1 id="hello" class="text-2xl font-bold">Mi cuenta</h1>
-      <p id="helloSub" class="text-slate-600 mt-1">Gestiona tus productos y compra nuevos planes.</p>
-
-      <div id="ownedChips" class="mt-4 flex flex-wrap gap-2"></div>
-    </section>
-
-    <!-- Paywall suave si no tiene biblioteca (se controla en runtime) -->
-    <section id="libraryQuick" class="hidden mb-8">
-      <div class="bg-white rounded-2xl p-5 border">
-        <div class="flex items-center justify-between">
-          <div>
-            <h3 class="font-semibold">Biblioteca Mágica</h3>
-            <p class="text-sm text-slate-600">Desbloquea todos los video‑cuentos sin límites.</p>
-          </div>
-          <a href="#" id="ctaAddLibrary" class="px-4 py-2 rounded-full bg-sky-600 text-white text-sm font-semibold">Suscribirme</a>
-        </div>
+  <main class="container mx-auto px-6 py-12">
+    <div class="max-w-3xl mx-auto">
+      <div id="loading-state" class="text-center py-12">
+        <h2 class="text-2xl font-bold section-title mb-2">Cargando tu cuenta...</h2>
+        <p class="text-gray-600">Estamos preparando tus productos.</p>
       </div>
-    </section>
 
-    <!-- Selector de planes (catálogo simple) -->
-    <section class="grid md:grid-cols-3 gap-4">
-      <article class="bg-white rounded-2xl p-5 border">
-        <h3 class="font-semibold">Biblioteca Mágica</h3>
-        <p class="text-sm text-slate-600">Acceso mensual a toda la biblioteca.</p>
-        <div class="flex items-center justify-between mt-4">
-          <span class="font-bold">$8.900</span>
-          <label class="inline-flex items-center gap-2 text-sm">
-            <input type="checkbox" class="accent-sky-600" data-id="plan-001" /> Agregar
-          </label>
+      <div id="account-content" class="hidden">
+        <div id="welcome-message" class="text-center mb-8">
+          <h2 class="text-2xl font-bold section-title">¡Bienvenido a tu cuenta!</h2>
+          <p class="text-gray-600 mt-1">Aquí encontrarás todos tus productos adquiridos.</p>
         </div>
-      </article>
-      <article class="bg-white rounded-2xl p-5 border">
-        <h3 class="font-semibold">Cuento a Medida</h3>
-        <p class="text-sm text-slate-600">Un cuento personalizado estándar.</p>
-        <div class="flex items-center justify-between mt-4">
-          <span class="font-bold">$18.900</span>
-          <label class="inline-flex items-center gap-2 text-sm">
-            <input type="checkbox" class="accent-sky-600" data-id="plan-002" data-custom="1"/> Agregar
-          </label>
-        </div>
-      </article>
-      <article class="bg-white rounded-2xl p-5 border">
-        <h3 class="font-semibold">Cuento Premium</h3>
-        <p class="text-sm text-slate-600">Hiper‑personalizado y con extras.</p>
-        <div class="flex items-center justify-between mt-4">
-          <span class="font-bold">$40.000</span>
-          <label class="inline-flex items-center gap-2 text-sm">
-            <input type="checkbox" class="accent-sky-600" data-id="plan-003" data-custom="1"/> Agregar
-          </label>
-        </div>
-      </article>
-    </section>
 
-    <!-- Barra fija: total + pagar (abre modal checkout) -->
-    <div id="bar" class="fixed inset-x-0 bottom-0 bg-white/90 backdrop-blur border-t hidden">
-      <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
-        <div class="text-sm text-slate-600">
-          <span>Seleccionados:</span>
-          <span id="barItems" class="font-semibold">—</span>
+        <!-- Mensaje de Compra Exitosa -->
+        <div id="success-purchase-msg" class="hidden bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-lg mb-8" role="alert">
+          <p class="font-bold">¡Compra exitosa!</p>
+          <p>Tus nuevos productos han sido añadidos a tu cuenta.</p>
         </div>
-        <div class="flex items-center gap-4">
-          <div class="text-right">
-            <div class="text-xs text-slate-500">Total</div>
-            <div id="barTotal" class="text-lg font-bold">$0</div>
+
+        <div class="bg-white p-8 rounded-2xl shadow-lg">
+          <h3 class="font-bold text-lg section-title mb-6">Mis Productos</h3>
+          <div id="products-list" class="space-y-4">
+            <p id="no-products-msg" class="text-gray-500">Aún no has adquirido ningún producto.</p>
           </div>
-          <button id="btnCheckout" class="px-5 py-2 rounded-full bg-sky-600 text-white font-semibold disabled:opacity-40" disabled>Pagar</button>
         </div>
       </div>
     </div>
   </main>
 
-  <!-- Modal Checkout (embebido) -->
-  <div id="checkoutModal" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center p-4">
-    <div class="bg-white w-full max-w-3xl rounded-2xl overflow-hidden shadow-lg">
-      <div class="flex items-center justify-between px-5 py-4 border-b">
-        <h2 class="font-semibold">Finalizar compra</h2>
-        <button id="closeModal" class="text-slate-500 hover:text-slate-800">✕</button>
-      </div>
-      <div class="grid md:grid-cols-2 gap-0">
-        <!-- Columna izquierda: Auth + cláusulas -->
-        <div class="p-5">
-          <div id="authBox" class="space-y-3">
-            <h3 class="font-semibold">Acceso</h3>
-            <p class="text-sm text-slate-600">Inicia sesión o crea tu cuenta para asociar la compra.</p>
-            <div class="flex gap-2">
-              <button id="btnLoginGoogle" class="px-3 py-2 rounded-lg border hover:bg-slate-50 text-sm">Continuar con Google</button>
-              <button id="btnLoginEmail" class="px-3 py-2 rounded-lg border hover:bg-slate-50 text-sm">Email</button>
-            </div>
-            <div id="emailBox" class="hidden space-y-2">
-              <input id="emailInp" type="email" placeholder="tu@email.com" class="w-full border rounded-lg px-3 py-2 text-sm" />
-              <input id="passInp" type="password" placeholder="Contraseña" class="w-full border rounded-lg px-3 py-2 text-sm" />
-              <div class="flex gap-2">
-                <button id="btnDoLogin" class="px-3 py-2 rounded-lg bg-sky-600 text-white text-sm">Entrar</button>
-                <button id="btnDoRegister" class="px-3 py-2 rounded-lg border text-sm">Crear cuenta</button>
-              </div>
-            </div>
-          </div>
-
-          <div id="clauses" class="mt-6 hidden">
-            <label class="flex items-start gap-3 text-sm">
-              <input id="chkClauses" type="checkbox" class="mt-1 accent-sky-600" />
-              <span>He leído y acepto las <a href="#" class="underline">condiciones del servicio</a> y autorizo el tratamiento de mis datos para la entrega del cuento personalizado.</span>
-            </label>
-          </div>
-        </div>
-
-        <!-- Columna derecha: Resumen + Pagar -->
-        <div class="bg-slate-50 p-5 border-l">
-          <h3 class="font-semibold mb-3">Resumen</h3>
-          <div id="orderSummary" class="divide-y mb-4"></div>
-          <div class="flex items-center justify-between text-sm">
-            <span class="text-slate-600">Total</span>
-            <strong id="sumTotal" class="text-lg">$0</strong>
-          </div>
-          <button id="btnPayNow" class="mt-5 w-full py-2 rounded-lg bg-emerald-600 text-white font-semibold disabled:opacity-30" disabled>Pagar con Mercado Pago</button>
-          <p id="payHint" class="text-xs text-slate-500 mt-2">Serás redirigido a Mercado Pago. Al aprobar, volverás aquí automáticamente.</p>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Toast -->
-  <div id="toast" class="fixed top-4 right-4 hidden bg-emerald-600 text-white px-4 py-2 rounded-lg shadow">¡Compra exitosa! Ya puedes ver tus productos.</div>
-
-  <!-- Firebase + lógica -->
   <script type="module">
-    // ===== Firebase =====
+    // =================================================================================
+    // IMPORTANTE: Este es el código que faltaba en tu archivo original.
+    // =================================================================================
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-    import { getAuth, onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore-lite.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore-lite.js";
 
-    const firebaseConfig = { /* TODO: tu config */ };
+    // Reemplaza esto con la configuración de tu proyecto de Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyBivlKO0Ijt1hvMNyH9aIGXf_7WZwE2tA4",
+      authDomain: "munabooki.firebaseapp.com",
+      projectId: "munabooki",
+      storageBucket: "munabooki.firebasestorage.app",
+      messagingSenderId: "585414544600",
+      appId: "1:585414544600:web:77026db4856b0111249bad",
+    };
+
+    // Inicializar Firebase
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    // ===== Catálogo =====
-    const PLAN = {
-      'plan-001': { code:'plan-001', name:'Biblioteca Mágica', price: 8900,  custom:false },
-      'plan-002': { code:'plan-002', name:'Cuento a Medida',    price: 18900, custom:true  },
-      'plan-003': { code:'plan-003', name:'Cuento Premium',     price: 40000, custom:true  },
-    };
+    // =================================================================================
 
-    const $ = (sel, root=document) => root.querySelector(sel);
-    const $$ = (sel, root=document) => [...root.querySelectorAll(sel)];
+    const loadingState = document.getElementById('loading-state');
+    const accountContent = document.getElementById('account-content');
+    const productsList = document.getElementById('products-list');
+    const noProductsMsg = document.getElementById('no-products-msg');
+    const userEmailDisplay = document.getElementById('user-email-display');
+    const logoutBtn = document.getElementById('logout-btn');
+    const successPurchaseMsg = document.getElementById('success-purchase-msg');
 
-    const owned = new Set();
-    const selected = new Set();
-    let currentUser = null;
-
-    // ===== Helpers =====
-    const CLP = (n)=> new Intl.NumberFormat('es-CL',{style:'currency',currency:'CLP',maximumFractionDigits:0}).format(n);
-
-    function updateBar(){
-      const ids = [...selected];
-      const tot = ids.reduce((a,id)=> a + (PLAN[id]?.price||0), 0);
-      $('#barItems').textContent = ids.map(id=>PLAN[id].name).join(', ') || '—';
-      $('#barTotal').textContent = CLP(tot);
-      $('#btnCheckout').disabled = ids.length === 0;
-      $('#bar').classList.toggle('hidden', ids.length===0);
+    // Muestra un mensaje si venimos de una compra exitosa
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('collection_status') === 'approved') {
+        successPurchaseMsg.classList.remove('hidden');
     }
 
-    function renderOwnedChips(){
-      const box = $('#ownedChips');
-      box.innerHTML = '';
-      if (!owned.size) {
-        box.innerHTML = '<span class="text-sm text-slate-500">Aún no tienes productos.</span>';
-        return;
-      }
-      owned.forEach(id=>{
-        const chip = document.createElement('span');
-        chip.className = 'px-3 py-1 text-sm rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200';
-        chip.textContent = PLAN[id]?.name || id;
-        box.appendChild(chip);
-      });
-    }
-
-    function applyPreselectFromURL(){
-      const sp = new URLSearchParams(location.search);
-      const plan = sp.get('plan');
-      const map = { biblioteca:'plan-001', estandar:'plan-002', premium:'plan-003' };
-      const id = map[plan];
-      if (id && !owned.has(id)) {
-        selected.add(id);
-        const chk = document.querySelector(`input[data-id="${id}"]`);
-        if (chk) chk.checked = true;
-      }
-      updateBar();
-    }
-
-    function refreshLibraryQuick(){
-      // Mostrar el bloque "suscríbete" si NO posee plan-001
-      const hasLib = owned.has('plan-001');
-      $('#libraryQuick').classList.toggle('hidden', hasLib);
-    }
-
-    function rebuildOrderSummary(){
-      const ids = [...selected];
-      const box = $('#orderSummary');
-      if (!ids.length) { box.innerHTML = '<p class="text-sm text-slate-500">No has seleccionado productos.</p>'; $('#sumTotal').textContent = CLP(0); return; }
-      box.innerHTML = ids.map(id=>{
-        const p = PLAN[id];
-        return `<div class="flex items-center justify-between py-2"><span>${p.name}</span><span>${CLP(p.price)}</span></div>`;
-      }).join('');
-      const total = ids.reduce((a,id)=> a + PLAN[id].price, 0);
-      $('#sumTotal').textContent = CLP(total);
-
-      const requiresClauses = ids.some(id=> PLAN[id].custom);
-      $('#clauses').classList.toggle('hidden', !requiresClauses);
-      $('#btnPayNow').disabled = requiresClauses && !$('#chkClauses').checked;
-    }
-
-    function openModal(){
-      rebuildOrderSummary();
-      $('#checkoutModal').classList.remove('hidden');
-      $('#checkoutModal').classList.add('flex');
-    }
-    function closeModal(){
-      $('#checkoutModal').classList.add('hidden');
-      $('#checkoutModal').classList.remove('flex');
-    }
-
-    // ===== Eventos UI =====
-    $$('#ctaAddLibrary').forEach(btn=> btn.addEventListener('click', e=>{
-      e.preventDefault();
-      if (!owned.has('plan-001')) {
-        selected.add('plan-001');
-        const chk = document.querySelector('input[data-id="plan-001"]');
-        if (chk) chk.checked = true;
-        updateBar();
-        openModal();
-      }
-    }));
-
-    $$('input[type="checkbox"][data-id]').forEach(chk=>{
-      chk.addEventListener('change', ()=>{
-        const id = chk.dataset.id;
-        if (chk.checked) selected.add(id); else selected.delete(id);
-        updateBar();
-      });
-    });
-
-    $('#btnCheckout').addEventListener('click', ()=>{
-      openModal();
-    });
-
-    $('#closeModal').addEventListener('click', closeModal);
-
-    $('#chkClauses').addEventListener('change', rebuildOrderSummary);
-
-    // Auth panel
-    $('#btnLoginGoogle').addEventListener('click', async ()=>{
-      const provider = new GoogleAuthProvider();
-      try { await signInWithPopup(auth, provider); } catch(e){ alert('No se pudo autenticar: '+e.message); }
-    });
-    $('#btnLoginEmail').addEventListener('click', ()=> $('#emailBox').classList.toggle('hidden'));
-    $('#btnDoLogin').addEventListener('click', async ()=>{
-      try { await signInWithEmailAndPassword(auth, $('#emailInp').value, $('#passInp').value); } catch(e){ alert('Error login: '+e.message); }
-    });
-    $('#btnDoRegister').addEventListener('click', async ()=>{
-      try { await createUserWithEmailAndPassword(auth, $('#emailInp').value, $('#passInp').value); } catch(e){ alert('Error registro: '+e.message); }
-    });
-
-    $('#btnLogout').addEventListener('click', async ()=>{ await signOut(auth); });
-
-    // ===== Pago (Cloud Function → Mercado Pago) =====
-    async function createPreference({ userUid, items }){
-      // TODO: Reemplazar por tu endpoint real (Cloud Functions /fetch o similar)
-      // Debe recibir: items: [{title, unit_price, quantity, currency_id}], metadata: { userUid, selectedPlanIds }, back_urls, auto_return
-      try {
-        const prices = { 'plan-001': 8900, 'plan-002': 18900, 'plan-003': 40000 };
-        const mpItems = items.map(id=>({
-          title: PLAN[id].name,
-          unit_price: prices[id],
-          quantity: 1,
-          currency_id: 'CLP',
-        }));
-        const payload = {
-          items: mpItems,
-          metadata: { userUid, selectedPlanIds: items },
-          backUrls: {
-            success: location.origin + location.pathname, // vuelve a esta página
-            failure: location.origin + location.pathname,
-            pending: location.origin + location.pathname,
-          }
-        };
-        const res = await fetch('https://YOUR_CLOUD_FUNCTION_URL/createPreference', {
-          method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
-        });
-        if (!res.ok) throw new Error('HTTP '+res.status);
-        const data = await res.json();
-        return data; // { init_point, id, ... }
-      } catch(e){
-        console.error(e);
-        throw e;
-      }
-    }
-
-    $('#btnPayNow').addEventListener('click', async ()=>{
-      if (!currentUser) { alert('Primero inicia sesión.'); return; }
-      const ids = [...selected];
-      if (!ids.length) return;
-      // Requerir cláusulas si hay custom
-      const needClauses = ids.some(id=> PLAN[id].custom);
-      if (needClauses && !$('#chkClauses').checked) { alert('Debes aceptar las condiciones.'); return; }
-
-      $('#btnPayNow').disabled = true;
-      $('#btnPayNow').textContent = 'Redirigiendo…';
-      try {
-        const pref = await createPreference({ userUid: currentUser.uid, items: ids });
-        // Redirige a Mercado Pago
-        if (pref?.init_point) {
-          sessionStorage.setItem('postPurchase','1');
-          location.href = pref.init_point;
-        } else {
-          alert('No se pudo iniciar el pago.');
-        }
-      } catch(e){
-        alert('Error al crear la preferencia.');
-      } finally {
-        $('#btnPayNow').disabled = false;
-        $('#btnPayNow').textContent = 'Pagar con Mercado Pago';
-      }
-    });
-
-    // ===== Estado (auth + productos + post‑compra) =====
-    onAuthStateChanged(auth, async (user)=>{
-      currentUser = user || null;
-      $('#btnLogout').classList.toggle('hidden', !user);
-
-      const name = user?.displayName || (user?.email ? user.email.split('@')[0] : 'Explorador/a');
-      $('#hello').textContent = user ? `¡Hola, ${name}!` : 'Mi cuenta';
-      $('#helloSub').textContent = user ? 'Gestiona tus productos y compra nuevos planes.' : 'Inicia sesión para asociar tus compras.';
-
-      owned.clear();
+    onAuthStateChanged(auth, async (user) => {
       if (user) {
-        try {
-          const snap = await getDoc(doc(db,'user_products',user.uid));
-          const arr = snap.exists() ? (snap.data().items||[]) : [];
-          arr.forEach(x=> owned.add(x));
-        } catch(e) { console.warn(e); }
+        // Usuario ha iniciado sesión
+        userEmailDisplay.textContent = user.email;
+        await loadUserProducts(user.uid);
+        
+        loadingState.classList.add('hidden');
+        accountContent.classList.remove('hidden');
+      } else {
+        // Usuario no ha iniciado sesión, redirigir a la página de inicio
+        window.location.href = 'index.html';
       }
-      renderOwnedChips();
-      refreshLibraryQuick();
-      applyPreselectFromURL();
+    });
 
-      // Toast post‑pago
-      if (sessionStorage.getItem('postPurchase') === '1'){
-        sessionStorage.removeItem('postPurchase');
-        const t = $('#toast'); t.classList.remove('hidden'); setTimeout(()=>t.classList.add('hidden'), 3500);
+    async function loadUserProducts(userId) {
+      try {
+        const paymentsRef = collection(db, 'payments');
+        const q = query(paymentsRef, where("uid", "==", userId));
+        const querySnapshot = await getDocs(q);
+
+        let userProducts = new Set();
+        querySnapshot.forEach((doc) => {
+          const payment = doc.data();
+          if (payment.items && Array.isArray(payment.items)) {
+            payment.items.forEach(item => userProducts.add(item));
+          }
+        });
+
+        renderProducts(Array.from(userProducts));
+      } catch (error) {
+        console.error("Error al cargar los productos del usuario:", error);
+        productsList.innerHTML = '<p class="text-red-500">Error al cargar tus productos. Inténtalo de nuevo más tarde.</p>';
       }
+    }
+
+    function renderProducts(productIds) {
+      if (productIds.length > 0) {
+        noProductsMsg.classList.add('hidden');
+        productsList.innerHTML = productIds.map(id => `
+          <div class="p-4 bg-gray-100 rounded-lg">
+            <span class="font-semibold text-gray-800">${getPlanName(id)}</span>
+          </div>
+        `).join('');
+      } else {
+        noProductsMsg.classList.remove('hidden');
+        productsList.innerHTML = ''; // Limpiar por si había algo antes
+      }
+    }
+
+    function getPlanName(id) {
+        const planNames = {
+            'plan-001': 'Suscripción Biblioteca Mágica',
+            'plan-002': 'Cuento a Medida (Estándar)',
+            'plan-003': 'Cuento Premium',
+            'plan-004': 'Complemento: Libro Impreso'
+        };
+        return planNames[id] || 'Producto Desconocido';
+    }
+
+    logoutBtn.addEventListener('click', () => {
+        signOut(auth).catch(error => console.error('Error al cerrar sesión:', error));
     });
 
   </script>
 </body>
 </html>
+
