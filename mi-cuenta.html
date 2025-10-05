@@ -1,3 +1,33 @@
+<script>
+(async () => {
+  const qs = new URLSearchParams(location.search);
+  console.log("[MI-CUENTA] query:", Object.fromEntries(qs.entries()));
+
+  const paymentId = qs.get("payment_id");
+  const status = qs.get("status");
+  console.log("[MI-CUENTA] paymentId:", paymentId, "status:", status);
+
+  const user = firebase.auth().currentUser || await new Promise(r => {
+    const u = firebase.auth().onAuthStateChanged(x => { u(); r(x); });
+  });
+  console.log("[MI-CUENTA] user:", user && user.uid);
+
+  if (status === "approved" && paymentId && user) {
+    const idToken = await user.getIdToken();
+    console.log("[MI-CUENTA] llamando confirmMercadoPagoPayment…");
+    const resp = await fetch("https://us-central1-munabooki.cloudfunctions.net/confirmMercadoPagoPayment", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${idToken}`
+      },
+      body: JSON.stringify({ payment_id: paymentId, user_id: user.uid })
+    });
+    const data = await resp.json().catch(()=> ({}));
+    console.log("[MI-CUENTA] respuesta confirm:", resp.status, data);
+  }
+})();
+</script>
 <!DOCTYPE html>
 <html lang="es" class="scroll-smooth">
 <head>
