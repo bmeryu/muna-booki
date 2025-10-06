@@ -57,6 +57,16 @@
         /* --- AUTH MODAL --- */
         .modal-backdrop { background: rgba(0,0,0,0.5); }
         .modal-hidden { display: none; }
+        
+        /* Legal & FAQ Modal Styles */
+        .modal-backdrop { transition: opacity 0.3s ease; }
+        .modal-content { transition: transform 0.3s ease, opacity 0.3s ease; }
+        .prose h2 { color: var(--color-dark-blue); font-weight: 700; margin-top: 2em; margin-bottom: 1em; }
+        .prose p { margin-bottom: 1em; line-height: 1.75; }
+        .prose ul { list-style-position: inside; margin-left: 1.5em; }
+        .prose li { margin-bottom: 0.5em; }
+        .faq-question { cursor: pointer; }
+        .faq-answer { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-in-out; }
     </style>
 </head>
 <body class="bg-white">
@@ -366,6 +376,159 @@
         </div>
       </div>
     </div>
+    
+    <!-- Legal Modals -->
+    <!-- FAQ Modal -->
+    <div id="faq-modal" class="fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center p-4 hidden modal-backdrop">
+        <div class="bg-white rounded-2xl w-full max-w-3xl transform scale-95 opacity-0 modal-content max-h-[90vh] flex flex-col">
+            <div class="flex justify-between items-center p-6 border-b sticky top-0 bg-white rounded-t-2xl">
+                <h2 class="text-2xl font-bold section-title">Preguntas Frecuentes</h2>
+                <button class="text-gray-400 hover:text-gray-700 text-3xl close-modal-btn">&times;</button>
+            </div>
+            <div class="p-8 overflow-y-auto">
+                <div class="space-y-6">
+                    <div class="faq-item border-b pb-4">
+                        <div class="faq-question flex justify-between items-center py-2">
+                            <h3 class="text-lg font-semibold text-gray-800">¿Cómo funciona la personalización?</h3>
+                            <span class="transform transition-transform duration-300 text-teal-500 font-bold text-2xl">+</span>
+                        </div>
+                        <div class="faq-answer text-gray-600 pt-2 pr-8">
+                            <p>Al elegir un plan de video personalizado, te haremos preguntas clave sobre el desafío, el nombre de tu hijo/a, sus gustos y características. Nuestro equipo de pedagogos y creativos usa esa información para crear una historia única donde tu pequeño es el héroe.</p>
+                        </div>
+                    </div>
+                    <div class="faq-item border-b pb-4">
+                        <div class="faq-question flex justify-between items-center py-2">
+                            <h3 class="text-lg font-semibold text-gray-800">¿En cuánto tiempo recibo mi video-cuento?</h3>
+                             <span class="transform transition-transform duration-300 text-teal-500 font-bold text-2xl">+</span>
+                        </div>
+                        <div class="faq-answer text-gray-600 pt-2 pr-8">
+                            <p>Recibirás tu video-cuento personalizado en tu correo electrónico en menos de 24 horas después de haber completado el formulario de personalización.</p>
+                        </div>
+                    </div>
+                     <div class="faq-item border-b pb-4">
+                        <div class="faq-question flex justify-between items-center py-2">
+                            <h3 class="text-lg font-semibold text-gray-800">¿Qué incluye la Garantía de Satisfacción?</h3>
+                             <span class="transform transition-transform duration-300 text-teal-500 font-bold text-2xl">+</span>
+                        </div>
+                        <div class="faq-answer text-gray-600 pt-2 pr-8">
+                            <p>Para los cuentos personalizados, te permite solicitar una ronda de ajustes menores dentro de las 48 horas posteriores a la entrega. Para las suscripciones, ofrecemos un reembolso completo si cancelas dentro de los primeros 7 días.</p>
+                        </div>
+                    </div>
+                    <div class="faq-item border-b pb-4">
+                        <div class="faq-question flex justify-between items-center py-2">
+                            <h3 class="text-lg font-semibold text-gray-800">¿Puedo cancelar mi suscripción cuando quiera?</h3>
+                             <span class="transform transition-transform duration-300 text-teal-500 font-bold text-2xl">+</span>
+                        </div>
+                        <div class="faq-answer text-gray-600 pt-2 pr-8">
+                            <p>¡Por supuesto! Puedes cancelar tu suscripción en cualquier momento desde tu panel de usuario, sin preguntas ni penalizaciones.</p>
+                        </div>
+                    </div>
+                </div>
+                <p class="mt-12 text-center text-sm text-gray-600 italic">
+                    Esta información tiene un carácter meramente informativo. Para obtener asesoramiento o diagnóstico médicos, consulta a un profesional.
+                </p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Privacy Modal -->
+    <div id="privacy-modal" class="fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center p-4 hidden modal-backdrop">
+        <div class="bg-white rounded-2xl w-full max-w-3xl transform scale-95 opacity-0 modal-content max-h-[90vh] flex flex-col">
+             <div class="flex justify-between items-center p-6 border-b sticky top-0 bg-white rounded-t-2xl">
+                <h2 class="text-2xl font-bold section-title">Políticas de Privacidad</h2>
+                <button class="text-gray-400 hover:text-gray-700 text-3xl close-modal-btn">&times;</button>
+            </div>
+            <div class="p-8 overflow-y-auto prose">
+                <p class="text-sm text-gray-500">Última actualización: 18 de septiembre de 2025</p>
+                <p>En Muna Booki, tu privacidad y la seguridad de tus datos son fundamentales. Esta Política de Privacidad describe cómo recopilamos, usamos y protegemos tu información.</p>
+                <h2>1. Información que Recopilamos</h2>
+                <ul>
+                    <li><strong>Información de la cuenta:</strong> Nombre, dirección de correo electrónico y contraseña.</li>
+                    <li><strong>Información de personalización:</strong> Datos del niño y detalles de la situación a tratar.</li>
+                    <li><strong>Información de pago:</strong> Procesada por terceros; no almacenamos datos de tarjetas.</li>
+                    <li><strong>Información de uso:</strong> Datos anónimos sobre interacciones con nuestro sitio.</li>
+                </ul>
+                <h2>2. Cómo Usamos tu Información</h2>
+                <p>Utilizamos la información para crear y entregar tu cuento, administrar tu cuenta, comunicarnos contigo y mejorar nuestro servicio. La información sensible de personalización se trata con máxima confidencialidad.</p>
+                <h2>3. Seguridad y Tus Derechos</h2>
+                <p>Implementamos medidas de seguridad para proteger tus datos. Tienes derecho a acceder, corregir o eliminar tu información personal contactándonos.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Terms Modal -->
+    <div id="terms-modal" class="fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center p-4 hidden modal-backdrop">
+        <div class="bg-white rounded-2xl w-full max-w-3xl transform scale-95 opacity-0 modal-content max-h-[90vh] flex flex-col">
+             <div class="flex justify-between items-center p-6 border-b sticky top-0 bg-white rounded-t-2xl">
+                <h2 class="text-2xl font-bold section-title">Términos y Condiciones</h2>
+                <button class="text-gray-400 hover:text-gray-700 text-3xl close-modal-btn">&times;</button>
+            </div>
+            <div class="p-8 overflow-y-auto prose">
+                <p class="text-sm text-gray-500">Última actualización: 18 de septiembre de 2025</p>
+                <p>Al acceder y utilizar nuestro sitio web, aceptas cumplir con los siguientes términos.</p>
+                <h2>1. Cuentas de Usuario</h2>
+                <p>Eres responsable de mantener la confidencialidad de tu contraseña. Debes ser mayor de 18 años para crear una cuenta y realizar compras.</p>
+                <h2>2. Pagos y Suscripciones</h2>
+                <ul>
+                    <li><strong>Suscripciones:</strong> Se renuevan automáticamente. Puedes cancelar en cualquier momento para evitar cargos futuros.</li>
+                    <li><strong>Pagos Únicos:</strong> Se cobran al momento de realizar el pedido.</li>
+                </ul>
+                <h2>3. Propiedad Intelectual</h2>
+                <p>Todo el contenido es propiedad exclusiva de Muna Booki. Los cuentos son para uso personal y familiar y no pueden ser revendidos.</p>
+                <h2>4. Limitación de Responsabilidad</h2>
+                <p>Nuestros cuentos son herramientas de apoyo y no sustituyen el consejo profesional, médico o psicológico. El resultado o impacto en cada niño puede variar.</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Footer -->
+    <footer style="background-color: var(--color-dark-blue);" class="text-white">
+        <div class="container mx-auto px-6 pt-16 pb-8">
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-10">
+                <!-- Columna Logo y Descripción -->
+                <div class="lg:col-span-1">
+                    <div class="bg-white rounded-lg p-2 inline-block mb-4">
+                        <img src="https://bmeryu.github.io/muna-booki/Logo_MunaBooki.png" alt="Logo de Muna Booki" class="h-16">
+                    </div>
+                    <p class="text-gray-300 text-sm">Tu aliado en la crianza, transformando desafíos en historias mágicas.</p>
+                    <div class="flex space-x-4 mt-6">
+                        <a href="#" class="text-gray-300 hover:text-white" aria-label="Instagram"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.85s-.011 3.584-.069 4.85c-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07s-3.584-.012-4.85-.07c-3.252-.148-4.771-1.691-4.919-4.919-.058-1.265-.069-1.645-.069-4.85s.011-3.584.069-4.85c.149-3.225 1.664 4.771 4.919-4.919 1.266-.057 1.644-.07 4.85-.07zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948s.014 3.667.072 4.947c.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072s3.667-.014 4.947-.072c4.358-.2 6.78-2.618 6.98-6.98.059-1.281.073-1.689.073-4.948s-.014-3.667-.072-4.947c-.2-4.358-2.618-6.78-6.98-6.98-1.281-.058-1.689-.072-4.948-.072zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.162 6.162 6.162 6.162-2.759 6.162-6.162-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4s1.791-4 4-4 4 1.79 4 4-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44 1.441-.645 1.441-1.44-.645-1.44-1.441-1.44z"/></svg></a>
+                        <a href="#" class="text-gray-300 hover:text-white" aria-label="Facebook"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M9 8h-3v4h3v12h5v-12h3.642l.358-4h-4v-1.667c0-.955.192-1.333 1.115-1.333h2.885v-5h-3.808c-3.596 0-5.192 1.583-5.192 4.615v3.385z"/></svg></a>
+                        <a href="#" class="text-gray-300 hover:text-white" aria-label="YouTube"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg></a>
+                    </div>
+                </div>
+                <div class="lg:col-span-1">
+                    <h4 class="font-bold text-lg mb-4 text-white uppercase tracking-wider">Muna Booki</h4>
+                    <ul class="space-y-3">
+                        <li><a href="biblioteca_mejorada.html" class="text-gray-300 hover:text-white transition-colors duration-300">Biblioteca Mágica</a></li>
+                        <li><a href="#personalized" class="text-gray-300 hover:text-white transition-colors duration-300">Cuentos Personalizados</a></li>
+                        <li><a href="#plans" class="text-gray-300 hover:text-white transition-colors duration-300">Nuestros Planes</a></li>
+                    </ul>
+                </div>
+                <div class="lg:col-span-1">
+                    <h4 class="font-bold text-lg mb-4 text-white uppercase tracking-wider">Soporte y Legal</h4>
+                    <ul class="space-y-3">
+                        <li><a href="#" id="faq-modal-trigger" class="text-gray-300 hover:text-white transition-colors duration-300">Preguntas Frecuentes</a></li>
+                        <li><a href="#" id="privacy-modal-trigger" class="text-gray-300 hover:text-white transition-colors duration-300">Políticas de Privacidad</a></li>
+                        <li><a href="#" id="terms-modal-trigger" class="text-gray-300 hover:text-white transition-colors duration-300">Términos y Condiciones</a></li>
+                    </ul>
+                </div>
+                <div class="lg:col-span-1">
+                    <h4 class="font-bold text-lg mb-4 text-white uppercase tracking-wider">Únete a la Magia</h4>
+                    <p class="text-gray-300 mb-4 text-sm">Recibe consejos de crianza y novedades directo en tu correo.</p>
+                    <form action="#" method="POST">
+                        <div class="flex">
+                            <input type="email" placeholder="tu@email.com" class="w-full bg-gray-700 text-white px-4 py-2 rounded-l-md focus:outline-none focus:ring-2 focus:ring-teal-500">
+                            <button type="submit" class="bg-teal-500 hover:bg-teal-600 text-white font-bold px-4 py-2 rounded-r-md transition-colors duration-300">Enviar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="text-center text-gray-400 mt-12 border-t border-gray-700 pt-8 text-sm">
+                © 2024 Muna Booki - Todos los derechos reservados.
+            </div>
+        </div>
+    </footer>
 
     <!-- ===== Firebase Auth (reutilizando la misma lógica/base del checkout) ===== -->
     <script type="module">
@@ -413,17 +576,18 @@
       function renderHeader(user) {
         authContainer.innerHTML = "";
         if (user) {
+          // Estado de sesión iniciada
           const hello = document.createElement("span");
-          hello.className = "hidden md:inline text-gray-600 mr-2";
+          hello.className = "hidden md:inline text-gray-600 mr-4";
           hello.textContent = `Hola, ${user.displayName || user.email?.split("@")[0] || "usuario"}`;
 
           const miCuenta = document.createElement("a");
           miCuenta.href = "mi-cuenta.html";
-          miCuenta.className = "btn btn-primary px-4 py-2 rounded-lg font-semibold";
+          miCuenta.className = "btn btn-primary px-5 py-2 rounded-lg font-semibold text-sm";
           miCuenta.textContent = "Mi Cuenta";
 
           const salir = document.createElement("button");
-          salir.className = "ml-2 bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold px-4 py-2 rounded-lg";
+          salir.className = "ml-2 text-gray-600 hover:text-teal-500 font-semibold text-sm focus-ring rounded p-2";
           salir.textContent = "Salir";
           salir.addEventListener("click", async () => { await signOut(auth); });
 
@@ -431,11 +595,19 @@
           authContainer.appendChild(miCuenta);
           authContainer.appendChild(salir);
         } else {
-          const entrar = document.createElement("button");
-          entrar.className = "btn btn-primary px-4 py-2 rounded-lg font-semibold";
-          entrar.textContent = "Ingresar / Registrarse";
-          entrar.addEventListener("click", () => { openModal(); switchTab("login"); });
-          authContainer.appendChild(entrar);
+          // Estado sin sesión
+          const loginBtn = document.createElement("button");
+          loginBtn.className = "font-semibold text-gray-700 hover:text-teal-600 transition-colors px-4 py-2 rounded-lg focus-ring";
+          loginBtn.textContent = "Ingresar";
+          loginBtn.addEventListener("click", () => { openModal(); switchTab("login"); });
+
+          const registerBtn = document.createElement("button");
+          registerBtn.className = "btn btn-primary ml-2 px-5 py-2 rounded-lg font-semibold text-sm";
+          registerBtn.textContent = "Registrarse";
+          registerBtn.addEventListener("click", () => { openModal(); switchTab("register"); });
+
+          authContainer.appendChild(loginBtn);
+          authContainer.appendChild(registerBtn);
         }
       }
 
@@ -495,6 +667,95 @@
           openModal();
         });
       });
+
+      // --- New Modal Logic ---
+      const modalTriggers = {
+          'faq-modal-trigger': 'faq-modal',
+          'header-faq-trigger': 'faq-modal',
+          'privacy-modal-trigger': 'privacy-modal',
+          'terms-modal-trigger': 'terms-modal'
+      };
+
+      const openModalGeneric = (modalId) => {
+          const modal = document.getElementById(modalId);
+          if (!modal) return;
+
+          const backdrop = modal;
+          const content = modal.querySelector('.modal-content');
+
+          backdrop.classList.remove('hidden');
+          setTimeout(() => {
+              backdrop.classList.remove('opacity-0');
+              if (content) {
+                content.classList.remove('scale-95', 'opacity-0');
+              }
+          }, 10);
+      };
+
+      const closeModalGeneric = (modal) => {
+          const backdrop = modal;
+          const content = modal.querySelector('.modal-content');
+          
+          if(content) {
+            content.classList.add('scale-95', 'opacity-0');
+          }
+          backdrop.classList.add('opacity-0');
+          setTimeout(() => {
+              backdrop.classList.add('hidden');
+          }, 300);
+      };
+      
+      // Event listeners for triggers
+      for (const triggerId in modalTriggers) {
+          const trigger = document.getElementById(triggerId);
+          if (trigger) {
+              trigger.addEventListener('click', (e) => {
+                  e.preventDefault();
+                  openModalGeneric(modalTriggers[triggerId]);
+              });
+          }
+      }
+
+      // Event listeners for closing modals
+      document.querySelectorAll('.modal-backdrop').forEach(backdrop => {
+          backdrop.addEventListener('click', (e) => {
+              if (e.target === backdrop && e.target.id !== 'auth-modal') { // Don't close auth modal on backdrop click
+                  closeModalGeneric(backdrop);
+              }
+          });
+      });
+      document.querySelectorAll('.close-modal-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+              closeModalGeneric(btn.closest('.modal-backdrop'));
+          });
+      });
+
+      // Check for URL params to open a modal on load
+      const urlParams = new URLSearchParams(window.location.search);
+      const modalToShow = urlParams.get('show');
+      if (modalToShow && ['faq', 'privacy', 'terms'].includes(modalToShow)) {
+          openModalGeneric(modalToShow + '-modal');
+      }
+      
+      // FAQ Accordion Logic (inside FAQ modal)
+      const faqItems = document.querySelectorAll('.faq-item');
+      faqItems.forEach(item => {
+          const question = item.querySelector('.faq-question');
+          const answer = item.querySelector('.faq-answer');
+          const icon = question.querySelector('span');
+
+          question.addEventListener('click', () => {
+              const isOpen = answer.style.maxHeight && answer.style.maxHeight !== '0px';
+              if (isOpen) {
+                  answer.style.maxHeight = '0px';
+                  icon.style.transform = 'rotate(0deg)';
+              } else {
+                  answer.style.maxHeight = answer.scrollHeight + 'px';
+                  icon.style.transform = 'rotate(45deg)';
+              }
+          });
+      });
+
     </script>
 </body>
 </html>
