@@ -112,7 +112,7 @@
                 <svg class="w-6 h-6 text-teal-500 mt-1 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                 <div>
                     <h4 class="font-semibold text-gray-800">Tiempos de entrega</h4>
-                    <p class="text-sm text-gray-600">Recibirás tu video‑cuento personalizado en <strong>menos de 24 horas</strong> tras completar el formulario post‑pago.</p>
+                    <p class="text-sm text-gray-600">Recibirás tu video-cuento personalizado en <strong>menos de 24 horas</strong> tras completar el formulario post-pago.</p>
                 </div>
             </div>
             <div class="flex items-start gap-3">
@@ -178,23 +178,23 @@
 
     // ---- UI builders ----
     function renderPlanCard(plan) {
-        const isOwned = owned.has(plan.id);
-        const isSelected = selected.has(plan.id);
-        return `
-          <div class="flex items-start justify-between p-5 rounded-2xl border shadow-sm transition-colors ${isOwned ? 'disabled-plan' : 'bg-white'}">
-            <div class="flex items-start gap-4">
-              <input type="checkbox" data-id="${plan.id}" class="mt-1 h-5 w-5 rounded border-gray-300 text-teal-600 focus:ring-teal-500" ${isOwned ? 'disabled checked' : ''} ${isSelected ? 'checked' : ''}>
-              <div>
-                <div class="flex items-center gap-2">
-                  <span class="font-semibold text-gray-800">${plan.name}</span>
-                  ${isOwned ? '<span class="text-xs bg-gray-200 text-gray-700 px-2 py-0.5 rounded-full border">Ya lo tienes</span>' : ''}
-                </div>
-                <div class="text-sm text-gray-500">${plan.description || fmt(plan.price)}</div>
+      const isOwned = owned.has(plan.id);
+      const isSelected = selected.has(plan.id);
+      return `
+        <div class="flex items-start justify-between p-5 rounded-2xl border shadow-sm transition-colors ${isOwned ? 'disabled-plan' : 'bg-white'}">
+          <div class="flex items-start gap-4">
+            <input type="checkbox" data-id="${plan.id}" class="mt-1 h-5 w-5 rounded border-gray-300 text-teal-600 focus:ring-teal-500" ${isOwned ? 'disabled checked' : ''} ${isSelected ? 'checked' : ''}>
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="font-semibold text-gray-800">${plan.name}</span>
+                ${isOwned ? '<span class="text-xs bg-gray-200 text-gray-700 px-2 py-0.5 rounded-full border">Ya lo tienes</span>' : ''}
               </div>
+              <div class="text-sm text-gray-500">${plan.description || fmt(plan.price)}</div>
             </div>
-            <div class="text-gray-700 font-semibold text-lg">${fmt(plan.price)}</div>
           </div>
-        `;
+          <div class="text-gray-700 font-semibold text-lg">${fmt(plan.price)}</div>
+        </div>
+      `;
     }
 
     function renderPlans() {
@@ -208,34 +208,34 @@
     }
     
     function updateStepIndicator(step) {
-        const step1Dot = $('#step1-indicator .step-dot');
-        const step1Text = $('#step1-indicator .step-text');
-        const step2Dot = $('#step2-indicator .step-dot');
-        const step2Text = $('#step2-indicator .step-text');
+      const step1Dot = $('#step1-indicator .step-dot');
+      const step1Text = $('#step1-indicator .step-text');
+      const step2Dot = $('#step2-indicator .step-dot');
+      const step2Text = $('#step2-indicator .step-text');
 
-        if (step === 1) {
-            step1Dot.classList.add('bg-teal-600', 'text-white');
-            step1Dot.classList.remove('bg-slate-300', 'bg-green-500');
-            step1Dot.innerHTML = '1';
-            step1Text.classList.add('font-semibold', 'text-teal-700');
-            step1Text.classList.remove('text-slate-500');
+      if (step === 1) {
+        step1Dot.classList.add('bg-teal-600', 'text-white');
+        step1Dot.classList.remove('bg-slate-300', 'bg-green-500');
+        step1Dot.innerHTML = '1';
+        step1Text.classList.add('font-semibold', 'text-teal-700');
+        step1Text.classList.remove('text-slate-500');
 
-            step2Dot.classList.add('bg-slate-300');
-            step2Dot.classList.remove('bg-teal-600', 'text-white');
-            step2Text.classList.add('text-slate-500');
-            step2Text.classList.remove('font-semibold', 'text-teal-700');
-        } else if (step === 2) {
-            step1Dot.classList.remove('bg-teal-600');
-            step1Dot.classList.add('bg-green-500', 'text-white');
-            step1Dot.innerHTML = '✓';
-            step1Text.classList.remove('font-semibold', 'text-teal-700');
-            step1Text.classList.add('text-slate-500');
+        step2Dot.classList.add('bg-slate-300');
+        step2Dot.classList.remove('bg-teal-600', 'text-white');
+        step2Text.classList.add('text-slate-500');
+        step2Text.classList.remove('font-semibold', 'text-teal-700');
+      } else if (step === 2) {
+        step1Dot.classList.remove('bg-teal-600');
+        step1Dot.classList.add('bg-green-500', 'text-white');
+        step1Dot.innerHTML = '✓';
+        step1Text.classList.remove('font-semibold', 'text-teal-700');
+        step1Text.classList.add('text-slate-500');
 
-            step2Dot.classList.add('bg-teal-600', 'text-white');
-            step2Dot.classList.remove('bg-slate-300');
-            step2Text.classList.add('font-semibold', 'text-teal-700');
-            step2Text.classList.remove('text-slate-500');
-        }
+        step2Dot.classList.add('bg-teal-600', 'text-white');
+        step2Dot.classList.remove('bg-slate-300');
+        step2Text.classList.add('font-semibold', 'text-teal-700');
+        step2Text.classList.remove('text-slate-500');
+      }
     }
 
     // Totales y botón
@@ -371,7 +371,7 @@
       return false;
     }
 
-    // ====== Auth & app flow (una sola vez) ======
+    // ====== Auth & app flow ======
     const loginTabBtn = $('#login-tab-btn'), registerTabBtn = $('#register-tab-btn');
     const loginForm = $('#login-form'), registerForm = $('#register-form');
 
@@ -437,4 +437,3 @@
   </script>
 </body>
 </html>
-
