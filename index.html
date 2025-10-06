@@ -28,140 +28,35 @@
             font-family: 'Poppins', sans-serif;
             color: #333;
         }
-        .font-cursive {
-            font-family: 'Pacifico', cursive;
-        }
-        .btn {
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        }
-        .btn-primary {
-            background-color: var(--color-teal);
-            color: white;
-        }
-        .btn-primary:hover {
-            background-color: #009a92;
-        }
-        .btn-secondary {
-            background-color: var(--color-gold);
-            color: var(--color-dark-blue);
-        }
-        .btn-secondary:hover {
-            background-color: #e6b43e;
-        }
-        .section-title {
-            color: var(--color-dark-blue);
-        }
-        .focus-ring:focus {
-            outline: 2px solid var(--color-gold);
-            outline-offset: 2px;
-        }
-        .plan-card {
-            border: 1px solid #e0e0e0;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-        .plan-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-        }
-        .plan-featured {
-            border: 2px solid var(--color-teal);
-            transform: scale(1.05);
-        }
-        .star-gold {
-            color: var(--color-gold);
-        }
-        .whatsapp-float {
-            position: fixed;
-            width: 60px;
-            height: 60px;
-            bottom: 40px;
-            right: 40px;
-            background-color: #25d366;
-            color: #FFF;
-            border-radius: 50px;
-            text-align: center;
-            font-size: 30px;
-            box-shadow: 2px 2px 6px rgba(0,0,0,0.25);
-            z-index: 100;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: transform 0.3s ease;
-        }
-        .whatsapp-float:hover {
-            transform: scale(1.1);
-        }
-        .video-thumbnail {
-            position: relative;
-            cursor: pointer;
-            overflow: hidden;
-            border-radius: 1rem;
-        }
-        .video-thumbnail::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.3);
-            transition: background 0.3s ease;
-        }
-        .video-thumbnail:hover::before {
-            background: rgba(0,0,0,0.1);
-        }
-        .play-icon {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) scale(1);
-            transition: transform 0.3s ease;
-            width: 80px;
-            height: 80px;
-            background: rgba(255,255,255,0.8);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .video-thumbnail:hover .play-icon {
-            transform: translate(-50%, -50%) scale(1.1);
-        }
-        /* Auth & Legal Modal Styles */
-        .modal-backdrop {
-            transition: opacity 0.3s ease;
-        }
-        .modal-content {
-            transition: transform 0.3s ease, opacity 0.3s ease;
-        }
-        .prose h2 { color: var(--color-dark-blue); font-weight: 700; margin-top: 2em; margin-bottom: 1em; }
-        .prose p { margin-bottom: 1em; line-height: 1.75; }
-        .prose ul { list-style-position: inside; margin-left: 1.5em; }
-        .prose li { margin-bottom: 0.5em; }
-        .faq-question { cursor: pointer; }
-        .faq-answer { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-in-out; }
+        .font-cursive { font-family: 'Pacifico', cursive; }
+        .btn { transition: transform 0.2s ease, box-shadow 0.2s ease; }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        .btn-primary { background-color: var(--color-teal); color: white; }
+        .btn-primary:hover { background-color: #009a92; }
+        .btn-secondary { background-color: var(--color-gold); color: var(--color-dark-blue); }
+        .btn-secondary:hover { background-color: #e6b43e; }
+        .section-title { color: var(--color-dark-blue); }
+        .focus-ring:focus { outline: 2px solid var(--color-gold); outline-offset: 2px; }
+        .plan-card { border: 1px solid #e0e0e0; transition: transform 0.3s ease, box-shadow 0.3s ease; }
+        .plan-card:hover { transform: translateY(-8px); box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        .plan-featured { border: 2px solid var(--color-teal); transform: scale(1.05); }
+        .star-gold { color: var(--color-gold); }
+        .whatsapp-float { position: fixed; width: 60px; height: 60px; bottom: 40px; right: 40px; background-color: #25d366; color: #FFF; border-radius: 50px; text-align: center; font-size: 30px; box-shadow: 2px 2px 6px rgba(0,0,0,0.25); z-index: 100; display: flex; align-items: center; justify-content: center; transition: transform 0.3s ease; }
+        .whatsapp-float:hover { transform: scale(1.1); }
+        .video-thumbnail { position: relative; cursor: pointer; overflow: hidden; border-radius: 1rem; }
+        .video-thumbnail::before { content: ''; position: absolute; inset: 0; background: rgba(0,0,0,0.3); transition: background 0.3s ease; }
+        .video-thumbnail:hover::before { background: rgba(0,0,0,0.1); }
+        .play-icon { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(1); transition: transform 0.3s ease; width: 80px; height: 80px; background: rgba(255,255,255,0.8); border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        .video-thumbnail:hover .play-icon { transform: translate(-50%, -50%) scale(1.1); }
 
-        /* NUEVO: Estilos para el tooltip de libro impreso */
-        .tooltip-trigger {
-            position: relative;
-            cursor: pointer;
-            border-bottom: 1px dotted var(--color-teal);
-        }
-        .tooltip-content {
-            visibility: hidden;
-            opacity: 0;
-            transition: opacity 0.3s ease, transform 0.3s ease;
-            transform: translateY(10px);
-        }
-        .tooltip-trigger:hover .tooltip-content {
-            visibility: visible;
-            opacity: 1;
-            transform: translateY(0);
-        }
+        /* Tooltip libro impreso */
+        .tooltip-trigger { position: relative; cursor: pointer; border-bottom: 1px dotted var(--color-teal); }
+        .tooltip-content { visibility: hidden; opacity: 0; transition: opacity 0.3s ease, transform 0.3s ease; transform: translateY(10px); }
+        .tooltip-trigger:hover .tooltip-content { visibility: visible; opacity: 1; transform: translateY(0); }
+
+        /* --- AUTH MODAL --- */
+        .modal-backdrop { background: rgba(0,0,0,0.5); }
+        .modal-hidden { display: none; }
     </style>
 </head>
 <body class="bg-white">
@@ -180,10 +75,10 @@
                 <a href="#plans" class="text-gray-600 hover:text-teal-500 font-semibold focus-ring rounded">Planes</a>
                 <a href="#" id="header-faq-trigger" class="text-gray-600 hover:text-teal-500 font-semibold focus-ring rounded">FAQ</a>
             </div>
-            
-            <!-- Auth Buttons Area -->
-            <div id="auth-container" class="flex items-center space-x-4">
-                <!-- This will be populated by JavaScript -->
+
+            <!-- Auth Buttons Area (llenado por JS) -->
+            <div id="auth-container" class="flex items-center space-x-2">
+                <!-- Poblado por JS según estado -->
             </div>
         </nav>
     </header>
@@ -206,7 +101,7 @@
             </div>
         </section>
 
-        <!-- Parenting Ally Section (Adjusted) -->
+        <!-- Parenting Ally Section -->
         <section id="ally" class="py-20 md:py-24 bg-gray-50">
             <div class="container mx-auto px-6 text-center">
                 <h2 class="text-4xl md:text-5xl font-bold section-title mb-6 leading-tight">Tu aliado para una crianza <br> más consciente y divertida</h2>
@@ -280,7 +175,6 @@
             </div>
         </section>
 
-
         <!-- Sample Stories Section -->
         <section id="samples" class="py-20">
             <div class="container mx-auto px-6 text-center">
@@ -321,8 +215,7 @@
             </div>
         </section>
 
-
-        <!-- Pricing Plans Section (Updated) -->
+        <!-- Pricing Plans Section -->
         <section id="plans" class="py-20 bg-gray-50">
             <div class="container mx-auto px-6">
                 <div class="text-center mb-16">
@@ -344,13 +237,12 @@
                             <span class="text-5xl font-extrabold" style="color: var(--color-dark-blue);">$8.900</span>
                             <span class="text-gray-500 font-medium">/ Mes</span>
                         </div>
-                        <!-- MEJORA: El botón ahora es un enlace directo al nuevo checkout con el plan pre-seleccionado -->
                         <a href="checkout.html?items=plan-001" class="w-full bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-3 px-6 rounded-lg transition-colors duration-300 mt-auto">
                             Suscribirme
                         </a>
                     </div>
 
-                    <!-- Plan 2: Libro Estándar a Solicitud -->
+                    <!-- Plan 2: Cuento a Medida -->
                     <div class="plan-card bg-white rounded-2xl shadow-lg p-8 flex flex-col text-center">
                         <h3 class="text-2xl font-bold text-gray-800">Tu Cuento a Medida</h3>
                         <p class="text-gray-500 mt-2 flex-grow">Un video-cuento único para un desafío o valor específico.</p>
@@ -367,13 +259,12 @@
                             <span class="text-5xl font-extrabold" style="color: var(--color-dark-blue);">$18.900</span>
                             <span class="text-gray-500 font-medium">/ único</span>
                         </div>
-                         <!-- MEJORA: El botón ahora es un enlace directo al nuevo checkout con el plan pre-seleccionado -->
                         <a href="checkout.html?items=plan-002" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition-colors duration-300 mt-auto">
                             Crear mi Cuento
                         </a>
                     </div>
 
-                    <!-- Plan 3: Libro Personalizado (DESTACADO) -->
+                    <!-- Plan 3: Cuento Premium -->
                     <div class="plan-card bg-white rounded-2xl shadow-2xl p-8 flex flex-col text-center plan-featured relative">
                          <span class="absolute top-0 -translate-y-1/2 bg-teal-500 text-white text-xs font-bold px-4 py-1 rounded-full uppercase tracking-wider">Más Popular</span>
                         <h3 class="text-2xl font-bold text-gray-800">Cuento Premium</h3>
@@ -391,7 +282,6 @@
                             <span class="text-5xl font-extrabold" style="color: var(--color-teal);">$40.000</span>
                              <span class="text-gray-500 font-medium">/ único</span>
                         </div>
-                         <!-- MEJORA: El botón ahora es un enlace directo al nuevo checkout con el plan pre-seleccionado -->
                         <a href="checkout.html?items=plan-003" class="w-full font-bold py-3 px-6 rounded-lg transition-colors duration-300 mt-auto" style="background-color: var(--color-teal); color: white;">
                             Diseñar Cuento Premium
                         </a>
@@ -409,7 +299,7 @@
             </div>
         </section>
 
-        <!-- NEW: Printed Book Section -->
+        <!-- Printed Book Section -->
         <section id="printed-book" class="py-20">
             <div class="container mx-auto px-6">
                 <div class="grid md:grid-cols-2 gap-12 items-center bg-white p-12 rounded-2xl shadow-xl">
@@ -422,7 +312,7 @@
                             <li class="flex items-start"><span class="text-gold-500 font-bold mr-3 mt-1" style="color: var(--color-gold);">✓</span><div><strong class="text-gray-800">Recuerdo para Siempre:</strong> Un objeto físico que podrán leer una y otra vez.</div></li>
                             <li class="flex items-start"><span class="text-gold-500 font-bold mr-3 mt-1" style="color: var(--color-gold);">✓</span><div><strong class="text-gray-800">Regalo Inolvidable:</strong> El complemento ideal para un regalo de cumpleaños o una ocasión especial.</div></li>
                         </ul>
-                        <a href="#faq-modal" id="more-info-printed" class="mt-8 inline-block btn btn-secondary font-bold py-3 px-8 rounded-full focus-ring">Saber más sobre la impresión</a>
+                        <a href="#auth" id="more-info-printed" class="mt-8 inline-block btn btn-secondary font-bold py-3 px-8 rounded-full focus-ring">Saber más sobre la impresión</a>
                     </div>
                     <div class="md:order-1">
                         <img src="https://placehold.co/600x450/FFECB3/0A2F5B?text=Libro+Impreso" alt="Un libro físico de Muna Booki abierto en una mesa" class="rounded-2xl shadow-xl w-full">
@@ -430,55 +320,181 @@
                 </div>
             </div>
         </section>
-
-
-        <!-- Testimonials -->
-        <section id="testimonials" class="py-20 bg-gray-50">
-            <div class="container mx-auto px-6">
-                <h2 class="text-3xl md:text-4xl font-bold section-title mb-12 text-center">Familias que encontraron a su aliado en Muna Booki</h2>
-                <div class="grid md:grid-cols-3 gap-8 text-left">
-                    <div class="bg-white p-8 rounded-2xl shadow-lg flex flex-col">
-                        <div class="flex items-center mb-4">
-                            <div class="w-12 h-12 rounded-full bg-teal-500 flex items-center justify-center text-white font-bold text-xl mr-4 flex-shrink-0">LG</div>
-                            <div>
-                                <div class="font-bold text-gray-800">Laura G.</div>
-                                <div class="flex mt-1"><span class="star-gold text-xl">★</span><span class="star-gold text-xl">★</span><span class="star-gold text-xl">★</span><span class="star-gold text-xl">★</span><span class="star-gold text-xl">★</span></div>
-                            </div>
-                        </div>
-                        <p class="text-gray-600 italic">"El cuento sobre compartir funcionó de maravilla. Mi hija ahora entiende mucho mejor el concepto. ¡Es una herramienta increíble!"</p>
-                    </div>
-                    <div class="bg-white p-8 rounded-2xl shadow-lg flex flex-col">
-                        <div class="flex items-center mb-4">
-                            <div class="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-xl mr-4 flex-shrink-0" style="background-color: var(--color-dark-blue);">MR</div>
-                            <div>
-                                <div class="font-bold text-gray-800">Marcos R.</div>
-                                <div class="flex mt-1"><span class="star-gold text-xl">★</span><span class="star-gold text-xl">★</span><span class="star-gold text-xl">★</span><span class="star-gold text-xl">★</span><span class="star-gold text-xl">★</span></div>
-                            </div>
-                        </div>
-                        <p class="text-gray-600 italic">"Usamos un cuento para prepararnos para la llegada de su hermanita y redujo muchísimo su ansiedad. Súper recomendado."</p>
-                    </div>
-                    <div class="bg-white p-8 rounded-2xl shadow-lg flex flex-col">
-                        <div class="flex items-center mb-4">
-                            <div class="w-12 h-12 rounded-full bg-yellow-500 flex items-center justify-center text-white font-bold text-xl mr-4 flex-shrink-0">SC</div>
-                            <div>
-                                <div class="font-bold text-gray-800">Sofía y Carlos</div>
-                                <div class="flex mt-1"><span class="star-gold text-xl">★</span><span class="star-gold text-xl">★</span><span class="star-gold text-xl">★</span><span class="star-gold text-xl">★</span><span class="star-gold text-xl">★</span></div>
-                            </div>
-                        </div>
-                        <p class="text-gray-600 italic">"¡Ver la carita de nuestro hijo al entender por qué no debía tener miedo a la oscuridad no tiene precio! Un servicio de 10."</p>
-                    </div>
-                </div>
-            </div>
-        </section>
     </main>
-    
-    <!-- Modals (FAQ, Auth, etc. - no changes needed here) -->
-    <!-- ... (El código de los modales permanece igual) ... -->
 
-    <!-- Footer (no changes needed here) -->
-    <!-- ... (El código del footer permanece igual) ... -->
+    <!-- ===== AUTH MODAL (Registro / Login) ===== -->
+    <div id="auth-modal" class="fixed inset-0 modal-backdrop modal-hidden z-50">
+      <div class="w-full h-full flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 relative">
+          <button id="auth-close" class="absolute top-3 right-3 text-gray-500 hover:text-gray-700" aria-label="Cerrar">
+            ✕
+          </button>
+          <h3 class="text-2xl font-bold text-center section-title mb-1">Accede a tu cuenta</h3>
+          <p class="text-center text-gray-600 mb-6">Inicia sesión o crea una cuenta para continuar.</p>
 
-    <!-- Scripts (no changes needed here, as auth is handled in checkout/mi-cuenta) -->
+          <div class="flex border-b mb-6">
+            <button id="auth-tab-login" class="flex-1 py-2 font-semibold text-teal-600 border-b-2 border-teal-600">Iniciar Sesión</button>
+            <button id="auth-tab-register" class="flex-1 py-2 font-semibold text-gray-500">Registrarse</button>
+          </div>
 
+          <p id="auth-error" class="text-red-500 text-sm text-center mb-4 h-5"></p>
+
+          <!-- Login -->
+          <form id="form-login" class="space-y-4">
+            <input name="email" type="email" placeholder="Correo electrónico" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500" />
+            <input name="password" type="password" placeholder="Contraseña" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500" />
+            <button type="submit" class="w-full btn btn-primary font-bold py-3 rounded-lg">Ingresar</button>
+          </form>
+
+          <!-- Register -->
+          <form id="form-register" class="space-y-4 hidden">
+            <input name="email" type="email" placeholder="Correo electrónico" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500" />
+            <input name="password" type="password" placeholder="Crear contraseña" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500" />
+            <button type="submit" class="w-full btn btn-primary font-bold py-3 rounded-lg">Crear Cuenta</button>
+          </form>
+
+          <div class="my-6 flex items-center">
+            <div class="flex-grow border-t border-gray-300"></div>
+            <span class="mx-4 text-gray-500 text-sm">o</span>
+            <div class="flex-grow border-t border-gray-300"></div>
+          </div>
+
+          <button id="btn-google" class="w-full flex items-center justify-center bg-white border border-gray-300 text-gray-700 font-semibold py-3 px-4 rounded-lg hover:bg-gray-50 transition">
+            <svg class="w-6 h-6 mr-3" viewBox="0 0 48 48" aria-hidden="true"><defs><path id="a" d="M44.5 20H24v8.5h11.8C34.7 33.9 30.1 37 24 37c-7.2 0-13-5.8-13-13s5.8-13 13-13c3.1 0 5.9 1.1 8.1 2.9l6.4-6.4C34.6 4.1 29.6 2 24 2 11.8 2 2 11.8 2 24s9.8 22 22 22c11 0 21-8 21-22 0-1.3-.2-2.7-.5-4z"/></defs><clipPath id="b"><use xlink:href="#a" overflow="visible"/></clipPath><path clip-path="url(#b)" fill="#FBBC05" d="M0 37V11l17 13z"/><path clip-path="url(#b)" fill="#EA4335" d="M0 11l17 13 7-6.1L48 14V0H0z"/><path clip-path="url(#b)" fill="#34A853" d="M0 37l30-23 7.9 1L48 0v48H0z"/><path clip-path="url(#b)" fill="#4285F4" d="M48 48L17 24l-4-3 35-10z"/></svg>
+            Continuar con Google
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== Firebase Auth (reutilizando la misma lógica/base del checkout) ===== -->
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+      import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+
+      // Config de Firebase (misma del checkout)
+      const firebaseConfig = {
+        apiKey: "AIzaSyBivlKO0Ijt1hvMNyH9aIGXf_7WZwE2tA4",
+        authDomain: "munabooki.firebaseapp.com",
+        projectId: "munabooki",
+        storageBucket: "munabooki.firebasestorage.app",
+        messagingSenderId: "585414544600",
+        appId: "1:585414544600:web:77026db4856b0111249bad",
+      };
+      const app = initializeApp(firebaseConfig);
+      const auth = getAuth(app);
+      const provider = new GoogleAuthProvider();
+
+      // UI helpers
+      const $ = (s) => document.querySelector(s);
+      const authContainer = $("#auth-container");
+      const modal = $("#auth-modal");
+      const tabLogin = $("#auth-tab-login");
+      const tabRegister = $("#auth-tab-register");
+      const formLogin = $("#form-login");
+      const formRegister = $("#form-register");
+      const btnGoogle = $("#btn-google");
+      const btnClose = $("#auth-close");
+      const errBox = $("#auth-error");
+
+      function openModal() { modal.classList.remove("modal-hidden"); }
+      function closeModal() { modal.classList.add("modal-hidden"); errBox.textContent = ""; }
+      function switchTab(which) {
+        const isLogin = which === "login";
+        formLogin.classList.toggle("hidden", !isLogin);
+        formRegister.classList.toggle("hidden", isLogin);
+        tabLogin.classList.toggle("text-teal-600", isLogin);
+        tabLogin.classList.toggle("border-teal-600", isLogin);
+        tabRegister.classList.toggle("text-teal-600", !isLogin);
+        tabRegister.classList.toggle("border-teal-600", !isLogin);
+      }
+
+      // Header buttons según sesión
+      function renderHeader(user) {
+        authContainer.innerHTML = "";
+        if (user) {
+          const hello = document.createElement("span");
+          hello.className = "hidden md:inline text-gray-600 mr-2";
+          hello.textContent = `Hola, ${user.displayName || user.email?.split("@")[0] || "usuario"}`;
+
+          const miCuenta = document.createElement("a");
+          miCuenta.href = "mi-cuenta.html";
+          miCuenta.className = "btn btn-primary px-4 py-2 rounded-lg font-semibold";
+          miCuenta.textContent = "Mi Cuenta";
+
+          const salir = document.createElement("button");
+          salir.className = "ml-2 bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold px-4 py-2 rounded-lg";
+          salir.textContent = "Salir";
+          salir.addEventListener("click", async () => { await signOut(auth); });
+
+          authContainer.appendChild(hello);
+          authContainer.appendChild(miCuenta);
+          authContainer.appendChild(salir);
+        } else {
+          const entrar = document.createElement("button");
+          entrar.className = "btn btn-primary px-4 py-2 rounded-lg font-semibold";
+          entrar.textContent = "Ingresar / Registrarse";
+          entrar.addEventListener("click", () => { openModal(); switchTab("login"); });
+          authContainer.appendChild(entrar);
+        }
+      }
+
+      // Eventos modal
+      tabLogin.addEventListener("click", () => switchTab("login"));
+      tabRegister.addEventListener("click", () => switchTab("register"));
+      btnClose.addEventListener("click", closeModal);
+      modal.addEventListener("click", (e) => { if (e.target === modal) closeModal(); });
+
+      // Acciones login/register
+      formLogin.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        errBox.textContent = "";
+        const email = e.target.email.value.trim();
+        const pass = e.target.password.value;
+        try {
+          await signInWithEmailAndPassword(auth, email, pass);
+          // redirección inmediata a Mi Cuenta
+          window.location.href = "mi-cuenta.html";
+        } catch (err) {
+          errBox.textContent = "Email o contraseña incorrectos.";
+        }
+      });
+
+      formRegister.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        errBox.textContent = "";
+        const email = e.target.email.value.trim();
+        const pass = e.target.password.value;
+        try {
+          await createUserWithEmailAndPassword(auth, email, pass);
+          window.location.href = "mi-cuenta.html";
+        } catch (err) {
+          errBox.textContent = "Error al registrar. Verifica los datos.";
+        }
+      });
+
+      btnGoogle.addEventListener("click", async () => {
+        errBox.textContent = "";
+        try {
+          await signInWithPopup(auth, provider);
+          window.location.href = "mi-cuenta.html";
+        } catch (err) {
+          errBox.textContent = "No se pudo completar con Google.";
+        }
+      });
+
+      // Estado de auth
+      onAuthStateChanged(auth, (user) => {
+        renderHeader(user);
+      });
+
+      // Acceso directo desde botones que requieran auth (opcional)
+      document.querySelectorAll('a[href="#auth"]').forEach(a => {
+        a.addEventListener("click", (e) => {
+          e.preventDefault();
+          openModal();
+        });
+      });
+    </script>
 </body>
 </html>
