@@ -76,7 +76,7 @@
       
       <!-- Paso 2: Productos y Pago (Oculto por defecto) -->
       <div id="purchase-section" class="hidden">
-          <div id="welcome-message" class="text-center mb-8 mt-12">
+          <div class="text-center mb-8 mt-12">
             <h2 class="text-2xl font-bold section-title">Paso 2: Elige tus productos y paga</h2>
             <p class="text-gray-600 mt-1">¡Hola, <span id="user-name" class="font-semibold"></span>! Ya puedes completar tu compra.</p>
           </div>
@@ -158,6 +158,9 @@
     const MP_PUBLIC_KEY = 'APP_USR-3ac9fc9a-2795-4219-b5c3-6e51e968d6c0';
     const mp = new MercadoPago(MP_PUBLIC_KEY, { locale: 'es-CL' });
     console.log('MP PK (front)=', MP_PUBLIC_KEY.slice(0, 16));
+
+    // === cambio 1: secuenciador para evitar renders concurrentes ===
+    let walletRenderSeq = 0;
 
     // Helpers UI
     const $ = (sel) => document.querySelector(sel);
@@ -267,7 +270,12 @@
       if (total > 0 && termsChecked){
         createCheckoutButton(ids);
       } else {
-        $('#mercado-pago-button-container').innerHTML = '';
+        // === cambio 3: desmontar seguro si no corresponde mostrar botón ===
+        if (window.checkoutButton && typeof window.checkoutButton.unmount === 'function') {
+          window.checkoutButton.unmount().catch(()=>{});
+          window.checkoutButton = null;
+        }
+        document.querySelector('#mercado-pago-button-container').innerHTML = '';
       }
     }
 
@@ -309,29 +317,42 @@
     }
 
     // ====== MP: crear botón Wallet con preferenceId ======
+    // === cambio 2: versión robusta con secuencia y unmount seguro ===
     async function createCheckoutButton(ids){
-      const container = $('#mercado-pago-button-container');
-      container.innerHTML = '<p class="text-center text-gray-500">Cargando botón de pago...</p>';
-      $('#payment-error').textContent = '';
+      const mySeq = ++walletRenderSeq;
+
+      const container = document.querySelector('#mercado-pago-button-container');
+      container.textContent = 'Cargando botón de pago…';
+      document.querySelector('#payment-error').textContent = '';
+
       const itemsToBuy = ids.map(id => PLANS.find(p => p.id === id)).filter(Boolean);
       const bricksBuilder = mp.bricks();
+
       try {
-        const preference = await createPreferenceOnBackend(itemsToBuy);
-        const preferenceId = preference?.preferenceId;
-        console.log('preferenceId (front)=', preferenceId);
+        const { preferenceId } = await createPreferenceOnBackend(itemsToBuy);
+        if (mySeq !== walletRenderSeq) return; // aborta si hay render más nuevo
         if (!preferenceId) throw new Error('No se obtuvo preferenceId');
 
+        // desmonta *antes* de tocar el DOM
+        if (window.checkoutButton && typeof window.checkoutButton.unmount === 'function') {
+          try { await window.checkoutButton.unmount(); } catch {}
+          window.checkoutButton = null;
+        }
+
+        // limpia y monta pasando el *elemento* (no solo el id)
         container.innerHTML = '';
-        if (window.checkoutButton) { try { await window.checkoutButton.unmount(); } catch {} }
-        window.checkoutButton = await bricksBuilder.create('wallet', container.id, {
+        window.checkoutButton = await bricksBuilder.create('wallet', container, {
           initialization: { preferenceId },
           customization: { texts: { valueProp: 'smart_option' } }
         });
+
         console.log('Wallet montado OK');
       } catch (error) {
+        if (mySeq !== walletRenderSeq) return; // ya hay otro render en curso
         console.error('Error al crear el botón de pago:', error);
         container.innerHTML = '';
-        $('#payment-error').textContent = 'Hubo un problema al generar el pago. Inténtalo de nuevo.';
+        document.querySelector('#payment-error').textContent =
+          'Hubo un problema al generar el pago. Inténtalo de nuevo.';
       }
     }
 
