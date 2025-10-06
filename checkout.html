@@ -159,7 +159,7 @@
     const mp = new MercadoPago(MP_PUBLIC_KEY, { locale: 'es-CL' });
     console.log('MP PK (front)=', MP_PUBLIC_KEY.slice(0, 16));
 
-    // === cambio 1: secuenciador para evitar renders concurrentes ===
+    // evita renders concurrentes del botón de pago
     let walletRenderSeq = 0;
 
     // Helpers UI
@@ -270,7 +270,7 @@
       if (total > 0 && termsChecked){
         createCheckoutButton(ids);
       } else {
-        // === cambio 3: desmontar seguro si no corresponde mostrar botón ===
+        // desmonta seguro si existe, luego limpia el contenedor
         if (window.checkoutButton && typeof window.checkoutButton.unmount === 'function') {
           window.checkoutButton.unmount().catch(()=>{});
           window.checkoutButton = null;
@@ -317,7 +317,6 @@
     }
 
     // ====== MP: crear botón Wallet con preferenceId ======
-    // === cambio 2: versión robusta con secuencia y unmount seguro ===
     async function createCheckoutButton(ids){
       const mySeq = ++walletRenderSeq;
 
@@ -339,12 +338,18 @@
           window.checkoutButton = null;
         }
 
-        // limpia y monta pasando el *elemento* (no solo el id)
+        // limpia el contenedor
         container.innerHTML = '';
-        window.checkoutButton = await bricksBuilder.create('wallet', container, {
-          initialization: { preferenceId },
-          customization: { texts: { valueProp: 'smart_option' } }
-        });
+
+        // 👇 ID en string (no elemento)
+        window.checkoutButton = await bricksBuilder.create(
+          'wallet',
+          'mercado-pago-button-container',
+          {
+            initialization: { preferenceId },
+            customization: { texts: { valueProp: 'smart_option' } }
+          }
+        );
 
         console.log('Wallet montado OK');
       } catch (error) {
