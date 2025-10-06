@@ -52,7 +52,7 @@
         <div class="bg-white p-8 rounded-2xl shadow-lg">
           <h3 class="font-bold text-lg section-title mb-6">Mis Productos</h3>
           <div id="products-list" class="space-y-4">
-            <p id="no-products-msg" class="text-gray-500">Aún no has adquirido ningún producto.</p>
+            <!-- Se renderiza dinámicamente -->
           </div>
         </div>
       </div>
@@ -86,7 +86,6 @@
     const loadingState = document.getElementById('loading-state');
     const accountContent = document.getElementById('account-content');
     const productsList = document.getElementById('products-list');
-    const noProductsMsg = document.getElementById('no-products-msg');
     const userEmailDisplay = document.getElementById('user-email-display');
     const logoutBtn = document.getElementById('logout-btn');
     const successPurchaseMsg = document.getElementById('success-purchase-msg');
@@ -104,13 +103,9 @@
         const qs = new URLSearchParams(location.search);
         const status = (qs.get('status') || qs.get('collection_status') || '').toLowerCase();
         const paymentId = qs.get('payment_id') || qs.get('collection_id');
-        console.log('[MI-CUENTA] query:', Object.fromEntries(qs.entries()));
-        console.log('[MI-CUENTA] paymentId:', paymentId, 'status:', status);
-
         if (status === 'approved' && paymentId && user) {
           const idToken = await user.getIdToken();
-          console.log('[MI-CUENTA] llamando confirmMercadoPagoPayment…');
-          const resp = await fetch('https://us-central1-munabooki.cloudfunctions.net/confirmMercadoPagoPayment', {
+          await fetch('https://us-central1-munabooki.cloudfunctions.net/confirmMercadoPagoPayment', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -118,15 +113,8 @@
             },
             body: JSON.stringify({ payment_id: paymentId, user_id: user.uid })
           });
-          const data = await resp.json().catch(()=> ({}));
-          console.log('[MI-CUENTA] respuesta confirm:', resp.status, data);
-
-          if (resp.ok) {
-            // Recarga productos por si el webhook no había llegado todavía
-            await loadUserProducts(user.uid);
-            // Limpia la query para no re-confirmar al refrescar
-            history.replaceState(null, '', location.pathname);
-          }
+          // Limpia query para evitar reintentos
+          history.replaceState(null, '', location.pathname);
         }
       } catch (e) {
         console.error('Confirm error', e);
@@ -137,7 +125,7 @@
       if (user) {
         userEmailDisplay.textContent = user.email;
         await loadUserProducts(user.uid);
-        await confirmPaymentIfNeeded(user); // ← clave
+        await confirmPaymentIfNeeded(user);
 
         loadingState.classList.add('hidden');
         accountContent.classList.remove('hidden');
@@ -169,16 +157,49 @@
 
     function renderProducts(productIds) {
       if (productIds.length > 0) {
-        noProductsMsg.classList.add('hidden');
         productsList.innerHTML = productIds.map(id => `
           <div class="p-4 bg-gray-100 rounded-lg">
             <span class="font-semibold text-gray-800">${getPlanName(id)}</span>
           </div>
         `).join('');
       } else {
-        noProductsMsg.classList.remove('hidden');
-        productsList.innerHTML = '';
+        renderEmptyState();
       }
+    }
+
+    function renderEmptyState() {
+      productsList.innerHTML = `
+        <div class="text-center">
+          <h4 class="text-xl font-bold text-gray-800 mb-2">Aún no has comprado productos</h4>
+          <p class="text-gray-600 mb-8">Explora nuestros planes y comienza a disfrutar de la magia de Muna Booki.</p>
+
+          <div class="grid md:grid-cols-3 gap-6 text-left">
+            <!-- Biblioteca -->
+            <div class="border rounded-xl p-5 shadow-sm">
+              <div class="text-sm font-semibold text-teal-600 mb-1">Biblioteca Mágica</div>
+              <div class="font-bold text-gray-900 mb-2">Acceso ilimitado a cuentos</div>
+              <p class="text-sm text-gray-600 mb-4">Historias seguras y educativas para toda la familia.</p>
+              <a href="checkout.html?items=plan-001" class="inline-block w-full text-center btn-primary py-2.5 rounded-lg font-semibold">Suscribirme</a>
+            </div>
+            <!-- Cuento Estándar -->
+            <div class="border rounded-xl p-5 shadow-sm">
+              <div class="text-sm font-semibold text-teal-600 mb-1">Cuento a Medida</div>
+              <div class="font-bold text-gray-900 mb-2">Versión Estándar</div>
+              <p class="text-sm text-gray-600 mb-4">Un video-cuento personalizado para un desafío concreto.</p>
+              <a href="checkout.html?items=plan-002" class="inline-block w-full text-center btn-primary py-2.5 rounded-lg font-semibold">Crear mi cuento</a>
+            </div>
+            <!-- Cuento Premium -->
+            <div class="border rounded-xl p-5 shadow-sm">
+              <div class="text-sm font-semibold text-teal-600 mb-1">Cuento Premium</div>
+              <div class="font-bold text-gray-900 mb-2">La experiencia completa</div>
+              <p class="text-sm text-gray-600 mb-4">Con tus fotos y audios para un recuerdo inolvidable.</p>
+              <a href="checkout.html?items=plan-003" class="inline-block w-full text-center btn-primary py-2.5 rounded-lg font-semibold">Diseñar Premium</a>
+            </div>
+          </div>
+
+          <a href="index.html#plans" class="inline-block mt-8 text-teal-700 font-semibold hover:underline">Ver todos los planes</a>
+        </div>
+      `;
     }
 
     function getPlanName(id) {
