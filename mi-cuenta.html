@@ -49,15 +49,44 @@
           <p>Tus nuevos productos han sido añadidos a tu cuenta.</p>
         </div>
 
+        <!-- ===== (lo tuyo) Mis Productos ===== -->
         <div class="bg-white p-8 rounded-2xl shadow-lg">
           <h3 class="font-bold text-lg section-title mb-6">Mis Productos</h3>
           <div id="products-list" class="space-y-4">
             <!-- Se renderiza dinámicamente -->
           </div>
         </div>
+
+        <!-- ===== NUEVO: Mis Cuentos (propios) ===== -->
+        <div class="bg-white p-8 rounded-2xl shadow-lg mt-8">
+          <h3 class="font-bold text-lg section-title mb-6">Mis Cuentos</h3>
+          <div id="owned-grid" class="grid sm:grid-cols-2 gap-5"></div>
+          <p id="owned-empty" class="hidden text-gray-500">Aún no tienes cuentos personalizados.</p>
+        </div>
+
+        <!-- ===== NUEVO: Mi Biblioteca (catálogo) ===== -->
+        <div class="bg-white p-8 rounded-2xl shadow-lg mt-8">
+          <div class="flex items-baseline gap-3 mb-2">
+            <h3 class="font-bold text-lg section-title">Mi Biblioteca</h3>
+            <span id="lib-badge" class="text-xs px-2 py-0.5 rounded bg-gray-200 text-gray-700">Inactivo</span>
+          </div>
+          <p id="lib-msg" class="text-gray-500 mb-4"></p>
+          <div id="library-grid" class="grid sm:grid-cols-2 gap-5"></div>
+        </div>
       </div>
     </div>
   </main>
+
+  <template id="video-card">
+    <div class="rounded-xl border shadow-sm overflow-hidden flex flex-col">
+      <img class="w-full aspect-video object-cover" />
+      <div class="p-4 flex-1 flex flex-col">
+        <div class="font-semibold mb-1 title"></div>
+        <div class="text-sm text-gray-500 mb-3 meta"></div>
+        <button class="btn-primary px-4 py-2 rounded-lg text-center mt-auto playBtn">Ver</button>
+      </div>
+    </div>
+  </template>
 
   <script type="module">
     // ============================
@@ -65,7 +94,10 @@
     // ============================
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-    import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore-lite.js";
+    import {
+      getFirestore, collection, query, where, getDocs, doc, getDoc
+    } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore-lite.js";
+    import { getStorage, ref, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
 
     // Config del proyecto
     const firebaseConfig = {
@@ -81,6 +113,7 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app, 'munabooki');
+    const storage = getStorage(app);
 
     // UI refs
     const loadingState = document.getElementById('loading-state');
@@ -89,6 +122,14 @@
     const userEmailDisplay = document.getElementById('user-email-display');
     const logoutBtn = document.getElementById('logout-btn');
     const successPurchaseMsg = document.getElementById('success-purchase-msg');
+
+    // NUEVO
+    const ownedGrid = document.getElementById('owned-grid');
+    const ownedEmpty = document.getElementById('owned-empty');
+    const libraryGrid = document.getElementById('library-grid');
+    const libBadge = document.getElementById('lib-badge');
+    const libMsg = document.getElementById('lib-msg');
+    const tpl = document.getElementById('video-card');
 
     // Mostrar banner si venimos de compra aprobada
     const urlParams = new URLSearchParams(window.location.search);
@@ -107,13 +148,9 @@
           const idToken = await user.getIdToken();
           await fetch('https://us-central1-munabooki.cloudfunctions.net/confirmMercadoPagoPayment', {
             method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${idToken}`
-            },
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${idToken}` },
             body: JSON.stringify({ payment_id: paymentId, user_id: user.uid })
           });
-          // Limpia query para evitar reintentos
           history.replaceState(null, '', location.pathname);
         }
       } catch (e) {
@@ -122,18 +159,23 @@
     }
 
     onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        userEmailDisplay.textContent = user.email;
-        await loadUserProducts(user.uid);
-        await confirmPaymentIfNeeded(user);
+      if (!user) { window.location.href = 'index.html'; return; }
+      userEmailDisplay.textContent = user.email;
 
-        loadingState.classList.add('hidden');
-        accountContent.classList.remove('hidden');
-      } else {
-        window.location.href = 'index.html';
-      }
+      const productIds = await loadUserProducts(user.uid); // mantiene tu flujo
+      await confirmPaymentIfNeeded(user);
+
+      // NUEVO: cargar videos propios y biblioteca
+      await loadOwnedVideos(user.uid);
+      await loadLibrarySection(user, productIds);
+
+      loadingState.classList.add('hidden');
+      accountContent.classList.remove('hidden');
     });
 
+    // =============================
+    // (lo tuyo) Cargar "Mis Productos"
+    // =============================
     async function loadUserProducts(userId) {
       try {
         const paymentsRef = collection(db, 'payments');
@@ -148,10 +190,13 @@
           }
         });
 
-        renderProducts([...userProducts]);
+        const arr = [...userProducts];
+        renderProducts(arr);
+        return arr; // NUEVO: lo usamos para saber si tiene plan-001
       } catch (error) {
         console.error("Error al cargar los productos del usuario:", error);
         productsList.innerHTML = '<p class="text-red-500">Error al cargar tus productos. Inténtalo de nuevo más tarde.</p>';
+        return [];
       }
     }
 
@@ -215,6 +260,106 @@
     logoutBtn.addEventListener('click', () => {
       signOut(auth).catch(error => console.error('Error al cerrar sesión:', error));
     });
+
+    // =============================
+    // NUEVO: Mis Cuentos (videos propios)
+    // =============================
+    async function loadOwnedVideos(uid){
+      ownedGrid.innerHTML = '';
+      ownedEmpty.classList.add('hidden');
+
+      const q = query(collection(db,'videos'), where('ownerUid','==', uid));
+      const snap = await getDocs(q);
+      if (!snap.docs.length){
+        ownedEmpty.classList.remove('hidden');
+        return;
+      }
+      for (const d of snap.docs){
+        renderVideoCard({ id:d.id, ...d.data() }, ownedGrid);
+      }
+    }
+
+    // =============================
+    // NUEVO: Biblioteca (si tiene plan-001 o está en allowlist / user_products)
+    // =============================
+    async function loadLibrarySection(user, productIds){
+      const hasFromPayments = productIds.includes('plan-001');
+      const hasFromUserProducts = await checkUserProductsPlan(user.uid);
+      const isAllowlisted = await checkAllowlist(user.email);
+
+      const hasAccess = hasFromPayments || hasFromUserProducts || isAllowlisted;
+
+      libBadge.textContent = hasAccess ? 'Activo' : 'Inactivo';
+      if (!hasAccess){
+        libMsg.innerHTML = `Para ver la Biblioteca, contrata el plan. <a class="text-teal-700 underline" href="checkout.html?items=plan-001">Suscribirme</a>`;
+        libraryGrid.innerHTML = '';
+        return;
+      }
+      libMsg.textContent = '';
+      const q = query(
+        collection(db,'videos'),
+        where('type','==','library'),
+        where('status','==','ready')
+      );
+      const snap = await getDocs(q);
+      libraryGrid.innerHTML = '';
+      if (!snap.docs.length){
+        libraryGrid.innerHTML = `<div class="text-gray-500">No hay títulos disponibles por ahora.</div>`;
+        return;
+      }
+      for (const d of snap.docs){
+        renderVideoCard({ id:d.id, ...d.data() }, libraryGrid);
+      }
+    }
+
+    // Lee user_products/{uid}.items para detectar plan-001 (si lo usas)
+    async function checkUserProductsPlan(uid){
+      try{
+        const up = await getDoc(doc(db,'user_products', uid));
+        if (!up.exists()) return false;
+        const items = up.data()?.items || [];
+        return Array.isArray(items) && items.includes('plan-001');
+      }catch(e){ console.warn('user_products check', e); return false; }
+    }
+
+    // Busca allowlist por email (si lo usas)
+    async function checkAllowlist(email){
+      try{
+        if (!email) return false;
+        // intentamos exacto y en minúsculas (dependiendo de cómo lo guardes)
+        const d1 = await getDoc(doc(db,'allowlist', email));
+        if (d1.exists()) return true;
+        const d2 = await getDoc(doc(db,'allowlist', email.toLowerCase()));
+        return d2.exists();
+      }catch(e){ console.warn('allowlist check', e); return false; }
+    }
+
+    // Render común de tarjetas de video
+    function renderVideoCard(v, container){
+      const node = tpl.content.cloneNode(true);
+      node.querySelector('img').src = v.thumbUrl || 'https://placehold.co/640x360?text=Sin+miniatura';
+      node.querySelector('.title').textContent = v.title || 'Cuento';
+      node.querySelector('.meta').textContent =
+        (v.durationSec ? Math.round((v.durationSec||0)/60)+' min · ' : '') + (v.topic || '');
+
+      const btn = node.querySelector('.playBtn');
+      if (v.status !== 'ready' || !v.storagePath){
+        btn.disabled = true;
+        btn.classList.add('opacity-50','cursor-not-allowed');
+        btn.textContent = 'Procesando…';
+      } else {
+        btn.addEventListener('click', async ()=>{
+          try{
+            const url = await getDownloadURL(ref(storage, v.storagePath));
+            window.open(url, '_blank', 'noopener');
+          }catch(err){
+            alert('No se pudo abrir el video. Revisa permisos o la ruta de Storage.');
+            console.error(err);
+          }
+        });
+      }
+      container.appendChild(node);
+    }
   </script>
 </body>
 </html>
